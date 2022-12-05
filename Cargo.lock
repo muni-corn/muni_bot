@@ -903,6 +903,7 @@ name = "muni_bot"
 version = "0.1.0"
 dependencies = [
  "async-trait",
+ "lazy_static",
  "open",
  "regex",
  "reqwest",
