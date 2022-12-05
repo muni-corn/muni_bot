@@ -1,12 +1,23 @@
 #![feature(decl_macro)]
 
+use bot::MuniBot;
 use reqwest::Url;
-use rocket::{get, routes, Ignite, Rocket};
+use rocket::{
+    get, http::ContentType, response::Responder, routes, Ignite, Response, Rocket, Shutdown, State,
+};
 use serde::Serialize;
-use std::{borrow::Cow, error::Error};
+use std::{
+    borrow::Cow,
+    error::Error,
+    fmt::Display,
+    io::Cursor,
+    sync::mpsc::{self, Receiver, SendError, SyncSender},
+};
 use tokio::task::JoinHandle;
+use twitch_irc::login::{GetAccessTokenResponse, UserAccessToken};
 use twitch_oauth2::{tokens::UserTokenBuilder, Scope};
 
+mod bot;
 mod token_storage;
 
 const SCOPE: [Scope; 7] = [
@@ -23,12 +34,7 @@ const REDIRECT_URI: &str = "http://localhost:6864/";
 
 #[rocket::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    // initialize rocket first and mount routes
-    let rocket = rocket::build()
-        .mount("/", routes![oauth_code_callback, catch_oauth_error])
-        .ignite()
-        .await?;
-
+    // initialize token builder
     let client_id = include_str!("./client_id.txt").trim().to_owned();
     let client_secret = include_str!("./client_secret.txt").trim().to_owned();
     let mut token_builder =
@@ -36,7 +42,19 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .force_verify(true)
             .set_scopes(SCOPE.to_vec());
 
+    // get url for auth page
     let (auth_page_url, _) = token_builder.generate_url();
+
+    // initialize rocket and mount routes
+    let (auth_tx, auth_rx) = mpsc::sync_channel::<UserAccessToken>(1);
+    let rocket = rocket::build()
+        .manage(RocketAuthState {
+            auth_tx,
+            token_builder,
+        })
+        .mount("/", routes![oauth_code_callback, catch_oauth_error])
+        .ignite()
+        .await?;
 
     // get a shutdown handle (to stop rocket after authentication) and launch rocket (no need to
     // await; awaiting will wait for the task to end)
@@ -45,6 +63,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // open web browser to authorize
     let auth_page_handle = open_auth_page(auth_page_url);
+
+    // also start up main handler for main bot logic
+    let main_handle = run_bot(auth_rx, shutdown_handle);
 
     // wait for rocket execution to end
     //
@@ -55,7 +76,25 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // wait for auth page task to end
     auth_page_handle.await?;
 
+    // wait for main task to end
+    main_handle.await?;
+
     Ok(())
+}
+
+#[must_use]
+fn run_bot(auth_rx: Receiver<UserAccessToken>, shutdown_handle: Shutdown) -> JoinHandle<()> {
+    tokio::task::spawn(async move {
+        println!("waiting for auth token...");
+        let token = auth_rx.recv().unwrap();
+        println!("got auth token! shutting down server");
+
+        // we have a token now, so we don't need to listen at our endpoints anymore
+        shutdown_handle.notify();
+        println!("server is shut down");
+
+        MuniBot::new(token).run().await
+    })
 }
 
 /// Opens the Twitch autorization page with a new thread. open-rs is not supposed to block, but it
@@ -64,7 +103,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 fn open_auth_page(auth_page_url: reqwest::Url) -> JoinHandle<()> {
     tokio::task::spawn(async move {
         println!("opening authorization page");
-        if let Err(e) = open::that(auth_page_url.path()) {
+        if let Err(e) = open::that(auth_page_url.to_string()) {
             eprintln!("couldn't open url: {e}");
             eprintln!("to authorize, open up this url: {auth_page_url}");
         } else {
@@ -80,14 +119,14 @@ fn launch_rocket(
     tokio::task::spawn(async { rocket.launch().await })
 }
 
-#[get("/?<code>&<scope>&<state>")]
-async fn oauth_code_callback(code: String, scope: Option<String>, state: Option<String>) -> String {
-    println!("authorized! code: {code}");
-    if let Some(scope) = scope {
-        println!("scope: {scope}");
-    }
-    if let Some(state) = state {
-        println!("state: {state}");
+#[get("/?<code>&<state>")]
+async fn oauth_code_callback(
+    code: String,
+    state: String,
+    auth_state: &State<RocketAuthState>,
+) -> Result<String, MuniBotError> {
+    if !auth_state.token_builder.csrf_is_valid(&state) {
+        return Err(MuniBotError::StateMismatch { got: state });
     }
 
     #[derive(Serialize)]
@@ -112,16 +151,17 @@ async fn oauth_code_callback(code: String, scope: Option<String>, state: Option<
         .send()
         .await
         .unwrap();
-    println!(
-        "response from token POST: {}",
-        response.text().await.unwrap()
-    );
 
-    "muni_bot is authorized! you can close this tab".to_string()
+    let user_access_token: UserAccessToken = UserAccessToken::from(serde_json::from_str::<
+        GetAccessTokenResponse,
+    >(&response.text().await?)?);
+    auth_state.auth_tx.send(user_access_token)?;
+
+    Ok("muni_bot is authorized! you can close this tab".to_string())
 }
 
-#[get("/?<error>&<error_description>&<state>", rank = 2)]
-fn catch_oauth_error(error: String, error_description: String, state: Option<String>) -> String {
+#[get("/?<error>&<error_description>", rank = 2)]
+fn catch_oauth_error(error: String, error_description: String) -> String {
     eprintln!("caught an error with auth: {error}");
     eprintln!("{error_description}");
 
@@ -129,4 +169,58 @@ fn catch_oauth_error(error: String, error_description: String, state: Option<Str
         "access_denied" => String::from("muni_bot was denied access to your account"),
         _ => String::from("muni_bot could not be authorized: {error_description} ({error})"),
     }
+}
+
+#[derive(Debug)]
+enum MuniBotError {
+    StateMismatch { got: String },
+    ParseError(String),
+    RequestError(String),
+    SendError(String),
+}
+
+impl From<serde_json::Error> for MuniBotError {
+    fn from(e: serde_json::Error) -> Self {
+        Self::ParseError(format!("couldn't parse: {e}"))
+    }
+}
+
+impl From<reqwest::Error> for MuniBotError {
+    fn from(e: reqwest::Error) -> Self {
+        Self::RequestError(format!("request failed: {e}"))
+    }
+}
+
+impl From<SendError<UserAccessToken>> for MuniBotError {
+    fn from(e: SendError<UserAccessToken>) -> Self {
+        Self::SendError(format!("sending token failed: {e}"))
+    }
+}
+
+impl Display for MuniBotError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            MuniBotError::StateMismatch { got } => write!(f, "state mismatch from twitch. be careful! this could mean someone is trying to do something malicious. (got code \"{got}\")"),
+            MuniBotError::ParseError(e) => write!(f, "parsing failure! {e}"),
+            MuniBotError::RequestError(e) => write!(f, "blegh!! {e}"),
+            MuniBotError::SendError(e) => write!(f, "send error! {e}"),
+        }
+    }
+}
+
+impl std::error::Error for MuniBotError {}
+
+impl<'req> Responder<'req, 'static> for MuniBotError {
+    fn respond_to(self, _request: &'req rocket::Request<'_>) -> rocket::response::Result<'static> {
+        let display = format!("{self}");
+        Response::build()
+            .header(ContentType::Plain)
+            .sized_body(display.len(), Cursor::new(display))
+            .ok()
+    }
+}
+
+struct RocketAuthState {
+    token_builder: UserTokenBuilder,
+    auth_tx: SyncSender<UserAccessToken>,
 }
