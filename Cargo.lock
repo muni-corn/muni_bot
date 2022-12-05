@@ -905,6 +905,7 @@ dependencies = [
  "async-trait",
  "lazy_static",
  "open",
+ "rand",
  "regex",
  "reqwest",
  "rocket",
