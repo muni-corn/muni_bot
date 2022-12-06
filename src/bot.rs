@@ -5,7 +5,8 @@ use rand::Rng;
 use regex::Regex;
 use twitch_irc::{
     login::{RefreshingLoginCredentials, UserAccessToken},
-    ClientConfig, SecureTCPTransport, TwitchIRCClient, message::ServerMessage,
+    message::ServerMessage,
+    ClientConfig, SecureTCPTransport, TwitchIRCClient,
 };
 
 use crate::token_storage::MuniBotTokenStorage;
@@ -53,9 +54,16 @@ impl MuniBot {
         join_handle.await.unwrap();
     }
 
-    async fn handle_message(client: &TwitchIRCClient<SecureTCPTransport, RefreshingLoginCredentials<MuniBotTokenStorage>>, message: ServerMessage) {
+    async fn handle_message(
+        client: &TwitchIRCClient<
+            SecureTCPTransport,
+            RefreshingLoginCredentials<MuniBotTokenStorage>,
+        >,
+        message: ServerMessage,
+    ) {
         lazy_static! {
-            static ref HI_REGEX: Regex = Regex::new(r"(?i)(?:hi+|hey+|hello+|howdy).*muni.*bot").unwrap();
+            static ref HI_REGEX: Regex =
+                Regex::new(r"(?i)(?:hi+|hey+|hello+|howdy).*muni.*bot").unwrap();
         }
 
         match message {
@@ -65,7 +73,8 @@ impl MuniBot {
 
                     // pick a template
                     let template_index = rand::thread_rng().gen_range(0..HELLO_TEMPLATES.len());
-                    let greeting = HELLO_TEMPLATES[template_index].replace("{name}", &m.sender.name);
+                    let greeting =
+                        HELLO_TEMPLATES[template_index].replace("{name}", &m.sender.name);
                     if let Err(e) = client.say(m.channel_login, greeting).await {
                         eprintln!("message send failure! {e}")
                     }
