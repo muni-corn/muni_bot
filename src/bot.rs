@@ -76,6 +76,16 @@ impl MuniBot {
                     } else if let Err(e) = client.say(m.channel_login.clone(), format!("sorry {}, uwu is reserved for the one and only Linokii", m.sender.name)).await {
                         eprintln!("message send failure! {e}")
                     }
+                } else if m.message_text.trim().starts_with("!lurk") {
+                    if let Err(e) = client.say(m.channel_login.clone(), format!("{} cast an invisibility spell!", m.sender.name)).await {
+                        eprintln!("message send failure! {e}")
+                    }
+
+                } else if m.message_text.trim().starts_with("!unlurk") {
+                    if let Err(e) = client.say(m.channel_login.clone(), format!("{}'s invisibility spell wore off. we can see you!", m.sender.name)).await {
+                        eprintln!("message send failure! {e}")
+                    }
+
                 } else if HI_REGEX.is_match(&m.message_text) {
                     // send a hi message back
 
