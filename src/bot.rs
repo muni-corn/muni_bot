@@ -68,13 +68,27 @@ impl MuniBot {
 
         match message {
             ServerMessage::Privmsg(m) => {
-                if HI_REGEX.is_match(&m.message_text) {
+                if m.message_text.trim().starts_with("uwu") {
+                    if m.sender.name == "Linokii" {
+                        if let Err(e) = client.say(m.channel_login.clone(), "linokii uwu<3".to_string()).await {
+                            eprintln!("message send failure! {e}")
+                        }
+                    } else if let Err(e) = client.say(m.channel_login.clone(), format!("sorry {}, uwu is reserved for the one and only Linokii", m.sender.name)).await {
+                        eprintln!("message send failure! {e}")
+                    }
+                } else if HI_REGEX.is_match(&m.message_text) {
                     // send a hi message back
 
                     // pick a template
                     let template_index = rand::thread_rng().gen_range(0..HELLO_TEMPLATES.len());
-                    let greeting =
+                    let mut greeting =
                         HELLO_TEMPLATES[template_index].replace("{name}", &m.sender.name);
+
+                    // if the message was sent from linokii, append a very special uwu
+                    if m.sender.name == "Linokii" {
+                        greeting.push_str(" uwu");
+                    }
+
                     if let Err(e) = client.say(m.channel_login, greeting).await {
                         eprintln!("message send failure! {e}")
                     }
