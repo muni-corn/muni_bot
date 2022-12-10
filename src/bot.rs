@@ -47,7 +47,7 @@ impl MuniBot {
         // error with `unwrap`.
         client.join("muni_corn".to_owned()).unwrap();
 
-        client.say("muni_corn".to_string(), "hello! i'm muni_bot! i'm municorn's chatbot. i don't do much yet, but you can say hi to me! i hope to bring much more fun and entertainment to everyone very soon. nice to meet you!".to_owned()).await.unwrap();
+        client.say("muni_corn".to_string(), "i'm here!".to_owned()).await.unwrap();
 
         // keep the tokio executor alive.
         // If you return instead of waiting the background task will exit.
