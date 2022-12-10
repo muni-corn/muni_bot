@@ -18,6 +18,7 @@ use twitch_irc::login::{GetAccessTokenResponse, UserAccessToken};
 use twitch_oauth2::{tokens::UserTokenBuilder, Scope};
 
 mod bot;
+mod handlers;
 mod token_storage;
 
 const SCOPE: [Scope; 7] = [
