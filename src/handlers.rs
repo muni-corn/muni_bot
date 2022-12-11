@@ -1,3 +1,5 @@
+pub mod lurk;
+
 use crate::token_storage::MuniBotTokenStorage;
 use async_trait::async_trait;
 use twitch_irc::{
