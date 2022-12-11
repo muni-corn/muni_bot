@@ -1,30 +1,35 @@
 use std::sync::Arc;
 
-use lazy_static::lazy_static;
-use rand::Rng;
-use regex::Regex;
+use async_trait::async_trait;
 use twitch_irc::{
     login::{RefreshingLoginCredentials, UserAccessToken},
     message::ServerMessage,
     ClientConfig, SecureTCPTransport, TwitchIRCClient,
 };
 
-use crate::token_storage::MuniBotTokenStorage;
+use crate::{
+    handlers::{lurk::LurkHandler, MessageHandler},
+    token_storage::MuniBotTokenStorage,
+};
 
 pub struct MuniBot {
     user_access_token: UserAccessToken,
+    message_handlers: Vec<Box<dyn MessageHandler>>,
 }
 
 impl MuniBot {
     pub fn new(user_access_token: UserAccessToken) -> Self {
-        Self { user_access_token }
+        Self {
+            user_access_token,
+            message_handlers: vec![Box::new(LurkHandler)],
+        }
     }
 
-    pub async fn run(self) {
+    pub async fn run(mut self) {
         let client_id = include_str!("./client_id.txt").trim().to_owned();
         let client_secret = include_str!("./client_secret.txt").to_owned();
         let token_storage = MuniBotTokenStorage {
-            user_access_token: self.user_access_token,
+            user_access_token: self.user_access_token.clone(),
         };
         let credentials = RefreshingLoginCredentials::init(client_id, client_secret, token_storage);
         let config = ClientConfig::new_simple(credentials);
@@ -37,7 +42,7 @@ impl MuniBot {
         let client_clone = client.clone();
         let join_handle = tokio::spawn(async move {
             while let Some(message) = incoming_messages.recv().await {
-                Self::handle_message(&client_clone, message).await;
+                self.handle_message(&client_clone, message).await;
             }
         });
 
@@ -57,17 +62,26 @@ impl MuniBot {
         join_handle.await.unwrap();
     }
 
+}
+
+#[async_trait]
+impl MessageHandler for MuniBot {
     async fn handle_message(
+        &mut self,
         client: &TwitchIRCClient<
             SecureTCPTransport,
             RefreshingLoginCredentials<MuniBotTokenStorage>,
         >,
         message: ServerMessage,
-    ) {
-        match message {
-            ServerMessage::Privmsg(m) => {
+    ) -> bool {
+        for message_handler in self.message_handlers.iter_mut() {
+            // try to handle the message. if the handler determines the message was handled, we'll
+            // stop
+            if message_handler.handle_message(client, message.clone()).await {
+                return true;
             }
-            m => eprintln!("unhandled message: {:#?}", m),
         }
+
+        return false;
     }
 }
