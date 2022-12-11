@@ -1,3 +1,4 @@
+pub mod greeting;
 pub mod lurk;
 
 use crate::token_storage::MuniBotTokenStorage;
