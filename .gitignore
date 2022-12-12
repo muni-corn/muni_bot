@@ -1,2 +1,4 @@
 /target
 .direnv/
+client_id.txt
+client_secret.txt
