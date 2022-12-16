@@ -1,11 +1,8 @@
 use async_trait::async_trait;
-use twitch_irc::{
-    login::RefreshingLoginCredentials, message::ServerMessage, SecureTCPTransport, TwitchIRCClient,
-};
-
-use crate::token_storage::MuniBotTokenStorage;
+use twitch_irc::message::ServerMessage;
 
 use super::MessageHandler;
+use crate::bot::MuniBotTwitchIRCClient;
 
 pub struct LurkHandler;
 
@@ -13,10 +10,7 @@ pub struct LurkHandler;
 impl MessageHandler for LurkHandler {
     async fn handle_message(
         &mut self,
-        client: &TwitchIRCClient<
-            SecureTCPTransport,
-            RefreshingLoginCredentials<MuniBotTokenStorage>,
-        >,
+        client: &MuniBotTwitchIRCClient,
         message: ServerMessage,
     ) -> bool {
         if let ServerMessage::Privmsg(m) = message {

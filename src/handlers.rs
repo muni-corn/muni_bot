@@ -1,11 +1,10 @@
 pub mod greeting;
 pub mod lurk;
 
-use crate::token_storage::MuniBotTokenStorage;
 use async_trait::async_trait;
-use twitch_irc::{
-    login::RefreshingLoginCredentials, message::ServerMessage, SecureTCPTransport, TwitchIRCClient,
-};
+use twitch_irc::message::ServerMessage;
+
+use crate::bot::MuniBotTwitchIRCClient;
 
 #[async_trait]
 pub trait MessageHandler: Send {
@@ -14,10 +13,7 @@ pub trait MessageHandler: Send {
     /// other handlers).
     async fn handle_message(
         &mut self,
-        client: &TwitchIRCClient<
-            SecureTCPTransport,
-            RefreshingLoginCredentials<MuniBotTokenStorage>,
-        >,
+        client: &MuniBotTwitchIRCClient,
         message: ServerMessage,
     ) -> bool;
 }

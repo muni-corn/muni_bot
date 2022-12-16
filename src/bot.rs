@@ -12,6 +12,11 @@ use crate::{
     token_storage::MuniBotTokenStorage,
 };
 
+pub type MuniBotTwitchIRCClient = TwitchIRCClient<
+    SecureTCPTransport,
+    RefreshingLoginCredentials<MuniBotTokenStorage>,
+>;
+
 pub struct MuniBot {
     user_access_token: UserAccessToken,
     message_handlers: Vec<Box<dyn MessageHandler>>,
@@ -34,7 +39,7 @@ impl MuniBot {
         let credentials = RefreshingLoginCredentials::init(client_id, client_secret, token_storage);
         let config = ClientConfig::new_simple(credentials);
 
-        let (mut incoming_messages, client) = TwitchIRCClient::<SecureTCPTransport, _>::new(config);
+        let (mut incoming_messages, client) = MuniBotTwitchIRCClient::new(config);
 
         // first thing you should do: start consuming incoming messages,
         // otherwise they will back up.
@@ -68,10 +73,7 @@ impl MuniBot {
 impl MessageHandler for MuniBot {
     async fn handle_message(
         &mut self,
-        client: &TwitchIRCClient<
-            SecureTCPTransport,
-            RefreshingLoginCredentials<MuniBotTokenStorage>,
-        >,
+        client: &MuniBotTwitchIRCClient,
         message: ServerMessage,
     ) -> bool {
         for message_handler in self.message_handlers.iter_mut() {

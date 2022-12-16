@@ -2,12 +2,9 @@ use async_trait::async_trait;
 use lazy_static::lazy_static;
 use rand::Rng;
 use regex::Regex;
-use twitch_irc::{
-    login::RefreshingLoginCredentials, message::ServerMessage, SecureTCPTransport, TwitchIRCClient,
-};
+use twitch_irc::message::ServerMessage;
 
-use crate::token_storage::MuniBotTokenStorage;
-
+use crate::bot::MuniBotTwitchIRCClient;
 use super::MessageHandler;
 
 pub struct GreetingHandler;
@@ -16,10 +13,7 @@ pub struct GreetingHandler;
 impl MessageHandler for GreetingHandler {
     async fn handle_message(
         &mut self,
-        client: &TwitchIRCClient<
-            SecureTCPTransport,
-            RefreshingLoginCredentials<MuniBotTokenStorage>,
-        >,
+        client: &MuniBotTwitchIRCClient,
         message: ServerMessage,
     ) -> bool {
         lazy_static! {
