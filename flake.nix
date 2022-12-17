@@ -31,7 +31,7 @@
 
         nativeBuildInputs = builtins.attrValues {
           inherit rust;
-          inherit (pkgs) pkg-config;
+          inherit (pkgs) pkg-config unqlite clang;
         };
         buildInputs = with pkgs; [libressl_3_5];
       in {
@@ -63,6 +63,7 @@
               rust-analyzer
               rustfmt
             ]);
+          LIBCLANG_PATH = "${pkgs.libclang.lib}/lib";
         };
       });
   in
