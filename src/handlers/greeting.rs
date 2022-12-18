@@ -4,8 +4,8 @@ use rand::Rng;
 use regex::Regex;
 use twitch_irc::message::ServerMessage;
 
-use crate::bot::MuniBotTwitchIRCClient;
 use super::MessageHandler;
+use crate::bot::MuniBotTwitchIRCClient;
 
 pub struct GreetingHandler;
 
@@ -45,7 +45,6 @@ impl MessageHandler for GreetingHandler {
                 true
             } else if HI_REGEX.is_match(&m.message_text) {
                 // send a hi message back
-
                 // pick a template
                 let template_index = rand::thread_rng().gen_range(0..HELLO_TEMPLATES.len());
                 let mut greeting =

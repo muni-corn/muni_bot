@@ -12,10 +12,8 @@ use crate::{
     token_storage::MuniBotTokenStorage,
 };
 
-pub type MuniBotTwitchIRCClient = TwitchIRCClient<
-    SecureTCPTransport,
-    RefreshingLoginCredentials<MuniBotTokenStorage>,
->;
+pub type MuniBotTwitchIRCClient =
+    TwitchIRCClient<SecureTCPTransport, RefreshingLoginCredentials<MuniBotTokenStorage>>;
 
 pub struct MuniBot {
     user_access_token: UserAccessToken,
@@ -66,7 +64,6 @@ impl MuniBot {
         // If you return instead of waiting the background task will exit.
         join_handle.await.unwrap();
     }
-
 }
 
 #[async_trait]
@@ -79,7 +76,10 @@ impl MessageHandler for MuniBot {
         for message_handler in self.message_handlers.iter_mut() {
             // try to handle the message. if the handler determines the message was handled, we'll
             // stop
-            if message_handler.handle_message(client, message.clone()).await {
+            if message_handler
+                .handle_message(client, message.clone())
+                .await
+            {
                 return true;
             }
         }
