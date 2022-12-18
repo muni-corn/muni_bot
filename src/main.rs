@@ -178,6 +178,7 @@ enum MuniBotError {
     ParseError(String),
     RequestError(String),
     SendError(String),
+    DbError(sled::Error),
 }
 
 impl From<serde_json::Error> for MuniBotError {
@@ -198,6 +199,12 @@ impl From<SendError<UserAccessToken>> for MuniBotError {
     }
 }
 
+impl From<sled::Error> for MuniBotError {
+    fn from(e: sled::Error) -> Self {
+        Self::DbError(e)
+    }
+}
+
 impl Display for MuniBotError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -205,6 +212,7 @@ impl Display for MuniBotError {
             MuniBotError::ParseError(e) => write!(f, "parsing failure! {e}"),
             MuniBotError::RequestError(e) => write!(f, "blegh!! {e}"),
             MuniBotError::SendError(e) => write!(f, "send error! {e}"),
+            MuniBotError::DbError(e) => write!(f, "db failure: {e}"),
         }
     }
 }
