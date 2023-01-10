@@ -14,6 +14,8 @@ use crate::{
 
 pub type MuniBotTwitchIRCClient =
     TwitchIRCClient<SecureTCPTransport, RefreshingLoginCredentials<MuniBotTokenStorage>>;
+pub type MuniBotTwitchIRCError =
+    twitch_irc::Error<SecureTCPTransport, RefreshingLoginCredentials<MuniBotTokenStorage>>;
 
 pub struct MuniBot {
     user_access_token: UserAccessToken,

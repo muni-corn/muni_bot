@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use twitch_irc::message::ServerMessage;
 
-use super::MessageHandler;
+use super::{MessageHandler, HandlerError};
 use crate::bot::MuniBotTwitchIRCClient;
 
 pub struct LurkHandler;
@@ -12,8 +12,8 @@ impl MessageHandler for LurkHandler {
         &mut self,
         client: &MuniBotTwitchIRCClient,
         message: ServerMessage,
-    ) -> bool {
-        if let ServerMessage::Privmsg(m) = message {
+    ) -> Result<bool, HandlerError> {
+        let handled = if let ServerMessage::Privmsg(m) = message {
             if m.message_text.trim().starts_with("!lurk") {
                 if let Err(e) = client
                     .say(
@@ -44,6 +44,8 @@ impl MessageHandler for LurkHandler {
             }
         } else {
             false
-        }
+        };
+
+        Ok(handled)
     }
 }
