@@ -1,5 +1,6 @@
 pub mod greeting;
 pub mod lurk;
+pub mod raid_msg;
 
 use std::fmt::Display;
 
