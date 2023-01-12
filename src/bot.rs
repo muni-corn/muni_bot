@@ -8,7 +8,10 @@ use twitch_irc::{
 };
 
 use crate::{
-    handlers::{lurk::LurkHandler, MessageHandler, raid_msg::RaidMsgHandler},
+    handlers::{
+        greeting::GreetingHandler, lurk::LurkHandler,
+        raid_msg::RaidMsgHandler, MessageHandler,
+    },
     token_storage::MuniBotTokenStorage,
 };
 
@@ -29,6 +32,7 @@ impl MuniBot {
             message_handlers: vec![
                 Box::new(RaidMsgHandler),
                 Box::new(LurkHandler),
+                Box::new(GreetingHandler),
             ],
         }
     }
