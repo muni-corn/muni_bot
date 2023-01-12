@@ -40,7 +40,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let client_secret = include_str!("./client_secret.txt").trim().to_owned();
     let mut token_builder =
         UserTokenBuilder::new(client_id, client_secret, Url::parse(REDIRECT_URI).unwrap())
-            .force_verify(true)
             .set_scopes(SCOPE.to_vec());
 
     // get url for auth page
