@@ -1,6 +1,7 @@
 pub mod greeting;
 pub mod lurk;
 pub mod raid_msg;
+pub mod socials;
 
 use std::fmt::Display;
 
