@@ -21,7 +21,7 @@ pub trait MessageHandler: Send {
         client
             .say(channel.to_string(), message.to_string())
             .await
-            .map_err(|e| HandlerError::SendMessage(e))
+            .map_err(HandlerError::SendMessage)
     }
 
     /// Handle a new message from chat. Returns `true` if something was done to handle the message,
