@@ -15,29 +15,23 @@ impl MessageHandler for LurkHandler {
     ) -> Result<bool, HandlerError> {
         let handled = if let ServerMessage::Privmsg(m) = message {
             if m.message_text.trim().starts_with("!lurk") {
-                if let Err(e) = client
-                    .say(
-                        m.channel_login.clone(),
-                        format!("{} cast an invisibility spell!", m.sender.name),
-                    )
-                    .await
-                {
-                    eprintln!("message send failure! {e}")
-                }
+                self.send_message(
+                    client,
+                    &m.channel_login,
+                    &format!("{} cast an invisibility spell!", m.sender.name),
+                )
+                .await?;
                 true
             } else if m.message_text.trim().starts_with("!unlurk") {
-                if let Err(e) = client
-                    .say(
-                        m.channel_login.clone(),
-                        format!(
-                            "{}'s invisibility spell wore off. we can see you!",
-                            m.sender.name
-                        ),
-                    )
-                    .await
-                {
-                    eprintln!("message send failure! {e}")
-                }
+                self.send_message(
+                    client,
+                    &m.channel_login,
+                    &format!(
+                        "{}'s invisibility spell wore off. we can see you!",
+                        m.sender.name
+                    ),
+                )
+                .await?;
                 true
             } else {
                 false

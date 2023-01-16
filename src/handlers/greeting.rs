@@ -24,23 +24,18 @@ impl MessageHandler for GreetingHandler {
         let handled = if let ServerMessage::Privmsg(m) = message {
             if m.message_text.trim().starts_with("uwu") {
                 if m.sender.name == "Linokii" {
-                    if let Err(e) = client
-                        .say(m.channel_login.clone(), "linokii uwu<3".to_string())
-                        .await
-                    {
-                        eprintln!("message send failure! {e}")
-                    }
-                } else if let Err(e) = client
-                    .say(
-                        m.channel_login.clone(),
-                        format!(
+                    self.send_message(client, &m.channel_login, "linokii uwu<3")
+                        .await?;
+                } else {
+                    self.send_message(
+                        client,
+                        &m.channel_login,
+                        &format!(
                             "sorry {}, uwu is reserved for the one and only Linokii",
                             m.sender.name
                         ),
                     )
-                    .await
-                {
-                    eprintln!("message send failure! {e}")
+                    .await?;
                 }
                 true
             } else if HI_REGEX.is_match(&m.message_text) {
@@ -55,9 +50,8 @@ impl MessageHandler for GreetingHandler {
                     greeting.push_str(" uwu");
                 }
 
-                if let Err(e) = client.say(m.channel_login, greeting).await {
-                    eprintln!("message send failure! {e}")
-                }
+                self.send_message(client, &m.channel_login, &greeting)
+                    .await?;
 
                 true
             } else {

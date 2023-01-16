@@ -15,18 +15,15 @@ impl MessageHandler for SocialsHandler {
     ) -> Result<bool, HandlerError> {
         let handled = if let ServerMessage::Privmsg(m) = message {
             if m.message_text.trim().starts_with("!discord") {
-                if let Err(e) = client
-                    .say(
-                        m.channel_login.clone(),
-                        format!(
-                            "join the herd's discord server here! {} (we have treats :))",
-                            include_str!("../../discord_link.txt")
-                        ),
-                    )
-                    .await
-                {
-                    eprintln!("message send failure! {e}")
-                }
+                self.send_message(
+                    client,
+                    &m.channel_login,
+                    &format!(
+                        "join the herd's discord server here! {} we have treats:)",
+                        include_str!("../../discord_link.txt")
+                    ),
+                )
+                .await?;
                 true
             } else {
                 false

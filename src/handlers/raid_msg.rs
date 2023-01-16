@@ -15,24 +15,20 @@ impl MessageHandler for RaidMsgHandler {
     ) -> Result<bool, HandlerError> {
         let handled = if let ServerMessage::Privmsg(m) = message {
             if m.message_text.trim().starts_with("!rmsg") {
-                if let Err(e) = client
-                    .say(
-                        m.channel_login.clone(),
-                        include_str!("../../raid_msg_normal.txt").to_string(),
-                    )
-                    .await
-                {
-                    eprintln!("message send failure! {e}")
-                }
-                if let Err(e) = client
-                    .say(
-                        m.channel_login.clone(),
-                        include_str!("../../raid_msg_subs.txt").to_string(),
-                    )
-                    .await
-                {
-                    eprintln!("message send failure! {e}")
-                }
+                self.send_message(
+                    client,
+                    &m.channel_login,
+                    include_str!("../../raid_msg_normal.txt"),
+                )
+                .await?;
+
+                self.send_message(
+                    client,
+                    &m.channel_login,
+                    include_str!("../../raid_msg_subs.txt"),
+                )
+                .await?;
+
                 true
             } else {
                 false
