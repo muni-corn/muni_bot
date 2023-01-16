@@ -4,7 +4,7 @@ use rand::Rng;
 use regex::Regex;
 use twitch_irc::message::ServerMessage;
 
-use super::MessageHandler;
+use super::{HandlerError, MessageHandler};
 use crate::bot::MuniBotTwitchIRCClient;
 
 pub struct GreetingHandler;
@@ -15,13 +15,13 @@ impl MessageHandler for GreetingHandler {
         &mut self,
         client: &MuniBotTwitchIRCClient,
         message: ServerMessage,
-    ) -> bool {
+    ) -> Result<bool, HandlerError> {
         lazy_static! {
             static ref HI_REGEX: Regex =
                 Regex::new(r"(?i)(?:hi+|hey+|hello+|howdy).*muni.*bot").unwrap();
         }
 
-        if let ServerMessage::Privmsg(m) = message {
+        let handled = if let ServerMessage::Privmsg(m) = message {
             if m.message_text.trim().starts_with("uwu") {
                 if m.sender.name == "Linokii" {
                     if let Err(e) = client
@@ -65,7 +65,9 @@ impl MessageHandler for GreetingHandler {
             }
         } else {
             false
-        }
+        };
+
+        Ok(handled)
     }
 }
 

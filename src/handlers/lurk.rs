@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use twitch_irc::message::ServerMessage;
 
-use super::{MessageHandler, HandlerError};
+use super::{HandlerError, MessageHandler};
 use crate::bot::MuniBotTwitchIRCClient;
 
 pub struct LurkHandler;

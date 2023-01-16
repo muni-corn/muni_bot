@@ -9,8 +9,8 @@ use twitch_irc::{
 
 use crate::{
     handlers::{
-        greeting::GreetingHandler, lurk::LurkHandler,
-        raid_msg::RaidMsgHandler, MessageHandler, socials::SocialsHandler,
+        greeting::GreetingHandler, lurk::LurkHandler, raid_msg::RaidMsgHandler,
+        socials::SocialsHandler, HandlerError, MessageHandler,
     },
     token_storage::MuniBotTokenStorage,
 };
@@ -82,18 +82,18 @@ impl MessageHandler for MuniBot {
         &mut self,
         client: &MuniBotTwitchIRCClient,
         message: ServerMessage,
-    ) -> bool {
+    ) -> Result<bool, HandlerError> {
         for message_handler in self.message_handlers.iter_mut() {
             // try to handle the message. if the handler determines the message was handled, we'll
             // stop
             if message_handler
                 .handle_message(client, message.clone())
-                .await
+                .await?
             {
-                return true;
+                return Ok(true);
             }
         }
 
-        return false;
+        return Ok(false);
     }
 }

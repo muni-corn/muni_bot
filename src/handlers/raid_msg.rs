@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use twitch_irc::message::ServerMessage;
 
-use super::MessageHandler;
+use super::{HandlerError, MessageHandler};
 use crate::bot::MuniBotTwitchIRCClient;
 
 pub struct RaidMsgHandler;
@@ -12,8 +12,8 @@ impl MessageHandler for RaidMsgHandler {
         &mut self,
         client: &MuniBotTwitchIRCClient,
         message: ServerMessage,
-    ) -> bool {
-        if let ServerMessage::Privmsg(m) = message {
+    ) -> Result<bool, HandlerError> {
+        let handled = if let ServerMessage::Privmsg(m) = message {
             if m.message_text.trim().starts_with("!rmsg") {
                 if let Err(e) = client
                     .say(
@@ -39,6 +39,8 @@ impl MessageHandler for RaidMsgHandler {
             }
         } else {
             false
-        }
+        };
+
+        Ok(handled)
     }
 }
