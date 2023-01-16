@@ -55,7 +55,9 @@ impl MuniBot {
         let client_clone = client.clone();
         let join_handle = tokio::spawn(async move {
             while let Some(message) = incoming_messages.recv().await {
-                self.handle_message(&client_clone, message).await;
+                if let Err(e) = self.handle_message(&client_clone, message).await {
+                    eprintln!("error in message handler! {e}");
+                }
             }
         });
 
