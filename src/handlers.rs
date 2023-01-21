@@ -1,3 +1,4 @@
+pub mod bonk;
 pub mod greeting;
 pub mod lurk;
 pub mod raid_msg;
