@@ -21,6 +21,8 @@ mod bot;
 mod handlers;
 mod token_storage;
 
+mod schema;
+
 const SCOPE: [Scope; 7] = [
     Scope::ChannelReadRedemptions,
     Scope::ChannelReadSubscriptions,
