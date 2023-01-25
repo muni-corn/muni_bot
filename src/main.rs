@@ -1,4 +1,5 @@
 #![feature(decl_macro)]
+#![feature(let_chains)]
 
 use bot::MuniBot;
 use reqwest::Url;
