@@ -3,12 +3,10 @@
 diesel::table! {
     quotes (id) {
         id -> Int4,
-        datetime -> Timestamptz,
         quote -> Text,
-        sayer -> Text,
+        speaker -> Text,
         invoker -> Nullable<Text>,
         stream_category -> Nullable<Text>,
         stream_title -> Nullable<Text>,
-        stream_secs -> Nullable<Int8>,
     }
 }
