@@ -39,6 +39,7 @@ pub trait MessageHandler: Send {
 pub enum HandlerError {
     SendMessage(MuniBotTwitchIRCError),
     TwitchIRCError(MuniBotTwitchIRCError),
+    DbError(diesel::result::Error),
 }
 
 impl From<MuniBotTwitchIRCError> for HandlerError {
@@ -52,6 +53,7 @@ impl Display for HandlerError {
         match self {
             HandlerError::SendMessage(e) => write!(f, "message send failure! {e}"),
             HandlerError::TwitchIRCError(e) => write!(f, "irc error :< {e}"),
+            HandlerError::DbError(e) => write!(f, "db error :/ {e}"),
         }
     }
 }
