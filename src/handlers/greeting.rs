@@ -18,7 +18,7 @@ impl MessageHandler for GreetingHandler {
     ) -> Result<bool, HandlerError> {
         lazy_static! {
             static ref HI_REGEX: Regex =
-                Regex::new(r"(?i)(?:hi+|hey+|hello+|howdy).*muni.*bot").unwrap();
+                Regex::new(r"(?i)(?:hi+|hey+|hello+|howdy|sup).*muni.*bot").unwrap();
         }
 
         let handled = if let ServerMessage::Privmsg(m) = message {
