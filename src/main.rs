@@ -175,7 +175,7 @@ fn catch_oauth_error(error: String, error_description: String) -> String {
 }
 
 #[derive(Debug)]
-enum MuniBotError {
+pub enum MuniBotError {
     StateMismatch { got: String },
     ParseError(String),
     RequestError(String),
