@@ -26,18 +26,10 @@ impl MessageHandler for GreetingHandler {
                 if m.sender.name == "Linokii" {
                     self.send_message(client, &m.channel_login, "linokii uwu<3")
                         .await?;
+                    true
                 } else {
-                    self.send_message(
-                        client,
-                        &m.channel_login,
-                        &format!(
-                            "sorry {}, uwu is reserved for the one and only Linokii",
-                            m.sender.name
-                        ),
-                    )
-                    .await?;
+                    false
                 }
-                true
             } else if HI_REGEX.is_match(&m.message_text) {
                 // send a hi message back
                 // pick a template
