@@ -23,6 +23,7 @@ mod handlers;
 mod token_storage;
 
 mod schema;
+mod models;
 
 const SCOPE: [Scope; 7] = [
     Scope::ChannelReadRedemptions,
