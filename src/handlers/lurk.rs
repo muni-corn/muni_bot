@@ -10,7 +10,7 @@ pub struct LurkHandler;
 
 #[async_trait]
 impl TwitchMessageHandler for LurkHandler {
-    async fn handle_message(
+    async fn handle_twitch_message(
         &mut self,
         client: &MuniBotTwitchIRCClient,
         message: ServerMessage,

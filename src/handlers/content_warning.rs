@@ -77,7 +77,7 @@ impl ContentWarningHandler {
 
 #[async_trait]
 impl TwitchMessageHandler for ContentWarningHandler {
-    async fn handle_message(
+    async fn handle_twitch_message(
         &mut self,
         client: &MuniBotTwitchIRCClient,
         message: ServerMessage,

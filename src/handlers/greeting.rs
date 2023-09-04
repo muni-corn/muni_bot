@@ -13,7 +13,7 @@ pub struct GreetingHandler;
 
 #[async_trait]
 impl TwitchMessageHandler for GreetingHandler {
-    async fn handle_message(
+    async fn handle_twitch_message(
         &mut self,
         client: &MuniBotTwitchIRCClient,
         message: ServerMessage,
