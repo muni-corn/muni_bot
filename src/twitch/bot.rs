@@ -13,7 +13,7 @@ use crate::handlers::{
 };
 
 use super::{
-    handler::{HandlerError, MessageHandler},
+    handler::{HandlerError, TwitchMessageHandler},
     token_storage::MuniBotTokenStorage,
 };
 
@@ -24,7 +24,7 @@ pub type MuniBotTwitchIRCError =
 
 pub struct MuniBot {
     user_access_token: UserAccessToken,
-    message_handlers: Vec<Box<dyn MessageHandler>>,
+    message_handlers: Vec<Box<dyn TwitchMessageHandler>>,
 }
 
 impl MuniBot {
@@ -82,7 +82,7 @@ impl MuniBot {
 }
 
 #[async_trait]
-impl MessageHandler for MuniBot {
+impl TwitchMessageHandler for MuniBot {
     async fn handle_message(
         &mut self,
         client: &MuniBotTwitchIRCClient,

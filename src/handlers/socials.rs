@@ -3,13 +3,13 @@ use twitch_irc::message::ServerMessage;
 
 use crate::twitch::{
     bot::MuniBotTwitchIRCClient,
-    handler::{HandlerError, MessageHandler},
+    handler::{HandlerError, TwitchMessageHandler},
 };
 
 pub struct SocialsHandler;
 
 #[async_trait]
-impl MessageHandler for SocialsHandler {
+impl TwitchMessageHandler for SocialsHandler {
     async fn handle_message(
         &mut self,
         client: &MuniBotTwitchIRCClient,

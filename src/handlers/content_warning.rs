@@ -6,7 +6,7 @@ use twitch_irc::message::{ReplyToMessage, ServerMessage};
 
 use crate::twitch::{
     bot::MuniBotTwitchIRCClient,
-    handler::{HandlerError, MessageHandler},
+    handler::{HandlerError, TwitchMessageHandler},
 };
 
 pub struct ContentWarningHandler {
@@ -76,7 +76,7 @@ impl ContentWarningHandler {
 }
 
 #[async_trait]
-impl MessageHandler for ContentWarningHandler {
+impl TwitchMessageHandler for ContentWarningHandler {
     async fn handle_message(
         &mut self,
         client: &MuniBotTwitchIRCClient,

@@ -2,12 +2,12 @@ use async_trait::async_trait;
 use rand::Rng;
 use twitch_irc::message::ServerMessage;
 
-use crate::twitch::{handler::{MessageHandler, HandlerError}, bot::MuniBotTwitchIRCClient};
+use crate::twitch::{handler::{TwitchMessageHandler, HandlerError}, bot::MuniBotTwitchIRCClient};
 
 pub struct BonkHandler;
 
 #[async_trait]
-impl MessageHandler for BonkHandler {
+impl TwitchMessageHandler for BonkHandler {
     async fn handle_message(
         &mut self,
         client: &MuniBotTwitchIRCClient,
