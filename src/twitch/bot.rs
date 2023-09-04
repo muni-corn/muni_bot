@@ -14,13 +14,13 @@ use crate::handlers::{
 
 use super::{
     handler::{HandlerError, TwitchMessageHandler},
-    token_storage::MuniBotTokenStorage,
+    token_storage::TwitchTokenStorage,
 };
 
 pub type MuniBotTwitchIRCClient =
-    TwitchIRCClient<SecureTCPTransport, RefreshingLoginCredentials<MuniBotTokenStorage>>;
+    TwitchIRCClient<SecureTCPTransport, RefreshingLoginCredentials<TwitchTokenStorage>>;
 pub type MuniBotTwitchIRCError =
-    twitch_irc::Error<SecureTCPTransport, RefreshingLoginCredentials<MuniBotTokenStorage>>;
+    twitch_irc::Error<SecureTCPTransport, RefreshingLoginCredentials<TwitchTokenStorage>>;
 
 pub struct TwitchBot {
     user_access_token: UserAccessToken,
@@ -44,7 +44,7 @@ impl TwitchBot {
     pub async fn run(mut self) {
         let client_id = include_str!("../client_id.txt").trim().to_owned();
         let client_secret = include_str!("../client_secret.txt").to_owned();
-        let token_storage = MuniBotTokenStorage {
+        let token_storage = TwitchTokenStorage {
             user_access_token: self.user_access_token.clone(),
         };
         let credentials = RefreshingLoginCredentials::init(client_id, client_secret, token_storage);

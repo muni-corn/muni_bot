@@ -2,12 +2,12 @@ use async_trait::async_trait;
 use twitch_irc::login::{TokenStorage, UserAccessToken};
 
 #[derive(Debug)]
-pub struct MuniBotTokenStorage {
+pub struct TwitchTokenStorage {
     pub user_access_token: UserAccessToken,
 }
 
 #[async_trait]
-impl TokenStorage for MuniBotTokenStorage {
+impl TokenStorage for TwitchTokenStorage {
     type LoadError = std::io::Error;
     type UpdateError = std::io::Error;
 
