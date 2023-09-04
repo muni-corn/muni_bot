@@ -7,11 +7,13 @@ use twitch_irc::{
     ClientConfig, SecureTCPTransport, TwitchIRCClient,
 };
 
-use crate::{
-    handlers::{
-        greeting::GreetingHandler, lurk::LurkHandler, raid_msg::RaidMsgHandler,
-        socials::SocialsHandler, HandlerError, MessageHandler, bonk::BonkHandler,
-    },
+use crate::handlers::{
+    bonk::BonkHandler, greeting::GreetingHandler, lurk::LurkHandler, raid_msg::RaidMsgHandler,
+    socials::SocialsHandler,
+};
+
+use super::{
+    handler::{HandlerError, MessageHandler},
     token_storage::MuniBotTokenStorage,
 };
 
@@ -40,8 +42,8 @@ impl MuniBot {
     }
 
     pub async fn run(mut self) {
-        let client_id = include_str!("./client_id.txt").trim().to_owned();
-        let client_secret = include_str!("./client_secret.txt").to_owned();
+        let client_id = include_str!("../client_id.txt").trim().to_owned();
+        let client_secret = include_str!("../client_secret.txt").to_owned();
         let token_storage = MuniBotTokenStorage {
             user_access_token: self.user_access_token.clone(),
         };

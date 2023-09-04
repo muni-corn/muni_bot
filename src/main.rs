@@ -1,7 +1,7 @@
 #![feature(decl_macro)]
 #![feature(let_chains)]
 
-use bot::MuniBot;
+use twitch::bot::MuniBot;
 use reqwest::Url;
 use rocket::{
     get, http::ContentType, response::Responder, routes, Ignite, Response, Rocket, Shutdown, State,
@@ -18,11 +18,9 @@ use tokio::task::JoinHandle;
 use twitch_irc::login::{GetAccessTokenResponse, UserAccessToken};
 use twitch_oauth2::{tokens::UserTokenBuilder, Scope};
 
-mod bot;
 mod handlers;
-mod token_storage;
-
 mod schema;
+mod twitch;
 
 const SCOPE: [Scope; 7] = [
     Scope::ChannelReadRedemptions,

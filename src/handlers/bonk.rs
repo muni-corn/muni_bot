@@ -2,9 +2,7 @@ use async_trait::async_trait;
 use rand::Rng;
 use twitch_irc::message::ServerMessage;
 
-use crate::bot::{MuniBotTwitchIRCClient, MuniBotTwitchIRCError};
-
-use super::{MessageHandler, HandlerError};
+use crate::twitch::{handler::{MessageHandler, HandlerError}, bot::MuniBotTwitchIRCClient};
 
 pub struct BonkHandler;
 

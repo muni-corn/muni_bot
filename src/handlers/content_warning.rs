@@ -4,8 +4,10 @@ use async_trait::async_trait;
 use regex::Regex;
 use twitch_irc::message::{ReplyToMessage, ServerMessage};
 
-use super::{HandlerError, MessageHandler};
-use crate::bot::MuniBotTwitchIRCClient;
+use crate::twitch::{
+    bot::MuniBotTwitchIRCClient,
+    handler::{HandlerError, MessageHandler},
+};
 
 pub struct ContentWarningHandler {
     active_warning: Option<String>,
