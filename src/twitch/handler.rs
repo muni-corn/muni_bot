@@ -12,11 +12,11 @@ pub trait TwitchMessageHandler: Send {
         client: &MuniBotTwitchIRCClient,
         channel: &str,
         message: &str,
-    ) -> Result<(), HandlerError> {
+    ) -> Result<(), TwitchHandlerError> {
         client
             .say(channel.to_string(), message.to_string())
             .await
-            .map_err(HandlerError::SendMessage)
+            .map_err(TwitchHandlerError::SendMessage)
     }
 
     /// Handle a new message from chat. Returns `true` if something was done to handle the message,
@@ -26,28 +26,28 @@ pub trait TwitchMessageHandler: Send {
         &mut self,
         client: &MuniBotTwitchIRCClient,
         message: ServerMessage,
-    ) -> Result<bool, HandlerError>;
+    ) -> Result<bool, TwitchHandlerError>;
 }
 
 #[derive(Debug)]
-pub enum HandlerError {
+pub enum TwitchHandlerError {
     SendMessage(MuniBotTwitchIRCError),
     TwitchIRCError(MuniBotTwitchIRCError),
 }
 
-impl From<MuniBotTwitchIRCError> for HandlerError {
+impl From<MuniBotTwitchIRCError> for TwitchHandlerError {
     fn from(e: MuniBotTwitchIRCError) -> Self {
         Self::TwitchIRCError(e)
     }
 }
 
-impl Display for HandlerError {
+impl Display for TwitchHandlerError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            HandlerError::SendMessage(e) => write!(f, "message send failure! {e}"),
-            HandlerError::TwitchIRCError(e) => write!(f, "irc error :< {e}"),
+            TwitchHandlerError::SendMessage(e) => write!(f, "message send failure! {e}"),
+            TwitchHandlerError::TwitchIRCError(e) => write!(f, "irc error :< {e}"),
         }
     }
 }
 
-impl std::error::Error for HandlerError {}
+impl std::error::Error for TwitchHandlerError {}

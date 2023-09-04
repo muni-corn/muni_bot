@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use rand::Rng;
 use twitch_irc::message::ServerMessage;
 
-use crate::twitch::{handler::{TwitchMessageHandler, HandlerError}, bot::MuniBotTwitchIRCClient};
+use crate::twitch::{handler::{TwitchMessageHandler, TwitchHandlerError}, bot::MuniBotTwitchIRCClient};
 
 pub struct BonkHandler;
 
@@ -12,7 +12,7 @@ impl TwitchMessageHandler for BonkHandler {
         &mut self,
         client: &MuniBotTwitchIRCClient,
         message: ServerMessage,
-    ) -> Result<bool, HandlerError> {
+    ) -> Result<bool, TwitchHandlerError> {
         let handled = if let ServerMessage::Privmsg(m) = message {
             if let Some(target) = m.message_text.trim().strip_prefix("!bonk ") {
                     // pick a template

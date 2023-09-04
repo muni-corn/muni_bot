@@ -3,7 +3,7 @@ use twitch_irc::message::ServerMessage;
 
 use crate::twitch::{
     bot::MuniBotTwitchIRCClient,
-    handler::{HandlerError, TwitchMessageHandler},
+    handler::{TwitchHandlerError, TwitchMessageHandler},
 };
 
 pub struct RaidMsgHandler;
@@ -14,7 +14,7 @@ impl TwitchMessageHandler for RaidMsgHandler {
         &mut self,
         client: &MuniBotTwitchIRCClient,
         message: ServerMessage,
-    ) -> Result<bool, HandlerError> {
+    ) -> Result<bool, TwitchHandlerError> {
         let handled = if let ServerMessage::Privmsg(m) = message {
             if m.message_text.trim().starts_with("!rmsg") {
                 self.send_message(

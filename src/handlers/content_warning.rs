@@ -6,7 +6,7 @@ use twitch_irc::message::{ReplyToMessage, ServerMessage};
 
 use crate::twitch::{
     bot::MuniBotTwitchIRCClient,
-    handler::{HandlerError, TwitchMessageHandler},
+    handler::{TwitchHandlerError, TwitchMessageHandler},
 };
 
 pub struct ContentWarningHandler {
@@ -27,7 +27,7 @@ impl ContentWarningHandler {
         client: &MuniBotTwitchIRCClient,
         channel: &str,
         addressee: &str,
-    ) -> Result<(), HandlerError> {
+    ) -> Result<(), TwitchHandlerError> {
         if let Some(warning) = &self.active_warning {
             self.send_message(client, channel, &format!("hey {}, muni has issued a content/trigger warning for this stream: {}. please take care of yourself! it's okay to leave or mute if this content will make you uncomfortable. and you are loved no matter what!", addressee, warning)).await
         } else {
@@ -39,7 +39,7 @@ impl ContentWarningHandler {
         &mut self,
         client: &MuniBotTwitchIRCClient,
         channel: &str,
-    ) -> Result<(), HandlerError> {
+    ) -> Result<(), TwitchHandlerError> {
         if let Some(warning) = &self.active_warning {
             self.send_message(
                 client,
@@ -65,7 +65,7 @@ impl ContentWarningHandler {
         client: &MuniBotTwitchIRCClient,
         channel: &str,
         user_name: &str,
-    ) -> Result<(), HandlerError> {
+    ) -> Result<(), TwitchHandlerError> {
         if !self.users_greeted.contains(user_name) && let Some(warning) = &self.active_warning {
             self.send_message(client, channel, &format!("welcome, {}! just so you know, muni has issued a content/trigger warning for this stream: {}. please take care of yourself! it's okay to leave or mute if this content will make you uncomfortable. and you are loved no matter what!", user_name, warning)).await?;
             self.users_greeted.insert(user_name.to_string());
@@ -81,7 +81,7 @@ impl TwitchMessageHandler for ContentWarningHandler {
         &mut self,
         client: &MuniBotTwitchIRCClient,
         message: ServerMessage,
-    ) -> Result<bool, HandlerError> {
+    ) -> Result<bool, TwitchHandlerError> {
         let handled = match message {
             ServerMessage::Privmsg(m) => {
                 if let Some(content) = m

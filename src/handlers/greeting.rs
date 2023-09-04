@@ -6,7 +6,7 @@ use twitch_irc::message::ServerMessage;
 
 use crate::twitch::{
     bot::MuniBotTwitchIRCClient,
-    handler::{HandlerError, TwitchMessageHandler},
+    handler::{TwitchHandlerError, TwitchMessageHandler},
 };
 
 pub struct GreetingHandler;
@@ -17,7 +17,7 @@ impl TwitchMessageHandler for GreetingHandler {
         &mut self,
         client: &MuniBotTwitchIRCClient,
         message: ServerMessage,
-    ) -> Result<bool, HandlerError> {
+    ) -> Result<bool, TwitchHandlerError> {
         lazy_static! {
             static ref HI_REGEX: Regex =
                 Regex::new(r"(?i)(?:hi+|hey+|hello+|howdy|sup).*muni.*bot").unwrap();

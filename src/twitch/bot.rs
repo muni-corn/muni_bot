@@ -13,7 +13,7 @@ use crate::handlers::{
 };
 
 use super::{
-    handler::{HandlerError, TwitchMessageHandler},
+    handler::{TwitchHandlerError, TwitchMessageHandler},
     token_storage::TwitchTokenStorage,
 };
 
@@ -87,7 +87,7 @@ impl TwitchMessageHandler for TwitchBot {
         &mut self,
         client: &MuniBotTwitchIRCClient,
         message: ServerMessage,
-    ) -> Result<bool, HandlerError> {
+    ) -> Result<bool, TwitchHandlerError> {
         for message_handler in self.message_handlers.iter_mut() {
             // try to handle the message. if the handler determines the message was handled, we'll
             // stop
