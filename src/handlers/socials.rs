@@ -17,7 +17,7 @@ impl TwitchMessageHandler for SocialsHandler {
     ) -> Result<bool, TwitchHandlerError> {
         let handled = if let ServerMessage::Privmsg(m) = message {
             if m.message_text.trim().starts_with("!discord") {
-                self.send_message(
+                self.send_twitch_message(
                     client,
                     &m.channel_login,
                     &format!(

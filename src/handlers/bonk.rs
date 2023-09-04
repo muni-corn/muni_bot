@@ -22,7 +22,7 @@ impl TwitchMessageHandler for BonkHandler {
                     let message = BONK_TEMPLATES[template_index].replace("{target}", target);
 
                     // and send!
-                    self.send_message(client, &m.channel_login, &message)
+                    self.send_twitch_message(client, &m.channel_login, &message)
                         .await.unwrap();
 
                     true

@@ -29,9 +29,9 @@ impl ContentWarningHandler {
         addressee: &str,
     ) -> Result<(), TwitchHandlerError> {
         if let Some(warning) = &self.active_warning {
-            self.send_message(client, channel, &format!("hey {}, muni has issued a content/trigger warning for this stream: {}. please take care of yourself! it's okay to leave or mute if this content will make you uncomfortable. and you are loved no matter what!", addressee, warning)).await
+            self.send_twitch_message(client, channel, &format!("hey {}, muni has issued a content/trigger warning for this stream: {}. please take care of yourself! it's okay to leave or mute if this content will make you uncomfortable. and you are loved no matter what!", addressee, warning)).await
         } else {
-            self.send_message(client, channel, &format!("hey {}, there is no active content/trigger warning in effect. enjoy the stream ^-^ if current conversation is making you uncomfortable, you can use the 'subject change /srs' redeem to change the subject!", addressee)).await
+            self.send_twitch_message(client, channel, &format!("hey {}, there is no active content/trigger warning in effect. enjoy the stream ^-^ if current conversation is making you uncomfortable, you can use the 'subject change /srs' redeem to change the subject!", addressee)).await
         }
     }
 
@@ -41,7 +41,7 @@ impl ContentWarningHandler {
         channel: &str,
     ) -> Result<(), TwitchHandlerError> {
         if let Some(warning) = &self.active_warning {
-            self.send_message(
+            self.send_twitch_message(
                 client,
                 channel,
                 &format!(
@@ -51,7 +51,7 @@ impl ContentWarningHandler {
             )
             .await
         } else {
-            self.send_message(
+            self.send_twitch_message(
                 client,
                 channel,
                 "hi muni! you don't have a content/trigger warning issued right now.",
@@ -67,7 +67,7 @@ impl ContentWarningHandler {
         user_name: &str,
     ) -> Result<(), TwitchHandlerError> {
         if !self.users_greeted.contains(user_name) && let Some(warning) = &self.active_warning {
-            self.send_message(client, channel, &format!("welcome, {}! just so you know, muni has issued a content/trigger warning for this stream: {}. please take care of yourself! it's okay to leave or mute if this content will make you uncomfortable. and you are loved no matter what!", user_name, warning)).await?;
+            self.send_twitch_message(client, channel, &format!("welcome, {}! just so you know, muni has issued a content/trigger warning for this stream: {}. please take care of yourself! it's okay to leave or mute if this content will make you uncomfortable. and you are loved no matter what!", user_name, warning)).await?;
             self.users_greeted.insert(user_name.to_string());
         }
 
@@ -96,7 +96,7 @@ impl TwitchMessageHandler for ContentWarningHandler {
                                 .await?;
                         } else if content == "clear" || content == "reset" {
                             self.active_warning = None;
-                            self.send_message(
+                            self.send_twitch_message(
                                 client,
                                 &m.channel_login,
                                 "okay! content/trigger warning has been cleared.",
@@ -105,7 +105,7 @@ impl TwitchMessageHandler for ContentWarningHandler {
                         } else {
                             self.active_warning = Some(content.to_string());
                             self.users_greeted.clear();
-                            self.send_message(client, &m.channel_login, &format!("okay! issued a content/trigger warning with the following reason: \"{}\"", content)).await?;
+                            self.send_twitch_message(client, &m.channel_login, &format!("okay! issued a content/trigger warning with the following reason: \"{}\"", content)).await?;
                         }
                     } else {
                         self.say_user_requested_warning(client, &m.channel_login, &m.sender.name)

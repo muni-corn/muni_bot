@@ -26,7 +26,7 @@ impl TwitchMessageHandler for GreetingHandler {
         let handled = if let ServerMessage::Privmsg(m) = message {
             if m.message_text.trim().starts_with("uwu") {
                 if m.sender.name == "Linokii" {
-                    self.send_message(client, &m.channel_login, "linokii uwu<3")
+                    self.send_twitch_message(client, &m.channel_login, "linokii uwu<3")
                         .await?;
                     true
                 } else {
@@ -44,7 +44,7 @@ impl TwitchMessageHandler for GreetingHandler {
                     greeting.push_str(" uwu");
                 }
 
-                self.send_message(client, &m.channel_login, &greeting)
+                self.send_twitch_message(client, &m.channel_login, &greeting)
                     .await?;
 
                 true

@@ -17,14 +17,14 @@ impl TwitchMessageHandler for RaidMsgHandler {
     ) -> Result<bool, TwitchHandlerError> {
         let handled = if let ServerMessage::Privmsg(m) = message {
             if m.message_text.trim().starts_with("!rmsg") {
-                self.send_message(
+                self.send_twitch_message(
                     client,
                     &m.channel_login,
                     include_str!("../../raid_msg_normal.txt"),
                 )
                 .await?;
 
-                self.send_message(
+                self.send_twitch_message(
                     client,
                     &m.channel_login,
                     include_str!("../../raid_msg_subs.txt"),

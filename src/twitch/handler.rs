@@ -7,7 +7,7 @@ use crate::twitch::bot::{MuniBotTwitchIRCClient, MuniBotTwitchIRCError};
 
 #[async_trait]
 pub trait TwitchMessageHandler: Send {
-    async fn send_message(
+    async fn send_twitch_message(
         &mut self,
         client: &MuniBotTwitchIRCClient,
         channel: &str,

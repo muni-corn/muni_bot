@@ -17,7 +17,7 @@ impl TwitchMessageHandler for LurkHandler {
     ) -> Result<bool, TwitchHandlerError> {
         let handled = if let ServerMessage::Privmsg(m) = message {
             if m.message_text.trim().starts_with("!lurk") {
-                self.send_message(
+                self.send_twitch_message(
                     client,
                     &m.channel_login,
                     &format!("{} cast an invisibility spell!", m.sender.name),
@@ -25,7 +25,7 @@ impl TwitchMessageHandler for LurkHandler {
                 .await?;
                 true
             } else if m.message_text.trim().starts_with("!unlurk") {
-                self.send_message(
+                self.send_twitch_message(
                     client,
                     &m.channel_login,
                     &format!(
