@@ -1,7 +1,7 @@
 #![feature(decl_macro)]
 #![feature(let_chains)]
 
-use twitch::bot::MuniBot;
+use twitch::bot::TwitchBot;
 use reqwest::Url;
 use rocket::{
     get, http::ContentType, response::Responder, routes, Ignite, Response, Rocket, Shutdown, State,
@@ -94,7 +94,7 @@ fn run_bot(auth_rx: Receiver<UserAccessToken>, shutdown_handle: Shutdown) -> Joi
         shutdown_handle.notify();
         println!("server is shut down");
 
-        MuniBot::new(token).run().await
+        TwitchBot::new(token).run().await
     })
 }
 

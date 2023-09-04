@@ -22,12 +22,12 @@ pub type MuniBotTwitchIRCClient =
 pub type MuniBotTwitchIRCError =
     twitch_irc::Error<SecureTCPTransport, RefreshingLoginCredentials<MuniBotTokenStorage>>;
 
-pub struct MuniBot {
+pub struct TwitchBot {
     user_access_token: UserAccessToken,
     message_handlers: Vec<Box<dyn TwitchMessageHandler>>,
 }
 
-impl MuniBot {
+impl TwitchBot {
     pub fn new(user_access_token: UserAccessToken) -> Self {
         Self {
             user_access_token,
@@ -82,7 +82,7 @@ impl MuniBot {
 }
 
 #[async_trait]
-impl TwitchMessageHandler for MuniBot {
+impl TwitchMessageHandler for TwitchBot {
     async fn handle_message(
         &mut self,
         client: &MuniBotTwitchIRCClient,
