@@ -5,4 +5,4 @@ client_secret.txt
 discord_link.txt
 raid_msg_subs.txt
 raid_msg_normal.txt
-.env*
+.env
