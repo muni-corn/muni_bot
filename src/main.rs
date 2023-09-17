@@ -212,7 +212,7 @@ impl Display for MuniBotError {
 impl std::error::Error for MuniBotError {}
 
 impl<'req> Responder<'req, 'static> for MuniBotError {
-    fn respond_to(self, _request: &'req rocket::Request<'_>) -> rocket::response::Result<'static> {
+    fn respond_to(self, _request: &rocket::Request) -> rocket::response::Result<'static> {
         let display = format!("{self}");
         Response::build()
             .header(ContentType::Plain)
