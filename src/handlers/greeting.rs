@@ -5,9 +5,12 @@ use rand::Rng;
 use regex::Regex;
 use twitch_irc::message::ServerMessage;
 
-use crate::twitch::{
-    bot::MuniBotTwitchIRCClient,
-    handler::{TwitchHandlerError, TwitchMessageHandler},
+use crate::{
+    discord::handler::{DiscordMessageHandler, DiscordMessageHandlerError},
+    twitch::{
+        bot::MuniBotTwitchIRCClient,
+        handler::{TwitchHandlerError, TwitchMessageHandler},
+    },
 };
 
 pub struct GreetingHandler;
@@ -62,6 +65,35 @@ impl TwitchMessageHandler for GreetingHandler {
         } else {
             false
         };
+
+        Ok(handled)
+    }
+}
+
+#[async_trait]
+impl DiscordMessageHandler for GreetingHandler {
+    fn name(&self) -> &'static str {
+        "greeting"
+    }
+
+    async fn handle_message(
+        &mut self,
+        context: &Context,
+        msg: &Message,
+    ) -> Result<bool, DiscordMessageHandlerError> {
+        let handled =
+            if let Some(response) = Self::get_greeting_message(&msg.author.name, &msg.content) {
+                msg.channel_id
+                    .say(&context.http, response)
+                    .await
+                    .map_err(|e| DiscordMessageHandlerError {
+                        message: e.to_string(),
+                        handler_name: self.name().to_string(),
+                    })?;
+                true
+            } else {
+                false
+            };
 
         Ok(handled)
     }
