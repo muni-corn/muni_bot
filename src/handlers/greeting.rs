@@ -33,7 +33,7 @@ impl GreetingHandler {
             // send a hi message back
             // pick a template
             let template_index = rand::thread_rng().gen_range(0..HELLO_TEMPLATES.len());
-            let mut greeting = HELLO_TEMPLATES[template_index].replace("{name}", &user_name);
+            let mut greeting = HELLO_TEMPLATES[template_index].replace("{name}", user_name);
 
             // if the message was sent from linokii, append a very special uwu
             if user_name == "Linokii" {
