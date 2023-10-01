@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tokio = { version = "1.22", features = [ "macros", "rt-multi-thread" ] }
+tokio = { version = "1.22", features = [ "full" ] }
 rocket = "0.5.0-rc.2"
 twitch-irc = { version = "5.0", features = [ "refreshing-token-native-tls" ] }
 twitch_oauth2 = "0.9"
@@ -20,6 +20,6 @@ lazy_static = "1.4"
 rand = "0.8"
 diesel = { version = "2.0.0", features = ["postgres"] }
 dotenvy = "0.15"
-chrono = "0.4.23"                   # Date and time library for Rust
-serenity = "0.11.6"
+chrono = "0.4.23"
 poise = "0.5.5"
+clap = "4.4.6"
