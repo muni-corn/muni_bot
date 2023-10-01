@@ -56,7 +56,7 @@ impl TwitchMessageHandler for GreetingHandler {
     ) -> Result<bool, TwitchHandlerError> {
         let handled = if let ServerMessage::Privmsg(m) = message {
             if let Some(response) = Self::get_greeting_message(&m.sender.name, &m.message_text) {
-                self.send_message(client, &m.channel_login, &response)
+                self.send_twitch_message(client, &m.channel_login, &response)
                     .await?;
                 true
             } else {
