@@ -33,7 +33,7 @@
           inherit rust;
           inherit (pkgs) pkg-config unqlite clang diesel-cli glibc;
         };
-        buildInputs = with pkgs; [libressl_3_5];
+        buildInputs = with pkgs; [libressl_3_6];
       in {
         # `nix build`
         defaultPackage = naersk-lib.buildPackage {
