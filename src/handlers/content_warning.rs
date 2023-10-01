@@ -1,8 +1,7 @@
 use std::collections::HashSet;
 
 use async_trait::async_trait;
-use regex::Regex;
-use twitch_irc::message::{ReplyToMessage, ServerMessage};
+use twitch_irc::message::ServerMessage;
 
 use crate::twitch::{
     bot::MuniBotTwitchIRCClient,
