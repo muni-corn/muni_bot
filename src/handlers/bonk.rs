@@ -14,7 +14,7 @@ impl TwitchMessageHandler for BonkHandler {
     async fn handle_twitch_message(
         &mut self,
         client: &MuniBotTwitchIRCClient,
-        message: ServerMessage,
+        message: &ServerMessage,
     ) -> Result<bool, TwitchHandlerError> {
         let handled = if let ServerMessage::Privmsg(m) = message {
             if let Some(target) = m.message_text.trim().strip_prefix("!bonk ") {

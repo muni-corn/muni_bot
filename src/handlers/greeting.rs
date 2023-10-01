@@ -52,7 +52,7 @@ impl TwitchMessageHandler for GreetingHandler {
     async fn handle_twitch_message(
         &mut self,
         client: &MuniBotTwitchIRCClient,
-        message: ServerMessage,
+        message: &ServerMessage,
     ) -> Result<bool, TwitchHandlerError> {
         let handled = if let ServerMessage::Privmsg(m) = message {
             if let Some(response) = Self::get_greeting_message(&m.sender.name, &m.message_text) {

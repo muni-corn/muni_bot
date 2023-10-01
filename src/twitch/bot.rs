@@ -58,7 +58,7 @@ impl TwitchBot {
         let client_clone = client.clone();
         let join_handle = tokio::spawn(async move {
             while let Some(message) = incoming_messages.recv().await {
-                if let Err(e) = self.handle_twitch_message(&client_clone, message).await {
+                if let Err(e) = self.handle_twitch_message(&client_clone, &message).await {
                     eprintln!("error in message handler! {e}");
                 }
             }
@@ -86,13 +86,13 @@ impl TwitchMessageHandler for TwitchBot {
     async fn handle_twitch_message(
         &mut self,
         client: &MuniBotTwitchIRCClient,
-        message: ServerMessage,
+        message: &ServerMessage,
     ) -> Result<bool, TwitchHandlerError> {
         for message_handler in self.message_handlers.iter_mut() {
             // try to handle the message. if the handler determines the message was handled, we'll
             // stop
             if message_handler
-                .handle_twitch_message(client, message.clone())
+                .handle_twitch_message(client, message)
                 .await?
             {
                 return Ok(true);

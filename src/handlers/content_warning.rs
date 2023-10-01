@@ -80,7 +80,7 @@ impl TwitchMessageHandler for ContentWarningHandler {
     async fn handle_twitch_message(
         &mut self,
         client: &MuniBotTwitchIRCClient,
-        message: ServerMessage,
+        message: &ServerMessage,
     ) -> Result<bool, TwitchHandlerError> {
         let handled = match message {
             ServerMessage::Privmsg(m) => {

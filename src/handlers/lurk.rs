@@ -13,7 +13,7 @@ impl TwitchMessageHandler for LurkHandler {
     async fn handle_twitch_message(
         &mut self,
         client: &MuniBotTwitchIRCClient,
-        message: ServerMessage,
+        message: &ServerMessage,
     ) -> Result<bool, TwitchHandlerError> {
         let handled = if let ServerMessage::Privmsg(m) = message {
             if m.message_text.trim().starts_with("!lurk") {
