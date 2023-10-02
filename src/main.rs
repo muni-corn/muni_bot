@@ -1,12 +1,13 @@
 #![feature(decl_macro)]
 #![feature(let_chains)]
 
-use auth_server::{open_auth_page, AuthServer};
-use bot::MuniBot;
+use std::{error::Error, sync::Arc};
+
+use handlers::{DiscordHandlerCollection, greeting::GreetingHandler};
 use rocket::{http::ContentType, response::Responder, Response};
-use tokio::sync::mpsc::error::SendError;
-use std::{error::Error, fmt::Display, io::Cursor};
+use tokio::sync::{mpsc::error::SendError, Mutex};
 use twitch_irc::login::UserAccessToken;
+use discord::start_discord_integration;
 
 mod discord;
 
@@ -14,30 +15,33 @@ mod auth_server;
 mod handlers;
 mod schema;
 mod twitch;
-pub mod bot;
+mod bot;
 
 #[rocket::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    let (mut auth_server, auth_rxs) = AuthServer::new();
-    let auth_server_handle = auth_server.launch().await?;
+    let discord_handlers: DiscordHandlerCollection = vec![Arc::new(Mutex::new(GreetingHandler))];
+    start_discord_integration(discord_handlers).await;
 
-    // open web browser to authorize
-    let twitch_auth_page_handle = open_auth_page(
-        auth_server
-        .get_twitch_auth_state()
-        .lock()
-        .await
-        .get_auth_page_url().clone(),
-    );
+    // let (mut auth_server, auth_rxs) = AuthServer::new();
+    // let auth_server_handle = auth_server.launch().await?;
 
-    let bot = MuniBot::new(auth_rxs);
-    bot.run().await;
+    // // open web browser to authorize
+    // let twitch_auth_page_handle = open_auth_page(
+    //     auth_server
+    //     .get_twitch_auth_state()
+    //     .lock()
+    //     .await
+    //     .get_auth_page_url().clone(),
+    // );
 
-    // wait for the auth server to stop, if ever
-    let _ = auth_server_handle.await??;
+    // let bot = MuniBot::new(auth_rxs);
+    // bot.run().await;
 
-    // wait for the twitch auth page to close, if ever
-    twitch_auth_page_handle.await?;
+    // // wait for the auth server to stop, if ever
+    // let _ = auth_server_handle.await??;
+
+    // // wait for the twitch auth page to close, if ever
+    // twitch_auth_page_handle.await?;
 
     Ok(())
 }
