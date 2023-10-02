@@ -8,12 +8,15 @@ use tokio::sync::mpsc::error::SendError;
 use std::{error::Error, fmt::Display, io::Cursor};
 use twitch_irc::login::UserAccessToken;
 
+mod auth_server;
 mod handlers;
 mod schema;
 mod twitch;
 
 #[rocket::main]
 async fn main() -> Result<(), Box<dyn Error>> {
+    let (mut auth_server, auth_rxs) = AuthServer::new();
+    let auth_server_handle = auth_server.launch().await?;
 
     // open web browser to authorize
     let twitch_auth_page_handle = open_auth_page(
@@ -25,6 +28,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     );
 
 
+    // wait for the auth server to stop, if ever
+    let _ = auth_server_handle.await??;
 
     // wait for the twitch auth page to close, if ever
     twitch_auth_page_handle.await?;
