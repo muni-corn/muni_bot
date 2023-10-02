@@ -24,7 +24,6 @@ impl AuthServer {
         (
             Self {
                 twitch_auth_state: Arc::new(Mutex::new(twitch_auth)),
-                discord_auth_state: Arc::new(Mutex::new(discord_auth)),
             },
             AuthTokenReceivers {
                 twitch: twitch_auth_rx,
@@ -51,10 +50,6 @@ impl AuthServer {
             .await?;
 
         Ok(tokio::task::spawn(async { rocket.launch().await }))
-    }
-
-    pub fn get_twitch_auth_state(&self) -> &Arc<Mutex<TwitchAuthState>> {
-        &self.twitch_auth_state
     }
 }
 
