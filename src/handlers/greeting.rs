@@ -24,7 +24,7 @@ impl GreetingHandler {
     /// Returns a greeting message if applicable, or None if not to keep quiet.
     fn get_greeting_message(user_name: &str, message_text: &str) -> Option<String> {
         if message_text.trim().starts_with("uwu") {
-            if user_name == "Linokii" {
+            if user_name.to_lowercase() == "linokii" {
                 Some("linokii uwu<3".to_string())
             } else {
                 None
@@ -36,7 +36,7 @@ impl GreetingHandler {
             let mut greeting = HELLO_TEMPLATES[template_index].replace("{name}", user_name);
 
             // if the message was sent from linokii, append a very special uwu
-            if user_name == "Linokii" {
+            if user_name.to_lowercase() == "linokii" {
                 greeting.push_str(" uwu");
             }
 
