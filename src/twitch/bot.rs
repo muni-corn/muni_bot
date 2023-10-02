@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
+use tokio::task::JoinHandle;
 use twitch_irc::{
     login::{RefreshingLoginCredentials, UserAccessToken},
     message::ServerMessage,
@@ -14,7 +15,7 @@ use crate::handlers::{
 
 use super::{
     handler::{TwitchHandlerError, TwitchMessageHandler},
-    token_storage::TwitchTokenStorage,
+    token_storage::TwitchTokenStorage, auth::get_client_tokens,
 };
 
 pub type MuniBotTwitchIRCClient =
@@ -24,13 +25,15 @@ pub type MuniBotTwitchIRCError =
 
 pub struct TwitchBot {
     user_access_token: UserAccessToken,
+    channel: String,
     message_handlers: Vec<Box<dyn TwitchMessageHandler>>,
 }
 
 impl TwitchBot {
-    pub fn new(user_access_token: UserAccessToken) -> Self {
+    pub fn new(user_access_token: UserAccessToken, channel: &str) -> Self {
         Self {
             user_access_token,
+            channel: channel.to_owned(),
             message_handlers: vec![
                 Box::new(BonkHandler),
                 Box::new(SocialsHandler),
@@ -41,9 +44,8 @@ impl TwitchBot {
         }
     }
 
-    pub async fn run(mut self) {
-        let client_id = include_str!("../client_id.txt").trim().to_owned();
-        let client_secret = include_str!("../client_secret.txt").to_owned();
+    pub async fn start(mut self) -> JoinHandle<()> {
+        let (client_id, client_secret) = get_client_tokens();
         let token_storage = TwitchTokenStorage {
             user_access_token: self.user_access_token.clone(),
         };
@@ -51,6 +53,9 @@ impl TwitchBot {
         let config = ClientConfig::new_simple(credentials);
 
         let (mut incoming_messages, client) = MuniBotTwitchIRCClient::new(config);
+
+        // clone the channel to a new variable before `self` is moved
+        let channel = self.channel.to_owned();
 
         // first thing you should do: start consuming incoming messages,
         // otherwise they will back up.
@@ -64,20 +69,17 @@ impl TwitchBot {
             }
         });
 
-        // join a channel
-        // This function only returns an error if the passed channel login name is malformed,
-        // so in this simple case where the channel name is hardcoded we can ignore the potential
-        // error with `unwrap`.
-        client.join("muni_corn".to_owned()).unwrap();
+        // join a channel. this function only returns an error if the passed channel login name is
+        // malformed, so in this simple case where the channel name is hardcoded we can ignore the
+        // potential error with `unwrap`.
+        client.join(channel.to_string()).unwrap();
 
         client
-            .say("muni_corn".to_string(), "i'm here!".to_owned())
+            .say(channel.to_string(), "i'm here!".to_owned())
             .await
             .unwrap();
 
-        // keep the tokio executor alive.
-        // If you return instead of waiting the background task will exit.
-        join_handle.await.unwrap();
+        join_handle
     }
 }
 
