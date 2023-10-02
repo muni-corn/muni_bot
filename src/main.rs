@@ -19,6 +19,8 @@ mod bot;
 
 #[rocket::main]
 async fn main() -> Result<(), Box<dyn Error>> {
+    dotenvy::dotenv().ok();
+
     let discord_handlers: DiscordHandlerCollection = vec![Arc::new(Mutex::new(GreetingHandler))];
     start_discord_integration(discord_handlers).await;
 
