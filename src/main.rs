@@ -8,6 +8,8 @@ use tokio::sync::mpsc::error::SendError;
 use std::{error::Error, fmt::Display, io::Cursor};
 use twitch_irc::login::UserAccessToken;
 
+mod discord;
+
 mod auth_server;
 mod handlers;
 mod schema;
