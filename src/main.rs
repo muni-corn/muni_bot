@@ -14,6 +14,7 @@ mod auth_server;
 mod handlers;
 mod schema;
 mod twitch;
+pub mod bot;
 
 #[rocket::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -29,6 +30,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .get_auth_page_url().clone(),
     );
 
+    let bot = MuniBot::new(auth_rxs);
+    bot.run().await;
 
     // wait for the auth server to stop, if ever
     let _ = auth_server_handle.await??;
