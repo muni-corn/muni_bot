@@ -76,7 +76,7 @@ impl DiscordMessageHandler for GreetingHandler {
         "greeting"
     }
 
-    async fn handle_message(
+    async fn handle_discord_message(
         &mut self,
         context: &Context,
         msg: &Message,
