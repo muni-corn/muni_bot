@@ -1,7 +1,7 @@
 #![feature(decl_macro)]
 #![feature(let_chains)]
 
-use std::{error::Error, sync::Arc};
+use std::{error::Error, sync::Arc, fmt::Display, io::Cursor};
 
 use handlers::{DiscordHandlerCollection, greeting::GreetingHandler};
 use rocket::{http::ContentType, response::Responder, Response};
