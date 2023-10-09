@@ -1,5 +1,8 @@
+use std::sync::Arc;
+
 use rocket::{get, State};
 use serde::Serialize;
+use tokio::sync::Mutex;
 use twitch_irc::login::{GetAccessTokenResponse, UserAccessToken};
 
 use crate::{auth_server::REDIRECT_URI, twitch::auth::{state::TwitchAuthState, get_client_tokens}, MuniBotError};
@@ -8,9 +11,9 @@ use crate::{auth_server::REDIRECT_URI, twitch::auth::{state::TwitchAuthState, ge
 pub(crate) async fn twitch_oauth_callback(
     code: String,
     state: String,
-    auth_state: &State<TwitchAuthState>,
+    auth_state: &State<Arc<Mutex<TwitchAuthState>>>,
 ) -> Result<String, MuniBotError> {
-    if !auth_state.csrf_is_valid(&state) {
+    if !auth_state.lock().await.csrf_is_valid(&state) {
         return Err(MuniBotError::StateMismatch { got: state });
     }
 
