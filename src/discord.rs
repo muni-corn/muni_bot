@@ -4,9 +4,8 @@ pub mod handler;
 use std::env;
 
 use dotenvy::dotenv;
-use poise::samples::{register_in_guild, register_globally};
+use poise::samples::register_globally;
 use poise::serenity_prelude as serenity;
-use poise::serenity_prelude::GuildId;
 use poise::Event;
 
 use crate::handlers::DiscordHandlerCollection;
