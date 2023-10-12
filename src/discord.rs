@@ -1,4 +1,5 @@
 pub mod auth;
+pub mod commands;
 pub mod handler;
 
 use std::env;
@@ -11,17 +12,28 @@ use poise::Event;
 use crate::handlers::DiscordHandlerCollection;
 use crate::MuniBotError;
 
-struct DiscordState {
+use self::commands::DiscordCommandProvider;
+
+pub struct DiscordState {
     handlers: DiscordHandlerCollection,
 }
 
-pub async fn start_discord_integration(handlers: DiscordHandlerCollection) {
+pub async fn start_discord_integration(
+    handlers: DiscordHandlerCollection,
+    command_providers: Vec<Box<dyn DiscordCommandProvider>>,
+) {
     dotenv().ok();
+
+    let commands = command_providers
+        .iter()
+        .flat_map(|provider| provider.commands())
+        .collect();
 
     let options = poise::FrameworkOptions::<DiscordState, MuniBotError> {
         event_handler: |_ctx, event, _framework, _data| {
             Box::pin(event_handler(_ctx, event, _framework, _data))
         },
+        commands,
         ..Default::default()
     };
 

@@ -1,13 +1,14 @@
 #![feature(decl_macro)]
 #![feature(let_chains)]
 
-use std::{error::Error, sync::Arc, fmt::Display, io::Cursor};
+use std::{error::Error, fmt::Display, io::Cursor, sync::Arc};
 
-use handlers::{DiscordHandlerCollection, greeting::GreetingHandler};
+use discord::{commands::DiscordCommandError, start_discord_integration};
 use rocket::{http::ContentType, response::Responder, Response};
 use tokio::sync::{mpsc::error::SendError, Mutex};
 use twitch_irc::login::UserAccessToken;
-use discord::start_discord_integration;
+
+use crate::handlers::{dice::DiceHandler, greeting::GreetingHandler, DiscordHandlerCollection};
 
 mod discord;
 
@@ -21,11 +22,11 @@ mod bot;
 async fn main() -> Result<(), Box<dyn Error>> {
     dotenvy::dotenv().ok();
 
-    let discord_handlers: DiscordHandlerCollection = vec![Arc::new(Mutex::new(GreetingHandler))];
-    start_discord_integration(discord_handlers).await;
 
-    // let (mut auth_server, auth_rxs) = AuthServer::new();
-    // let auth_server_handle = auth_server.launch().await?;
+    let discord_handlers: DiscordHandlerCollection = vec![Arc::new(Mutex::new(GreetingHandler))];
+    let discord_command_providers: Vec<Box<dyn discord::commands::DiscordCommandProvider>> =
+        vec![Box::new(DiceHandler)];
+    start_discord_integration(discord_handlers, discord_command_providers).await;
 
     // // open web browser to authorize
     // let twitch_auth_page_handle = open_auth_page(
@@ -54,6 +55,7 @@ enum MuniBotError {
     ParseError(String),
     RequestError(String),
     SendError(String),
+    DiscordCommand(DiscordCommandError),
 }
 
 impl From<serde_json::Error> for MuniBotError {
@@ -81,6 +83,7 @@ impl Display for MuniBotError {
             MuniBotError::ParseError(e) => write!(f, "parsing failure! {e}"),
             MuniBotError::RequestError(e) => write!(f, "blegh!! {e}"),
             MuniBotError::SendError(e) => write!(f, "send error! {e}"),
+            MuniBotError::DiscordCommand(e) => e.fmt(f),
         }
     }
 }
@@ -94,5 +97,11 @@ impl<'req> Responder<'req, 'static> for MuniBotError {
             .header(ContentType::Plain)
             .sized_body(display.len(), Cursor::new(display))
             .ok()
+    }
+}
+
+impl From<DiscordCommandError> for MuniBotError {
+    fn from(e: DiscordCommandError) -> Self {
+        Self::DiscordCommand(e)
     }
 }
