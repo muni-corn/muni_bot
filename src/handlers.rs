@@ -12,6 +12,7 @@ pub mod content_warning;
 pub mod dice;
 pub mod greeting;
 pub mod lurk;
+pub mod nuzzle;
 pub mod raid_msg;
 pub mod socials;
 
