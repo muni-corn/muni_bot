@@ -42,10 +42,6 @@ impl AuthServer {
                 "/twitch",
                 routes![twitch_oauth_callback, catch_twitch_oauth_error],
             )
-            .mount(
-                "/discord",
-                routes![discord_oauth_callback],
-            )
             .ignite()
             .await?;
 
