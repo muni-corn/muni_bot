@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use rand::{seq::SliceRandom, rngs::StdRng, SeedableRng};
+use rand::{rngs::StdRng, seq::SliceRandom, SeedableRng};
 use twitch_irc::message::ServerMessage;
 
 use crate::twitch::{

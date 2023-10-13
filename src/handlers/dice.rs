@@ -82,7 +82,6 @@ const CRITICAL_SUCCESS_SUFFIXES: [&str; 7] = [
 fn number_to_message(result: u8, sides: u8) -> RollResult {
     let mut rng = rand::thread_rng();
     let prefix = RESULT_PREFIXES.choose(&mut rng).unwrap();
-
     match result {
         n if sides < 20 || (n != 1 && n != sides) => {
             let suffix = if n <= sides / 2 { '.' } else { '!' };
