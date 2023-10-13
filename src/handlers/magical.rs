@@ -19,10 +19,17 @@ pub struct MagicalHandler;
 
 impl MagicalHandler {
     fn get_magic_amount(user_id: &str) -> u8 {
-        let date_user_id = format!("{}{user_id}", Local::now().date_naive());
+        // we determine a user's magicalness based on the current date and their user id.
+        let today = Local::now().date_naive();
+        let date_user_id = format!("{today}{user_id}");
         let hashed = xxh3_64(date_user_id.as_bytes());
-        let x = 1.0 - ((hashed % 100 + 1) as f32 / 100.0);
-        ((1.0 - x * x * x) * 100.0) as u8
+
+        // a number between 1 and 100
+        let x = hashed % 100 + 1;
+
+        // give a cubic-interpolated value between 1 and 100, favoring higher numbers, without
+        // floating point arithmetic :>
+        100 - ((x * x * x) / (100 * 100)) as u8
     }
 
     fn get_message(user_id: &str, user_display_name: &str) -> String {
