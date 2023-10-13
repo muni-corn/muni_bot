@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use lazy_static::lazy_static;
 use poise::serenity_prelude::{Context, Message};
-use rand::Rng;
+use rand::seq::SliceRandom;
 use regex::Regex;
 use twitch_irc::message::ServerMessage;
 
@@ -32,8 +32,11 @@ impl GreetingHandler {
         } else if HI_REGEX.is_match(message_text) {
             // send a hi message back
             // pick a template
-            let template_index = rand::thread_rng().gen_range(0..HELLO_TEMPLATES.len());
-            let mut greeting = HELLO_TEMPLATES[template_index].replace("{name}", user_name);
+            let mut rng = rand::thread_rng();
+            let mut greeting = HELLO_TEMPLATES
+                .choose(&mut rng)
+                .unwrap()
+                .replace("{name}", user_name);
 
             // if the message was sent from linokii, append a very special uwu
             if user_name.to_lowercase() == "linokii" {
