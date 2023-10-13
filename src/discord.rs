@@ -66,7 +66,8 @@ async fn on_ready(
         .await
         .expect("failed to register commands in guild");
 
-    ctx.set_activity(serenity::Activity::watching("you sleep uwu")).await;
+    ctx.set_activity(serenity::Activity::watching("you sleep uwu"))
+        .await;
 
     Ok(DiscordState { handlers })
 }

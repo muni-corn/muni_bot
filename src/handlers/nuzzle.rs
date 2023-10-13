@@ -2,7 +2,10 @@ use poise::serenity_prelude::MessageBuilder;
 use rand::{seq::SliceRandom, Rng};
 
 use crate::{
-    discord::{commands::{DiscordCommandProvider, DiscordCommandError}, DiscordState},
+    discord::{
+        commands::{DiscordCommandError, DiscordCommandProvider},
+        DiscordState,
+    },
     MuniBotError,
 };
 
@@ -39,7 +42,8 @@ impl NuzzleProvider {
         };
 
         // then push the nuzzle action and build the message
-        msg.push_italic(format!("{action}{exclamation}{heart}")).build()
+        msg.push_italic(format!("{action}{exclamation}{heart}"))
+            .build()
     }
 }
 
