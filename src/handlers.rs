@@ -15,6 +15,7 @@ pub mod lurk;
 pub mod nuzzle;
 pub mod raid_msg;
 pub mod socials;
+pub mod magical;
 
 pub type TwitchHandlerCollection = Vec<Arc<Mutex<dyn TwitchMessageHandler>>>;
 pub type DiscordHandlerCollection = Vec<Arc<Mutex<dyn DiscordMessageHandler>>>;
