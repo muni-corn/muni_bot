@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use rand::seq::SliceRandom;
+use rand::{seq::SliceRandom, rngs::StdRng, SeedableRng};
 use twitch_irc::message::ServerMessage;
 
 use crate::twitch::{
@@ -19,7 +19,7 @@ impl TwitchMessageHandler for BonkHandler {
         let handled = if let ServerMessage::Privmsg(m) = message {
             if let Some(target) = m.message_text.trim().strip_prefix("!bonk ") {
                 // pick a template and craft message by replacing all {target}s with the message's arguments
-                let mut rng = rand::thread_rng();
+                let mut rng = StdRng::from_entropy();
                 let message = BONK_TEMPLATES
                     .choose(&mut rng)
                     .unwrap()
