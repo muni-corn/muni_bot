@@ -81,19 +81,24 @@ impl DiscordMessageHandler for GreetingHandler {
         context: &Context,
         msg: &Message,
     ) -> Result<bool, DiscordMessageHandlerError> {
-        let handled =
-            if let Some(response) = Self::get_greeting_message(&msg.author.name, &msg.content) {
-                msg.channel_id
-                    .say(&context.http, response)
-                    .await
-                    .map_err(|e| DiscordMessageHandlerError {
-                        message: e.to_string(),
-                        handler_name: self.name().to_string(),
-                    })?;
-                true
-            } else {
-                false
-            };
+        let author_name = msg
+            .author_nick(&context.http)
+            .await
+            .unwrap_or_else(|| msg.author.name.clone());
+
+        let handled = if let Some(response) = Self::get_greeting_message(&author_name, &msg.content)
+        {
+            msg.channel_id
+                .say(&context.http, response)
+                .await
+                .map_err(|e| DiscordMessageHandlerError {
+                    message: e.to_string(),
+                    handler_name: self.name().to_string(),
+                })?;
+            true
+        } else {
+            false
+        };
 
         Ok(handled)
     }
