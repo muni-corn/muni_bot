@@ -10,11 +10,11 @@ pub trait TwitchMessageHandler: Send {
     async fn send_twitch_message(
         &mut self,
         client: &MuniBotTwitchIRCClient,
-        channel: &str,
+        channel_login: &str,
         message: &str,
     ) -> Result<(), TwitchHandlerError> {
         client
-            .say(channel.to_string(), message.to_string())
+            .say(channel_login.to_string(), message.to_string())
             .await
             .map_err(TwitchHandlerError::SendMessage)
     }
