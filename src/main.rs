@@ -4,7 +4,7 @@
 use std::{error::Error, fmt::Display, io::Cursor, sync::Arc};
 
 use discord::{commands::DiscordCommandError, start_discord_integration};
-use handlers::magical::MagicalHandler;
+use handlers::{magical::MagicalHandler, DiscordCommandProviderCollection};
 use rocket::{http::ContentType, response::Responder, Response};
 use tokio::sync::{mpsc::error::SendError, Mutex};
 use twitch_irc::login::UserAccessToken;
@@ -16,19 +16,21 @@ use crate::handlers::{
 mod discord;
 
 mod auth_server;
+mod bot;
 mod handlers;
 mod schema;
 mod twitch;
-mod bot;
 
 #[rocket::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     dotenvy::dotenv().ok();
 
-
     let discord_handlers: DiscordHandlerCollection = vec![Arc::new(Mutex::new(GreetingHandler))];
-    let discord_command_providers: Vec<Box<dyn discord::commands::DiscordCommandProvider>> =
-        vec![Box::new(DiceHandler), Box::new(NuzzleProvider), Box::new(MagicalHandler)];
+    let discord_command_providers: DiscordCommandProviderCollection = vec![
+        Box::new(DiceHandler),
+        Box::new(NuzzleProvider),
+        Box::new(MagicalHandler),
+    ];
     start_discord_integration(discord_handlers, discord_command_providers).await;
 
     // // open web browser to authorize
