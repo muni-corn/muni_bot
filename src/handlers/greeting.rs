@@ -17,7 +17,7 @@ pub struct GreetingHandler;
 
 lazy_static! {
     static ref HI_REGEX: Regex =
-        Regex::new(r"(?i)\b(?:hi+|hey+|hello+|howdy+|sup+|heww?o+)\b.*\bmuni.?bot\b").unwrap();
+        Regex::new(r"(?i)\b(?:hi+|hey+|hello+|howdy+|sup+|heww?o+|henlo+)\b.*\bmuni.?bot\b").unwrap();
 }
 
 impl GreetingHandler {
