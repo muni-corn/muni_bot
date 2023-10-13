@@ -69,13 +69,14 @@ const CRITICAL_FAILURE_SUFFIXES: [&str; 6] = [
     " lol",
 ];
 
-const CRITICAL_SUCCESS_SUFFIXES: [&str; 6] = [
+const CRITICAL_SUCCESS_SUFFIXES: [&str; 7] = [
     "! impressive ;3",
     "! HECK YEAH",
     " LET'S GOOOOOOO",
     " WOOOOOO",
-    "!!",
+    "!! >u<",
     "!! :D ",
+    "!! >:D ",
 ];
 
 fn number_to_message(result: u8, sides: u8) -> RollResult {
