@@ -1,5 +1,5 @@
 use poise::serenity_prelude::MessageBuilder;
-use rand::Rng;
+use rand::{Rng, seq::SliceRandom};
 
 use crate::{
     discord::{
@@ -80,7 +80,8 @@ const CRITICAL_SUCCESS_SUFFIXES: [&str; 7] = [
 ];
 
 fn number_to_message(result: u8, sides: u8) -> RollResult {
-    let prefix = RESULT_PREFIXES[rand::thread_rng().gen_range(0..RESULT_PREFIXES.len())];
+    let mut rng = rand::thread_rng();
+    let prefix = RESULT_PREFIXES.choose(&mut rng).unwrap();
 
     match result {
         n if sides < 20 || (n != 1 && n != sides) => {
@@ -90,16 +91,12 @@ fn number_to_message(result: u8, sides: u8) -> RollResult {
         1 => RollResult::Full(
             prefix.to_string(),
             result,
-            CRITICAL_FAILURE_SUFFIXES
-                [rand::thread_rng().gen_range(0..CRITICAL_FAILURE_SUFFIXES.len())]
-            .to_string(),
+            CRITICAL_FAILURE_SUFFIXES.choose(&mut rng).unwrap().to_string(),
         ),
         n if n == sides => RollResult::Full(
             prefix.to_string(),
             n,
-            CRITICAL_SUCCESS_SUFFIXES
-                [rand::thread_rng().gen_range(0..CRITICAL_SUCCESS_SUFFIXES.len())]
-            .to_string(),
+            CRITICAL_SUCCESS_SUFFIXES.choose(&mut rng).unwrap().to_string(),
         ),
         n => RollResult::Full(
             "i don't know how, but you rolled a ".to_string(),
