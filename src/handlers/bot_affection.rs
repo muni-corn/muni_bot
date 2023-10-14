@@ -14,9 +14,9 @@ const CHANCE_OF_PREFIX: f64 = 0.5;
 const CHANCE_OF_EXCLAMATION: f64 = 0.5;
 const CHANCE_OF_HEART: f64 = 0.25;
 
-pub struct NuzzleProvider;
+pub struct BotAffectionProvider;
 
-impl NuzzleProvider {
+impl BotAffectionProvider {
     pub fn get_response() -> String {
         let mut rng = rand::thread_rng();
         let mut msg = MessageBuilder::new();
@@ -50,7 +50,7 @@ impl NuzzleProvider {
 /// Nuzzle the good bot!
 #[poise::command(slash_command, prefix_command)]
 async fn nuzzle(ctx: poise::Context<'_, DiscordState, MuniBotError>) -> Result<(), MuniBotError> {
-    ctx.say(NuzzleProvider::get_response())
+    ctx.say(BotAffectionProvider::get_response())
         .await
         .map_err(|e| DiscordCommandError {
             message: format!("couldn't send message :( {e}"),
@@ -68,7 +68,7 @@ const ACTIONS: [&str; 5] = [
     "nuzznuzz",
 ];
 
-impl DiscordCommandProvider for NuzzleProvider {
+impl DiscordCommandProvider for BotAffectionProvider {
     fn commands(&self) -> Vec<poise::Command<DiscordState, MuniBotError>> {
         vec![nuzzle()]
     }

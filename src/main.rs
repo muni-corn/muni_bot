@@ -10,7 +10,7 @@ use tokio::sync::{mpsc::error::SendError, Mutex};
 use twitch_irc::login::UserAccessToken;
 
 use crate::handlers::{
-    dice::DiceHandler, greeting::GreetingHandler, nuzzle::NuzzleProvider, DiscordHandlerCollection,
+    dice::DiceHandler, greeting::GreetingHandler, bot_affection::BotAffectionProvider, DiscordHandlerCollection,
 };
 
 mod discord;
@@ -28,7 +28,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let discord_handlers: DiscordHandlerCollection = vec![Arc::new(Mutex::new(GreetingHandler))];
     let discord_command_providers: DiscordCommandProviderCollection = vec![
         Box::new(DiceHandler),
-        Box::new(NuzzleProvider),
+        Box::new(BotAffectionProvider),
         Box::new(MagicalHandler),
     ];
     start_discord_integration(discord_handlers, discord_command_providers).await;
