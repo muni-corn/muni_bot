@@ -62,7 +62,7 @@ impl DiscordCommandProvider for DiceHandler {
 
 const RESULT_PREFIXES: [&str; 5] = [
     "you roll and... it lands on ",
-    "what a roll! it's a ",
+    "...it's a ",
     "you rolled a ",
     "it's a ",
     "",
