@@ -1,5 +1,5 @@
 use poise::serenity_prelude::MessageBuilder;
-use rand::{Rng, seq::SliceRandom};
+use rand::{seq::SliceRandom, Rng};
 
 use crate::{
     discord::{
@@ -37,12 +37,20 @@ impl DiceHandler {
 async fn roll(
     ctx: poise::Context<'_, DiscordState, MuniBotError>,
     #[description = "number of sides on the die you want to roll"] sides: u8,
+    #[description = "specify what you're rolling for"] purpose: Option<String>,
 ) -> Result<(), MuniBotError> {
-    let message = MessageBuilder::from(DiceHandler::roll_for_message(sides)).build();
-    ctx.say(message).await.map_err(|e| DiscordCommandError {
-        message: format!("couldn't send message :( {e}"),
-        command_identifier: "roll".to_string(),
-    })?;
+    let mut builder = MessageBuilder::new();
+    if let Some(p) = purpose {
+        builder.push(format!("rolling {p}: "));
+    }
+    DiceHandler::roll_for_message(sides).add_to_message_builder(&mut builder);
+
+    ctx.say(builder.build())
+        .await
+        .map_err(|e| DiscordCommandError {
+            message: format!("couldn't send message :( {e}"),
+            command_identifier: "roll".to_string(),
+        })?;
     Ok(())
 }
 
@@ -90,12 +98,18 @@ fn number_to_message(result: u8, sides: u8) -> RollResult {
         1 => RollResult::Full(
             prefix.to_string(),
             result,
-            CRITICAL_FAILURE_SUFFIXES.choose(&mut rng).unwrap().to_string(),
+            CRITICAL_FAILURE_SUFFIXES
+                .choose(&mut rng)
+                .unwrap()
+                .to_string(),
         ),
         n if n == sides => RollResult::Full(
             prefix.to_string(),
             n,
-            CRITICAL_SUCCESS_SUFFIXES.choose(&mut rng).unwrap().to_string(),
+            CRITICAL_SUCCESS_SUFFIXES
+                .choose(&mut rng)
+                .unwrap()
+                .to_string(),
         ),
         n => RollResult::Full(
             "i don't know how, but you rolled a ".to_string(),
@@ -110,15 +124,13 @@ pub enum RollResult {
     Full(String, u8, String),
 }
 
-impl From<RollResult> for MessageBuilder {
-    fn from(result: RollResult) -> Self {
-        match result {
-            RollResult::SingleMessage(msg) => MessageBuilder::new().push(msg).to_owned(),
-            RollResult::Full(prefix, result, suffix) => MessageBuilder::new()
-                .push(prefix)
-                .push_bold(result)
-                .push(suffix)
-                .to_owned(),
-        }
+impl RollResult {
+    fn add_to_message_builder(&self, builder: &mut MessageBuilder) {
+        match self {
+            RollResult::SingleMessage(msg) => builder.push(msg),
+            RollResult::Full(prefix, result, suffix) => {
+                builder.push(prefix).push_bold(result).push(suffix)
+            }
+        };
     }
 }
