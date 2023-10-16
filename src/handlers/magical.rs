@@ -75,9 +75,19 @@ impl TwitchMessageHandler for MagicalHandler {
 /// Check your magicalness today.
 #[poise::command(prefix_command, slash_command)]
 async fn magical(ctx: poise::Context<'_, DiscordState, MuniBotError>) -> Result<(), MuniBotError> {
+    let author = ctx.author();
+    let nick = if let Some(guild_id) = ctx.guild_id() {
+        author
+            .nick_in(ctx.http(), guild_id)
+            .await
+            .unwrap_or_else(|| author.name.clone())
+    } else {
+        author.name.clone()
+    };
+
     ctx.say(MagicalHandler::get_message(
         &ctx.author().id.to_string(),
-        &ctx.author().name,
+        &nick,
     ))
     .await
     .map_err(|e| DiscordCommandError {
