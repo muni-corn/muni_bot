@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use chrono::Local;
 use twitch_irc::message::ServerMessage;
-use xxhash_rust::const_xxh3::xxh3_64;
+use xxhash_rust::const_xxh3::xxh3_128;
 
 use crate::{
     discord::{
@@ -22,7 +22,7 @@ impl MagicalHandler {
         // we determine a user's magicalness based on the current date and their user id.
         let today = Local::now().date_naive();
         let date_user_id = format!("{today}{user_id}");
-        let hashed = xxh3_64(date_user_id.as_bytes());
+        let hashed = xxh3_128(date_user_id.as_bytes());
 
         // a number between 1 and 100
         let x = hashed % 100 + 1;
@@ -37,7 +37,7 @@ impl MagicalHandler {
         let suffix = match magic_amount {
             1 => ". ouch. lol.",
             100 => "!! wow :3",
-            x if x < 25 => ". sounds like a good day for some self care. <3",
+            x if x < 25 => ". sounds like a good day for some self care <3",
             _ => "!",
         };
         format!("{user_display_name} is {magic_amount}% magical today{suffix}")
