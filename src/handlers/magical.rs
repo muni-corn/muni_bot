@@ -36,6 +36,7 @@ impl MagicalHandler {
         let magic_amount = Self::get_magic_amount(user_id);
         let suffix = match magic_amount {
             1 => ". ouch. lol.",
+            69 => ". nice ;3",
             100 => "!! wow :3",
             x if x < 25 => ". sounds like a good day for some self care <3",
             _ => "!",

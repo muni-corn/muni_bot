@@ -103,6 +103,7 @@ fn number_to_message(result: u8, sides: u8) -> RollResult {
                 .unwrap()
                 .to_string(),
         ),
+        69 => RollResult::Full(prefix.to_string(), result, ". nice ;3".to_string()),
         n if n == sides => RollResult::Full(
             prefix.to_string(),
             n,
