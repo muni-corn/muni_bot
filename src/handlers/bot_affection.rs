@@ -18,7 +18,7 @@ const NUZZLE_ACTIONS: [&str; 5] = [
     "nuzznuzz",
 ];
 const BOOP_PREFIXES: [&str; 4] = ["ACK! ", "ack! ", "eep! ", "meep! "];
-const BOOP_ACTIONS: [&str; 5] = ["boops back!", "", "", "", ""];
+const BOOP_ACTIONS: [&str; 2] = ["boops back!", "bzzzt! @~@"];
 const BOOP_ERROR_MESSAGE: &str =
     "thread 'boop handler' panicked at 'your boop has broken the bot!!', src/handlers/bot_affection.rs:60:9
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace";
@@ -31,12 +31,12 @@ const CHANCE_OF_HEART: f64 = 0.1;
 pub struct BotAffectionProvider;
 
 impl BotAffectionProvider {
-    pub fn get_generic_response(prefixes: &[&str], actions: &[&str]) -> String {
+    fn get_generic_response(prefixes: &[&str], actions: ActionResponse) -> String {
         let mut rng = rand::thread_rng();
         let mut msg = MessageBuilder::new();
 
         // start by choosing an action
-        let action = actions.choose(&mut rng).unwrap_or(&"");
+        let action = actions.pick(&mut rng).unwrap_or("");
 
         // start the message with a prefix, if decided
         if rng.gen_bool(CHANCE_OF_PREFIX) {
@@ -68,7 +68,7 @@ impl BotAffectionProvider {
     async fn handle_generic_affection(
         ctx: poise::Context<'_, DiscordState, MuniBotError>,
         prefixes: &[&str],
-        actions: &[&str],
+        actions: ActionResponse<'_>,
     ) -> Result<(), MuniBotError> {
         ctx.say(Self::get_generic_response(prefixes, actions))
             .await
@@ -107,18 +107,51 @@ async fn boop(ctx: poise::Context<'_, DiscordState, MuniBotError>) -> Result<(),
             })
             .map(|_| Ok(()))?
     } else {
-        BotAffectionProvider::handle_generic_affection(ctx, &BOOP_PREFIXES, &BOOP_ACTIONS).await
+        BotAffectionProvider::handle_generic_affection(
+            ctx,
+            &BOOP_PREFIXES,
+            ActionResponse::Rare(&BOOP_ACTIONS, 0.1),
+        )
+        .await
     }
 }
 
 /// Nuzzle the good bot!
 #[poise::command(slash_command, prefix_command)]
 async fn nuzzle(ctx: poise::Context<'_, DiscordState, MuniBotError>) -> Result<(), MuniBotError> {
-    BotAffectionProvider::handle_generic_affection(ctx, &NUZZLE_PREFIXES, &NUZZLE_ACTIONS).await
+    BotAffectionProvider::handle_generic_affection(
+        ctx,
+        &NUZZLE_PREFIXES,
+        ActionResponse::Always(&NUZZLE_ACTIONS),
+    )
+    .await
 }
 
 impl DiscordCommandProvider for BotAffectionProvider {
     fn commands(&self) -> Vec<poise::Command<DiscordState, MuniBotError>> {
         vec![boop(), nuzzle()]
+    }
+}
+
+enum ActionResponse<'a> {
+    /// A collection of actions that always happen.
+    Always(&'a [&'a str]),
+
+    /// A collection of actions that may only happen with the probability specified.
+    Rare(&'a [&'a str], f64),
+}
+
+impl ActionResponse<'_> {
+    fn pick(&self, mut rng: impl Rng) -> Option<&str> {
+        match self {
+            Self::Always(opts) => opts.choose(&mut rng).copied(),
+            Self::Rare(opts, p) => {
+                if rng.gen_bool(*p) {
+                    opts.choose(&mut rng).copied()
+                } else {
+                    None
+                }
+            }
+        }
     }
 }
