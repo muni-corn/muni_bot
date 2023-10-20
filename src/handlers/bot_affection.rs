@@ -86,6 +86,7 @@ impl BotAffectionProvider {
 /// Boop the bot!
 #[poise::command(slash_command, prefix_command)]
 async fn boop(ctx: poise::Context<'_, DiscordState, MuniBotError>) -> Result<(), MuniBotError> {
+    // rarely throw a fake error message
     if rand::thread_rng().gen_bool(0.01) {
         ctx.say(
             MessageBuilder::new()
@@ -109,6 +110,7 @@ async fn boop(ctx: poise::Context<'_, DiscordState, MuniBotError>) -> Result<(),
             })
             .map(|_| Ok(()))?
     } else {
+        // otherwise, respond normally
         BotAffectionProvider::handle_generic_affection(
             ctx,
             &BOOP_PREFIXES,
