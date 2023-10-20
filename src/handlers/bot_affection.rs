@@ -62,7 +62,12 @@ impl BotAffectionProvider {
             msg.push_italic(format!("{action}{tilde}{exclamation}{heart}"));
         }
 
-        msg.build().trim().to_string()
+        let result = msg.build().trim().to_string();
+        if result.is_empty() {
+            ">.>".to_string()
+        } else {
+            result
+        }
     }
 
     async fn handle_generic_affection(
