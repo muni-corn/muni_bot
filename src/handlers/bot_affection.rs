@@ -20,7 +20,8 @@ const NUZZLE_ACTIONS: [&str; 5] = [
 
 const CHANCE_OF_PREFIX: f64 = 0.5;
 const CHANCE_OF_EXCLAMATION: f64 = 0.5;
-const CHANCE_OF_HEART: f64 = 0.25;
+const CHANCE_OF_TILDE: f64 = 0.25;
+const CHANCE_OF_HEART: f64 = 0.1;
 
 pub struct BotAffectionProvider;
 
@@ -37,7 +38,12 @@ impl BotAffectionProvider {
             msg.push(prefixes.choose(&mut rng).unwrap());
         }
 
-        // generate optional exclamation mark and heart
+        // generate optional suffixes
+        let tilde = if rng.gen_bool(CHANCE_OF_TILDE) {
+            "~"
+        } else {
+            ""
+        };
         let exclamation = if rng.gen_bool(CHANCE_OF_EXCLAMATION) {
             "!"
         } else {
@@ -50,7 +56,7 @@ impl BotAffectionProvider {
         };
 
         // then push the nuzzle action and build the message
-        msg.push_italic(format!("{action}{exclamation}{heart}"))
+        msg.push_italic(format!("{action}{tilde}{exclamation}{heart}"))
             .build()
     }
 
