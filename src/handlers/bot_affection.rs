@@ -157,8 +157,8 @@ async fn kiss(ctx: poise::Context<'_, DiscordState, MuniBotError>) -> Result<(),
     } else {
         BotAffectionProvider::handle_generic_affection(
             ctx,
-            ResponseSelection::Rare(&KISS_PREFIXES, 0.7),
-            ResponseSelection::Rare(&KISS_ACTIONS, 0.2),
+            ResponseSelection::Rare(&KISS_PREFIXES, 0.9),
+            ResponseSelection::Rare(&KISS_ACTIONS, 0.3),
         )
         .await
     }
