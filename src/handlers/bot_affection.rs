@@ -43,21 +43,9 @@ impl BotAffectionProvider {
         // start by choosing an action
         if let Some(action) = actions.pick(&mut rng) {
             // generate optional suffixes
-            let tilde = if rng.gen_bool(CHANCE_OF_TILDE) {
-                "~"
-            } else {
-                ""
-            };
-            let exclamation = if rng.gen_bool(CHANCE_OF_EXCLAMATION) {
-                "!"
-            } else {
-                ""
-            };
-            let heart = if rng.gen_bool(CHANCE_OF_HEART) {
-                "<3"
-            } else {
-                ""
-            };
+            let tilde = get_str_or_empty(&mut rng, "~", CHANCE_OF_TILDE);
+            let exclamation = get_str_or_empty(&mut rng, "!", CHANCE_OF_EXCLAMATION);
+            let heart = get_str_or_empty(&mut rng, " <3", CHANCE_OF_HEART);
 
             // then push the nuzzle action and build the message
             msg.push_italic(format!("{action}{tilde}{exclamation}{heart}"));
@@ -75,10 +63,18 @@ impl BotAffectionProvider {
             .await
             .map_err(|e| DiscordCommandError {
                 message: format!("couldn't send message :( {e}"),
-                command_identifier: "nuzzle".to_string(),
+                command_identifier: "generic affection".to_string(),
             })?;
 
         Ok(())
+    }
+}
+
+fn get_str_or_empty(mut rng: impl Rng, s: &str, p: f64) -> &str {
+    if rng.gen_bool(p) {
+        s
+    } else {
+        ""
     }
 }
 
