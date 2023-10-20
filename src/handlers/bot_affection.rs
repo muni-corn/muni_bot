@@ -32,7 +32,7 @@ const CHANCE_OF_HEART: f64 = 0.1;
 pub struct BotAffectionProvider;
 
 impl BotAffectionProvider {
-    fn get_generic_response(prefixes: &[&str], actions: ActionResponse) -> String {
+    fn get_generic_response(prefixes: &[&str], actions: ResponseSelection) -> String {
         let mut rng = rand::thread_rng();
         let mut msg = MessageBuilder::new();
 
@@ -70,7 +70,7 @@ impl BotAffectionProvider {
     async fn handle_generic_affection(
         ctx: poise::Context<'_, DiscordState, MuniBotError>,
         prefixes: &[&str],
-        actions: ActionResponse<'_>,
+        actions: ResponseSelection<'_>,
     ) -> Result<(), MuniBotError> {
         ctx.say(Self::get_generic_response(prefixes, actions))
             .await
@@ -112,7 +112,7 @@ async fn boop(ctx: poise::Context<'_, DiscordState, MuniBotError>) -> Result<(),
         BotAffectionProvider::handle_generic_affection(
             ctx,
             &BOOP_PREFIXES,
-            ActionResponse::Rare(&BOOP_ACTIONS, 0.1),
+            ResponseSelection::Rare(&BOOP_ACTIONS, 0.1),
         )
         .await
     }
@@ -124,7 +124,7 @@ async fn nuzzle(ctx: poise::Context<'_, DiscordState, MuniBotError>) -> Result<(
     BotAffectionProvider::handle_generic_affection(
         ctx,
         &NUZZLE_PREFIXES,
-        ActionResponse::Always(&NUZZLE_ACTIONS),
+        ResponseSelection::Always(&NUZZLE_ACTIONS),
     )
     .await
 }
@@ -135,15 +135,15 @@ impl DiscordCommandProvider for BotAffectionProvider {
     }
 }
 
-enum ActionResponse<'a> {
-    /// A collection of actions that always happen.
+enum ResponseSelection<'a> {
+    /// A collection of responses that will always have a selection.
     Always(&'a [&'a str]),
 
-    /// A collection of actions that may only happen with the probability specified.
+    /// A collection of responses that may only happen with the probability specified.
     Rare(&'a [&'a str], f64),
 }
 
-impl ActionResponse<'_> {
+impl ResponseSelection<'_> {
     fn pick(&self, mut rng: impl Rng) -> Option<&str> {
         match self {
             Self::Always(opts) => opts.choose(&mut rng).copied(),
