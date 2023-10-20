@@ -9,7 +9,15 @@ use crate::{
     MuniBotError,
 };
 
-const PREFIXES: [&'_ str; 5] = ["*giggle!* ", "eee hehe! ", "hehehe! ", "aaa! ", "eep! "];
+const NUZZLE_PREFIXES: [&str; 5] = ["*giggle!* ", "eee hehe! ", "hehehe! ", "aaa! ", "eep! "];
+const NUZZLE_ACTIONS: [&str; 5] = [
+    "nuzzle",
+    "nuzzleeeee",
+    "nuzzlenuzzle",
+    "nuzzles back",
+    "nuzznuzz",
+];
+
 const CHANCE_OF_PREFIX: f64 = 0.5;
 const CHANCE_OF_EXCLAMATION: f64 = 0.5;
 const CHANCE_OF_HEART: f64 = 0.25;
@@ -17,16 +25,16 @@ const CHANCE_OF_HEART: f64 = 0.25;
 pub struct BotAffectionProvider;
 
 impl BotAffectionProvider {
-    pub fn get_response() -> String {
+    pub fn get_generic_response(prefixes: &[&str], actions: &[&str]) -> String {
         let mut rng = rand::thread_rng();
         let mut msg = MessageBuilder::new();
 
         // start by choosing an action
-        let action = ACTIONS.choose(&mut rng).unwrap();
+        let action = actions.choose(&mut rng).unwrap();
 
         // start the message with a prefix, if decided
         if rng.gen_bool(CHANCE_OF_PREFIX) {
-            msg.push(PREFIXES.choose(&mut rng).unwrap());
+            msg.push(prefixes.choose(&mut rng).unwrap());
         }
 
         // generate optional exclamation mark and heart
@@ -45,28 +53,28 @@ impl BotAffectionProvider {
         msg.push_italic(format!("{action}{exclamation}{heart}"))
             .build()
     }
+
+    async fn handle_generic_affection(
+        ctx: poise::Context<'_, DiscordState, MuniBotError>,
+        prefixes: &[&str],
+        actions: &[&str],
+    ) -> Result<(), MuniBotError> {
+        ctx.say(Self::get_generic_response(prefixes, actions))
+            .await
+            .map_err(|e| DiscordCommandError {
+                message: format!("couldn't send message :( {e}"),
+                command_identifier: "nuzzle".to_string(),
+            })?;
+
+        Ok(())
+    }
 }
 
 /// Nuzzle the good bot!
 #[poise::command(slash_command, prefix_command)]
 async fn nuzzle(ctx: poise::Context<'_, DiscordState, MuniBotError>) -> Result<(), MuniBotError> {
-    ctx.say(BotAffectionProvider::get_response())
-        .await
-        .map_err(|e| DiscordCommandError {
-            message: format!("couldn't send message :( {e}"),
-            command_identifier: "nuzzle".to_string(),
-        })?;
-
-    Ok(())
+    BotAffectionProvider::handle_generic_affection(ctx, &NUZZLE_PREFIXES, &NUZZLE_ACTIONS).await
 }
-
-const ACTIONS: [&str; 5] = [
-    "nuzzle",
-    "nuzzleeeee",
-    "nuzzlenuzzle",
-    "nuzzles back",
-    "nuzznuzz",
-];
 
 impl DiscordCommandProvider for BotAffectionProvider {
     fn commands(&self) -> Vec<poise::Command<DiscordState, MuniBotError>> {
