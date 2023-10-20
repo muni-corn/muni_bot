@@ -24,6 +24,17 @@ const BOOP_ERROR_MESSAGE: &str =
     "thread 'boop handler' panicked at 'your boop has broken the bot!!', src/handlers/bot_affection.rs:60:9
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace";
 
+const KISS_PREFIXES: [&str; 7] = [
+    "ooooo~ ", "oh! ", "meep~! ", "uwu~ ", "ehehe~ ", "mmm~ ", "owo~ ",
+];
+const KISS_ACTIONS: [&str; 5] = [
+    "nuzzles in return",
+    "blushes",
+    "blushyblush",
+    "smirks",
+    "giggles",
+];
+
 const CHANCE_OF_EXCLAMATION: f64 = 0.5;
 const CHANCE_OF_TILDE: f64 = 0.25;
 const CHANCE_OF_HEART: f64 = 0.1;
@@ -126,9 +137,31 @@ async fn nuzzle(ctx: poise::Context<'_, DiscordState, MuniBotError>) -> Result<(
     .await
 }
 
+/// Smooch the bot ;3
+#[poise::command(slash_command, prefix_command)]
+async fn kiss(ctx: poise::Context<'_, DiscordState, MuniBotError>) -> Result<(), MuniBotError> {
+    // VERY rarely will the boot smooch back.
+    if rand::thread_rng().gen_bool(0.00001) {
+        ctx.say("smooch~")
+            .await
+            .map_err(|e| DiscordCommandError {
+                message: format!("couldn't send message :( {e}"),
+                command_identifier: "kiss".to_string(),
+            })
+            .map(|_| Ok(()))?
+    } else {
+        BotAffectionProvider::handle_generic_affection(
+            ctx,
+            ResponseSelection::Always(&KISS_PREFIXES),
+            ResponseSelection::Rare(&KISS_ACTIONS, 0.2),
+        )
+        .await
+    }
+}
+
 impl DiscordCommandProvider for BotAffectionProvider {
     fn commands(&self) -> Vec<poise::Command<DiscordState, MuniBotError>> {
-        vec![boop(), nuzzle()]
+        vec![boop(), nuzzle(), kiss()]
     }
 }
 
