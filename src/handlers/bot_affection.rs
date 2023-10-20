@@ -17,6 +17,11 @@ const NUZZLE_ACTIONS: [&str; 5] = [
     "nuzzles back",
     "nuzznuzz",
 ];
+const BOOP_PREFIXES: [&str; 4] = ["ACK! ", "ack! ", "eep! ", "meep! "];
+const BOOP_ACTIONS: [&str; 5] = ["boops back!", "", "", "", ""];
+const BOOP_ERROR_MESSAGE: &str =
+    "thread 'boop handler' panicked at 'your boop has broken the bot!!', src/handlers/bot_affection.rs:60:9
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace";
 
 const CHANCE_OF_PREFIX: f64 = 0.5;
 const CHANCE_OF_EXCLAMATION: f64 = 0.5;
@@ -31,11 +36,11 @@ impl BotAffectionProvider {
         let mut msg = MessageBuilder::new();
 
         // start by choosing an action
-        let action = actions.choose(&mut rng).unwrap();
+        let action = actions.choose(&mut rng).unwrap_or(&"");
 
         // start the message with a prefix, if decided
         if rng.gen_bool(CHANCE_OF_PREFIX) {
-            msg.push(prefixes.choose(&mut rng).unwrap());
+            msg.push(prefixes.choose(&mut rng).unwrap_or(&""));
         }
 
         // generate optional suffixes
@@ -76,6 +81,36 @@ impl BotAffectionProvider {
     }
 }
 
+/// Boop the bot!
+#[poise::command(slash_command, prefix_command)]
+async fn boop(ctx: poise::Context<'_, DiscordState, MuniBotError>) -> Result<(), MuniBotError> {
+    if rand::thread_rng().gen_bool(0.01) {
+        ctx.say(
+            MessageBuilder::new()
+                .push_codeblock_safe(BOOP_ERROR_MESSAGE, None)
+                .build(),
+        )
+        .await
+        .map_err(|e| DiscordCommandError {
+            message: format!("couldn't send message :( {e}"),
+            command_identifier: "boop".to_string(),
+        })?;
+
+        // sleep for a sec before assuring the user that everything is fine
+        std::thread::sleep(std::time::Duration::from_secs(1));
+
+        ctx.say("jk. i'm fine. hehe! :3")
+            .await
+            .map_err(|e| DiscordCommandError {
+                message: format!("couldn't send message :( {e}"),
+                command_identifier: "boop".to_string(),
+            })
+            .map(|_| Ok(()))?
+    } else {
+        BotAffectionProvider::handle_generic_affection(ctx, &BOOP_PREFIXES, &BOOP_ACTIONS).await
+    }
+}
+
 /// Nuzzle the good bot!
 #[poise::command(slash_command, prefix_command)]
 async fn nuzzle(ctx: poise::Context<'_, DiscordState, MuniBotError>) -> Result<(), MuniBotError> {
@@ -84,6 +119,6 @@ async fn nuzzle(ctx: poise::Context<'_, DiscordState, MuniBotError>) -> Result<(
 
 impl DiscordCommandProvider for BotAffectionProvider {
     fn commands(&self) -> Vec<poise::Command<DiscordState, MuniBotError>> {
-        vec![nuzzle()]
+        vec![boop(), nuzzle()]
     }
 }
