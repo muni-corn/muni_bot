@@ -24,7 +24,6 @@ const BOOP_ERROR_MESSAGE: &str =
     "thread 'boop handler' panicked at 'your boop has broken the bot!!', src/handlers/bot_affection.rs:60:9
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace";
 
-const CHANCE_OF_PREFIX: f64 = 0.5;
 const CHANCE_OF_EXCLAMATION: f64 = 0.5;
 const CHANCE_OF_TILDE: f64 = 0.25;
 const CHANCE_OF_HEART: f64 = 0.1;
@@ -32,13 +31,13 @@ const CHANCE_OF_HEART: f64 = 0.1;
 pub struct BotAffectionProvider;
 
 impl BotAffectionProvider {
-    fn get_generic_response(prefixes: &[&str], actions: ResponseSelection) -> String {
+    fn get_generic_response(prefixes: ResponseSelection, actions: ResponseSelection) -> String {
         let mut rng = rand::thread_rng();
         let mut msg = MessageBuilder::new();
 
         // start the message with a prefix, if decided
-        if rng.gen_bool(CHANCE_OF_PREFIX) {
-            msg.push(prefixes.choose(&mut rng).unwrap_or(&""));
+        if let Some(prefix) = prefixes.pick(&mut rng) {
+            msg.push(prefix);
         }
 
         // start by choosing an action
@@ -69,7 +68,7 @@ impl BotAffectionProvider {
 
     async fn handle_generic_affection(
         ctx: poise::Context<'_, DiscordState, MuniBotError>,
-        prefixes: &[&str],
+        prefixes: ResponseSelection<'_>,
         actions: ResponseSelection<'_>,
     ) -> Result<(), MuniBotError> {
         ctx.say(Self::get_generic_response(prefixes, actions))
@@ -113,7 +112,7 @@ async fn boop(ctx: poise::Context<'_, DiscordState, MuniBotError>) -> Result<(),
         // otherwise, respond normally
         BotAffectionProvider::handle_generic_affection(
             ctx,
-            &BOOP_PREFIXES,
+            ResponseSelection::Always(&BOOP_PREFIXES),
             ResponseSelection::Rare(&BOOP_ACTIONS, 0.1),
         )
         .await
@@ -125,7 +124,7 @@ async fn boop(ctx: poise::Context<'_, DiscordState, MuniBotError>) -> Result<(),
 async fn nuzzle(ctx: poise::Context<'_, DiscordState, MuniBotError>) -> Result<(), MuniBotError> {
     BotAffectionProvider::handle_generic_affection(
         ctx,
-        &NUZZLE_PREFIXES,
+        ResponseSelection::Rare(&NUZZLE_PREFIXES, 0.5),
         ResponseSelection::Always(&NUZZLE_ACTIONS),
     )
     .await
