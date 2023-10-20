@@ -64,7 +64,7 @@ impl BotAffectionProvider {
 
         let result = msg.build().trim().to_string();
         if result.is_empty() {
-            ">.>".to_string()
+            ">.>;".to_string()
         } else {
             result
         }
