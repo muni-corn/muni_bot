@@ -17,8 +17,9 @@ const NUZZLE_ACTIONS: [&str; 5] = [
     "nuzzles back",
     "nuzznuzz",
 ];
+
 const BOOP_PREFIXES: [&str; 4] = ["ACK! ", "ack! ", "eep! ", "meep! "];
-const BOOP_ACTIONS: [&str; 2] = ["boops back!", "bzzzt! @~@"];
+const BOOP_ACTIONS: [&str; 2] = ["boops back", "@~@ bzzzt"];
 const BOOP_ERROR_MESSAGE: &str =
     "thread 'boop handler' panicked at 'your boop has broken the bot!!', src/handlers/bot_affection.rs:60:9
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace";
@@ -35,34 +36,35 @@ impl BotAffectionProvider {
         let mut rng = rand::thread_rng();
         let mut msg = MessageBuilder::new();
 
-        // start by choosing an action
-        let action = actions.pick(&mut rng).unwrap_or("");
-
         // start the message with a prefix, if decided
         if rng.gen_bool(CHANCE_OF_PREFIX) {
             msg.push(prefixes.choose(&mut rng).unwrap_or(&""));
         }
 
-        // generate optional suffixes
-        let tilde = if rng.gen_bool(CHANCE_OF_TILDE) {
-            "~"
-        } else {
-            ""
-        };
-        let exclamation = if rng.gen_bool(CHANCE_OF_EXCLAMATION) {
-            "!"
-        } else {
-            ""
-        };
-        let heart = if rng.gen_bool(CHANCE_OF_HEART) {
-            "<3"
-        } else {
-            ""
-        };
+        // start by choosing an action
+        if let Some(action) = actions.pick(&mut rng) {
+            // generate optional suffixes
+            let tilde = if rng.gen_bool(CHANCE_OF_TILDE) {
+                "~"
+            } else {
+                ""
+            };
+            let exclamation = if rng.gen_bool(CHANCE_OF_EXCLAMATION) {
+                "!"
+            } else {
+                ""
+            };
+            let heart = if rng.gen_bool(CHANCE_OF_HEART) {
+                "<3"
+            } else {
+                ""
+            };
 
-        // then push the nuzzle action and build the message
-        msg.push_italic(format!("{action}{tilde}{exclamation}{heart}"))
-            .build()
+            // then push the nuzzle action and build the message
+            msg.push_italic(format!("{action}{tilde}{exclamation}{heart}"));
+        }
+
+        msg.build().trim().to_string()
     }
 
     async fn handle_generic_affection(
