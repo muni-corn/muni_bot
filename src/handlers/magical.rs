@@ -1,7 +1,8 @@
+use std::{hash::{Hash, Hasher}, collections::hash_map::DefaultHasher};
+
 use async_trait::async_trait;
 use chrono::Local;
 use twitch_irc::message::ServerMessage;
-use xxhash_rust::const_xxh3::xxh3_128;
 
 use crate::{
     discord::{
@@ -22,20 +23,24 @@ impl MagicalHandler {
         // we determine a user's magicalness based on the current date and their user id.
         let today = Local::now().date_naive();
         let date_user_id = format!("{today}{user_id}");
-        let hashed = xxh3_128(date_user_id.as_bytes());
+
+        // hash the value
+        let mut hash_state = DefaultHasher::new();
+        date_user_id.hash(&mut hash_state);
+        let hashed = hash_state.finish();
 
         // a number between 1 and 100
         let x = hashed % 100 + 1;
 
         // give a cubic-interpolated value between 1 and 100, favoring higher numbers, without
         // floating point arithmetic :>
-        100 - ((x * x * x) / (100 * 100)) as u8
+        ((100u64.pow(3) - x * x * x) / (100 * 100)) as u8
     }
 
     fn get_message(user_id: &str, user_display_name: &str) -> String {
         let magic_amount = Self::get_magic_amount(user_id);
         let suffix = match magic_amount {
-            1 => ". ouch. lol.",
+            x if x <= 1 => ". ouch. lol.",
             69 => ". nice ;3",
             100 => "!! wow :3",
             x if x < 25 => ". sounds like a good day for some self care <3",
