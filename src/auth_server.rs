@@ -10,7 +10,7 @@ use crate::twitch::auth::{
     AuthTokenReceivers,
 };
 
-pub(crate) const REDIRECT_URI: &str = "http://localhost:6864/";
+pub(crate) const REDIRECT_URI: &str = "http://localhost:6864/twitch";
 
 /// AuthServer is a server that handles authorization with various services.
 pub struct AuthServer {

@@ -27,13 +27,16 @@ pub struct TwitchAuthState {
 
 impl TwitchAuthState {
     pub fn new() -> (Self, Receiver<UserAccessToken>) {
-        let twitch_redirect_uri = format!("{REDIRECT_URI}/twitch");
+        let twitch_redirect_uri = REDIRECT_URI;
 
         // initialize token builder
         let (client_id, client_secret) = get_client_tokens();
-        let mut token_builder =
-            UserTokenBuilder::new(client_id, client_secret, Url::parse(&twitch_redirect_uri).unwrap())
-                .set_scopes(SCOPE.to_vec());
+        let mut token_builder = UserTokenBuilder::new(
+            client_id,
+            client_secret,
+            Url::parse(twitch_redirect_uri).unwrap(),
+        )
+        .set_scopes(SCOPE.to_vec());
 
         // get url for auth page
         let (auth_page_url, _) = token_builder.generate_url();
