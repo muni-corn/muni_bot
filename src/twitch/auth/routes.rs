@@ -5,7 +5,11 @@ use serde::Serialize;
 use tokio::sync::Mutex;
 use twitch_irc::login::{GetAccessTokenResponse, UserAccessToken};
 
-use crate::{auth_server::REDIRECT_URI, twitch::auth::{state::TwitchAuthState, get_client_tokens}, MuniBotError};
+use crate::{
+    auth_server::REDIRECT_URI,
+    twitch::auth::{get_client_tokens, state::TwitchAuthState},
+    MuniBotError,
+};
 
 #[get("/?<code>&<state>")]
 pub(crate) async fn twitch_oauth_callback(

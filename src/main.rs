@@ -1,16 +1,21 @@
 #![feature(decl_macro)]
 #![feature(let_chains)]
 
-use std::{error::Error, fmt::Display, io::Cursor, sync::Arc};
+use std::{fmt::Display, io::Cursor, sync::Arc};
 
 use discord::{commands::DiscordCommandError, start_discord_integration};
 use handlers::{magical::MagicalHandler, DiscordCommandProviderCollection};
 use rocket::{http::ContentType, response::Responder, Response};
 use tokio::sync::{mpsc::error::SendError, Mutex};
+use twitch::{auth::state::TwitchAuthState, bot::TwitchBot};
 use twitch_irc::login::UserAccessToken;
 
-use crate::handlers::{
-    dice::DiceHandler, greeting::GreetingHandler, bot_affection::BotAffectionProvider, DiscordHandlerCollection,
+use crate::{
+    handlers::{
+        bot_affection::BotAffectionProvider, dice::DiceHandler, greeting::GreetingHandler,
+        DiscordHandlerCollection,
+    },
+    twitch::auth::state::get_basic_url,
 };
 
 mod discord;
@@ -22,36 +27,48 @@ mod schema;
 mod twitch;
 
 #[rocket::main]
-async fn main() -> Result<(), Box<dyn Error>> {
+async fn main() -> Result<(), MuniBotError> {
     dotenvy::dotenv().ok();
 
-    let discord_handlers: DiscordHandlerCollection = vec![Arc::new(Mutex::new(GreetingHandler))];
-    let discord_command_providers: DiscordCommandProviderCollection = vec![
-        Box::new(DiceHandler),
-        Box::new(BotAffectionProvider),
-        Box::new(MagicalHandler),
-    ];
-    start_discord_integration(discord_handlers, discord_command_providers).await;
+    // ensure credentials exist
+    match std::env::var("TWITCH_TOKEN") {
+        Ok(twitch_token) => {
+            // start twitch
+            let twitch_handle = TwitchBot::new().start("muni_corn".to_owned(), twitch_token);
 
-    // // open web browser to authorize
-    // let twitch_auth_page_handle = open_auth_page(
-    //     auth_server
-    //     .get_twitch_auth_state()
-    //     .lock()
-    //     .await
-    //     .get_auth_page_url().clone(),
-    // );
+            // start discord
+            let discord_handlers: DiscordHandlerCollection =
+                vec![Arc::new(Mutex::new(GreetingHandler))];
+            let discord_command_providers: DiscordCommandProviderCollection = vec![
+                Box::new(DiceHandler),
+                Box::new(BotAffectionProvider),
+                Box::new(MagicalHandler),
+            ];
+            let discord_handle = tokio::spawn(start_discord_integration(
+                discord_handlers,
+                discord_command_providers,
+            ));
 
-    // let bot = MuniBot::new(auth_rxs);
-    // bot.run().await;
+            // wait for the twitch bot to stop, if ever
+            if let Err(e) = twitch_handle.await {
+                eprintln!("twitch bot died with error: {e}");
+            }
 
-    // // wait for the auth server to stop, if ever
-    // let _ = auth_server_handle.await??;
+            // wait for the discord bot to stop, if ever
+            if let Err(e) = discord_handle.await {
+                eprintln!("discord bot died with error: {e}");
+            }
 
-    // // wait for the twitch auth page to close, if ever
-    // twitch_auth_page_handle.await?;
-
-    Ok(())
+            Ok(())
+        }
+        Err(e) => {
+            // let (twitch_auth_state, _) = TwitchAuthState::new();
+            let auth_page_url = get_basic_url();
+            println!("no twitch token found ({e})");
+            println!("visit {auth_page_url} to get a token");
+            Err(MuniBotError::MissingToken)
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -61,6 +78,7 @@ enum MuniBotError {
     RequestError(String),
     SendError(String),
     DiscordCommand(DiscordCommandError),
+    MissingToken,
 }
 
 impl From<serde_json::Error> for MuniBotError {
@@ -89,6 +107,7 @@ impl Display for MuniBotError {
             MuniBotError::RequestError(e) => write!(f, "blegh!! {e}"),
             MuniBotError::SendError(e) => write!(f, "send error! {e}"),
             MuniBotError::DiscordCommand(e) => e.fmt(f),
+            MuniBotError::MissingToken => write!(f, "missing token!"),
         }
     }
 }

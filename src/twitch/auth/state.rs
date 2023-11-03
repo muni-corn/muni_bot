@@ -1,9 +1,9 @@
-use std::borrow::Cow;
+use std::{borrow::Cow, str::FromStr};
 
-use reqwest::Url;
 use tokio::sync::mpsc::{Receiver, Sender};
 use twitch_irc::login::UserAccessToken;
 use twitch_oauth2::{tokens::UserTokenBuilder, Scope};
+use url::Url;
 
 use crate::auth_server::REDIRECT_URI;
 
@@ -61,4 +61,22 @@ impl TwitchAuthState {
     pub fn csrf_is_valid(&self, state: &str) -> bool {
         self.token_builder.csrf_is_valid(state)
     }
+}
+
+pub fn get_basic_url() -> Url {
+    let mut url = Url::from_str("https://id.twitch.tv/oauth2/authorize").unwrap();
+    let client_id = std::env::var("TWITCH_CLIENT_ID").unwrap();
+
+    let auth = vec![
+        ("response_type", "token"),
+        ("client_id", client_id.as_str()),
+        ("redirect_uri", REDIRECT_URI),
+    ];
+
+    url.query_pairs_mut().extend_pairs(auth);
+
+    url.query_pairs_mut()
+        .append_pair("scope", &SCOPE.as_slice().join(" "));
+
+    url
 }

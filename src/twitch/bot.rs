@@ -3,7 +3,7 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use tokio::task::JoinHandle;
 use twitch_irc::{
-    login::{RefreshingLoginCredentials, UserAccessToken},
+    login::{RefreshingLoginCredentials, StaticLoginCredentials, UserAccessToken},
     message::ServerMessage,
     ClientConfig, SecureTCPTransport, TwitchIRCClient,
 };
@@ -14,26 +14,20 @@ use crate::handlers::{
 };
 
 use super::{
+    auth::get_client_tokens,
     handler::{TwitchHandlerError, TwitchMessageHandler},
-    token_storage::TwitchTokenStorage, auth::get_client_tokens,
 };
 
-pub type MuniBotTwitchIRCClient =
-    TwitchIRCClient<SecureTCPTransport, RefreshingLoginCredentials<TwitchTokenStorage>>;
-pub type MuniBotTwitchIRCError =
-    twitch_irc::Error<SecureTCPTransport, RefreshingLoginCredentials<TwitchTokenStorage>>;
+pub type MuniBotTwitchIRCClient = TwitchIRCClient<SecureTCPTransport, StaticLoginCredentials>;
+pub type MuniBotTwitchIRCError = twitch_irc::Error<SecureTCPTransport, StaticLoginCredentials>;
 
 pub struct TwitchBot {
-    user_access_token: UserAccessToken,
-    channel: String,
     message_handlers: Vec<Box<dyn TwitchMessageHandler>>,
 }
 
 impl TwitchBot {
-    pub fn new(user_access_token: UserAccessToken, channel: &str) -> Self {
+    pub fn new() -> Self {
         Self {
-            user_access_token,
-            channel: channel.to_owned(),
             message_handlers: vec![
                 Box::new(BonkHandler),
                 Box::new(SocialsHandler),
@@ -44,42 +38,27 @@ impl TwitchBot {
         }
     }
 
-    pub async fn start(mut self) -> JoinHandle<()> {
-        let (client_id, client_secret) = get_client_tokens();
-        let token_storage = TwitchTokenStorage {
-            user_access_token: self.user_access_token.clone(),
-        };
-        let credentials = RefreshingLoginCredentials::init(client_id, client_secret, token_storage);
+    pub fn start(mut self, channel: String, token: String) -> JoinHandle<()> {
+        let credentials = StaticLoginCredentials::new("muni__bot".to_owned(), Some(token));
         let config = ClientConfig::new_simple(credentials);
 
         let (mut incoming_messages, client) = MuniBotTwitchIRCClient::new(config);
 
-        // clone the channel to a new variable before `self` is moved
-        let channel = self.channel.to_owned();
+        // join a channel. this will panic if the passed channel login name is malformed.
+        client.join(channel.clone()).unwrap();
 
-        // first thing you should do: start consuming incoming messages,
-        // otherwise they will back up.
-        let client = Arc::new(client);
-        let client_clone = client.clone();
-        let join_handle = tokio::spawn(async move {
+        tokio::spawn(async move {
+            client
+                .say(channel.to_owned(), "i'm here!".to_owned())
+                .await
+                .unwrap();
+
             while let Some(message) = incoming_messages.recv().await {
-                if let Err(e) = self.handle_twitch_message(&client_clone, &message).await {
+                if let Err(e) = self.handle_twitch_message(&client, &message).await {
                     eprintln!("error in message handler! {e}");
                 }
             }
-        });
-
-        // join a channel. this function only returns an error if the passed channel login name is
-        // malformed, so in this simple case where the channel name is hardcoded we can ignore the
-        // potential error with `unwrap`.
-        client.join(channel.to_string()).unwrap();
-
-        client
-            .say(channel.to_string(), "i'm here!".to_owned())
-            .await
-            .unwrap();
-
-        join_handle
+        })
     }
 }
 
