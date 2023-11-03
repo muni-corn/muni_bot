@@ -1109,7 +1109,7 @@ dependencies = [
  "clap",
  "diesel",
  "dotenvy",
- "lazy_static",
+ "once_cell",
  "open",
  "poise",
  "rand",

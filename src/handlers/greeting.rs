@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use lazy_static::lazy_static;
+use once_cell::sync::Lazy;
 use poise::serenity_prelude::{Context, Message};
 use rand::seq::SliceRandom;
 use regex::Regex;
@@ -15,10 +15,9 @@ use crate::{
 
 pub struct GreetingHandler;
 
-lazy_static! {
-    static ref HI_REGEX: Regex =
-        Regex::new(r"(?i)\b(?:hi+|hey+|hello+|howdy+|sup+|heww?o+|henlo+)\b.*\bmuni.?bot\b").unwrap();
-}
+static HI_REGEX: Lazy<Regex> = Lazy::new(|| {
+    Regex::new(r"(?i)\b(?:hi+|hey+|hello+|howdy+|sup+|heww?o+|henlo+)\b.*\bmuni.?bot\b").unwrap()
+});
 
 impl GreetingHandler {
     /// Returns a greeting message if applicable, or None if not to keep quiet.
