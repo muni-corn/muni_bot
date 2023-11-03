@@ -1,11 +1,8 @@
-use std::sync::Arc;
-
 use async_trait::async_trait;
 use tokio::task::JoinHandle;
 use twitch_irc::{
-    login::{RefreshingLoginCredentials, StaticLoginCredentials, UserAccessToken},
-    message::ServerMessage,
-    ClientConfig, SecureTCPTransport, TwitchIRCClient,
+    login::StaticLoginCredentials, message::ServerMessage, ClientConfig, SecureTCPTransport,
+    TwitchIRCClient,
 };
 
 use crate::handlers::{
@@ -13,10 +10,7 @@ use crate::handlers::{
     socials::SocialsHandler,
 };
 
-use super::{
-    auth::get_client_tokens,
-    handler::{TwitchHandlerError, TwitchMessageHandler},
-};
+use super::handler::{TwitchHandlerError, TwitchMessageHandler};
 
 pub type MuniBotTwitchIRCClient = TwitchIRCClient<SecureTCPTransport, StaticLoginCredentials>;
 pub type MuniBotTwitchIRCError = twitch_irc::Error<SecureTCPTransport, StaticLoginCredentials>;

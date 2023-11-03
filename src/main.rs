@@ -7,7 +7,7 @@ use discord::{commands::DiscordCommandError, start_discord_integration};
 use handlers::{magical::MagicalHandler, DiscordCommandProviderCollection};
 use rocket::{http::ContentType, response::Responder, Response};
 use tokio::sync::{mpsc::error::SendError, Mutex};
-use twitch::{auth::state::TwitchAuthState, bot::TwitchBot};
+use twitch::bot::TwitchBot;
 use twitch_irc::login::UserAccessToken;
 
 use crate::{
@@ -15,13 +15,11 @@ use crate::{
         bot_affection::BotAffectionProvider, dice::DiceHandler, greeting::GreetingHandler,
         DiscordHandlerCollection,
     },
-    twitch::auth::state::get_basic_url,
+    twitch::get_basic_auth_url,
 };
 
 mod discord;
 
-mod auth_server;
-mod bot;
 mod handlers;
 mod schema;
 mod twitch;
@@ -63,7 +61,7 @@ async fn main() -> Result<(), MuniBotError> {
         }
         Err(e) => {
             // let (twitch_auth_state, _) = TwitchAuthState::new();
-            let auth_page_url = get_basic_url();
+            let auth_page_url = get_basic_auth_url();
             println!("no twitch token found ({e})");
             println!("visit {auth_page_url} to get a token");
             Err(MuniBotError::MissingToken)
@@ -73,7 +71,6 @@ async fn main() -> Result<(), MuniBotError> {
 
 #[derive(Debug)]
 enum MuniBotError {
-    StateMismatch { got: String },
     ParseError(String),
     RequestError(String),
     SendError(String),
@@ -102,7 +99,6 @@ impl From<SendError<UserAccessToken>> for MuniBotError {
 impl Display for MuniBotError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            MuniBotError::StateMismatch { got } => write!(f, "state mismatch from twitch. be careful! this could mean someone is trying to do something malicious. (got code \"{got}\")"),
             MuniBotError::ParseError(e) => write!(f, "parsing failure! {e}"),
             MuniBotError::RequestError(e) => write!(f, "blegh!! {e}"),
             MuniBotError::SendError(e) => write!(f, "send error! {e}"),
