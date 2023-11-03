@@ -1,4 +1,7 @@
-use std::{error::Error, fmt::{Display, self}};
+use std::{
+    error::Error,
+    fmt::{self, Display},
+};
 
 use crate::MuniBotError;
 
