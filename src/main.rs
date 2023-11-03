@@ -1,11 +1,10 @@
 #![feature(decl_macro)]
 #![feature(let_chains)]
 
-use std::{fmt::Display, io::Cursor, sync::Arc};
+use std::{fmt::Display, sync::Arc};
 
 use discord::{commands::DiscordCommandError, start_discord_integration};
 use handlers::{magical::MagicalHandler, DiscordCommandProviderCollection};
-use rocket::{http::ContentType, response::Responder, Response};
 use tokio::sync::{mpsc::error::SendError, Mutex};
 use twitch::bot::TwitchBot;
 use twitch_irc::login::UserAccessToken;
@@ -24,7 +23,7 @@ mod handlers;
 mod schema;
 mod twitch;
 
-#[rocket::main]
+#[tokio::main]
 async fn main() -> Result<(), MuniBotError> {
     dotenvy::dotenv().ok();
 
@@ -109,16 +108,6 @@ impl Display for MuniBotError {
 }
 
 impl std::error::Error for MuniBotError {}
-
-impl<'req> Responder<'req, 'static> for MuniBotError {
-    fn respond_to(self, _request: &rocket::Request) -> rocket::response::Result<'static> {
-        let display = format!("{self}");
-        Response::build()
-            .header(ContentType::Plain)
-            .sized_body(display.len(), Cursor::new(display))
-            .ok()
-    }
-}
 
 impl From<DiscordCommandError> for MuniBotError {
     fn from(e: DiscordCommandError) -> Self {
