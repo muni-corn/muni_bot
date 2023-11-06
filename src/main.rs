@@ -30,7 +30,9 @@ async fn main() -> Result<(), MuniBotError> {
     match std::env::var("TWITCH_TOKEN") {
         Ok(twitch_token) => {
             // start twitch
-            let twitch_handle = TwitchBot::new().start("muni_corn".to_owned(), twitch_token);
+            let twitch_handle = TwitchBot::new()
+                .await
+                .start("muni_corn".to_owned(), twitch_token);
 
             // start discord
             let discord_handlers: DiscordHandlerCollection =
@@ -97,6 +99,12 @@ impl From<SendError<UserAccessToken>> for MuniBotError {
     }
 }
 
+impl From<DiscordCommandError> for MuniBotError {
+    fn from(e: DiscordCommandError) -> Self {
+        Self::DiscordCommand(e)
+    }
+}
+
 impl From<surrealdb::Error> for MuniBotError {
     fn from(value: surrealdb::Error) -> Self {
         Self::DbError(value)
@@ -111,14 +119,9 @@ impl Display for MuniBotError {
             MuniBotError::SendError(e) => write!(f, "send error! {e}"),
             MuniBotError::DiscordCommand(e) => e.fmt(f),
             MuniBotError::MissingToken => write!(f, "missing token!"),
+            MuniBotError::DbError(e) => write!(f, "database error :( {e}"),
         }
     }
 }
 
 impl std::error::Error for MuniBotError {}
-
-impl From<DiscordCommandError> for MuniBotError {
-    fn from(e: DiscordCommandError) -> Self {
-        Self::DiscordCommand(e)
-    }
-}

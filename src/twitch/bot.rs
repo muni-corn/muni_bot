@@ -7,7 +7,7 @@ use twitch_irc::{
 
 use crate::handlers::{
     bonk::BonkHandler, greeting::GreetingHandler, lurk::LurkHandler, raid_msg::RaidMsgHandler,
-    socials::SocialsHandler,
+    socials::SocialsHandler, quotes::QuotesHandler,
 };
 
 use super::handler::{TwitchHandlerError, TwitchMessageHandler};
@@ -20,9 +20,10 @@ pub struct TwitchBot {
 }
 
 impl TwitchBot {
-    pub fn new() -> Self {
+    pub async fn new() -> Self {
         Self {
             message_handlers: vec![
+                Box::new(QuotesHandler::new().await.unwrap()),
                 Box::new(BonkHandler),
                 Box::new(SocialsHandler),
                 Box::new(RaidMsgHandler),
