@@ -46,21 +46,23 @@ async fn main() -> Result<(), MuniBotError> {
             ));
 
             // wait for the twitch bot to stop, if ever
-            if let Err(e) = twitch_handle.await {
-                eprintln!("twitch bot died with error: {e}");
+            match twitch_handle.await {
+                Ok(_) => println!("twitch bot stopped o.o"),
+                Err(e) => eprintln!("twitch bot died with error: {e}")
             }
 
             // wait for the discord bot to stop, if ever
-            if let Err(e) = discord_handle.await {
-                eprintln!("discord bot died with error: {e}");
+            match discord_handle.await {
+                Ok(_) => println!("discord bot stopped o.o"),
+                Err(e) => eprintln!("discord bot died with error: {e}")
             }
 
+            println!("all bot integrations have stopped. goodbye ^-^");
             Ok(())
         }
         Err(e) => {
-            // let (twitch_auth_state, _) = TwitchAuthState::new();
             let auth_page_url = get_basic_auth_url();
-            println!("no twitch token found ({e})");
+            println!("no TWITCH_TOKEN found ({e})");
             println!("visit {auth_page_url} to get a token");
             Err(MuniBotError::MissingToken)
         }
