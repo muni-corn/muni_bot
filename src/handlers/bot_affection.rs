@@ -20,6 +20,7 @@ const NUZZLE_ACTIONS: [&str; 5] = [
 
 const BOOP_PREFIXES: [&str; 4] = ["ACK! ", "ack! ", "eep! ", "meep! "];
 const BOOP_ACTIONS: [&str; 2] = ["boops back", "@~@ bzzzt"];
+const BOOP_ERROR_CHANCE: f64 = 0.01;
 const BOOP_ERROR_MESSAGE: &str =
     "thread 'boop handler' panicked at 'your boop has broken the bot!!', src/handlers/bot_affection.rs:60:9
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace";
@@ -98,7 +99,7 @@ fn get_str_or_empty(mut rng: impl Rng, s: &str, p: f64) -> &str {
 #[poise::command(slash_command, prefix_command)]
 async fn boop(ctx: poise::Context<'_, DiscordState, MuniBotError>) -> Result<(), MuniBotError> {
     // rarely throw a fake error message
-    if rand::thread_rng().gen_bool(0.01) {
+    if rand::thread_rng().gen_bool(BOOP_ERROR_CHANCE) {
         ctx.say(
             MessageBuilder::new()
                 .push_codeblock_safe(BOOP_ERROR_MESSAGE, None)
