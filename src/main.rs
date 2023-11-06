@@ -20,7 +20,6 @@ use crate::{
 mod discord;
 
 mod handlers;
-mod schema;
 mod twitch;
 
 #[tokio::main]
@@ -75,6 +74,7 @@ enum MuniBotError {
     SendError(String),
     DiscordCommand(DiscordCommandError),
     MissingToken,
+    DbError(surrealdb::Error),
 }
 
 impl From<serde_json::Error> for MuniBotError {
@@ -92,6 +92,12 @@ impl From<reqwest::Error> for MuniBotError {
 impl From<SendError<UserAccessToken>> for MuniBotError {
     fn from(e: SendError<UserAccessToken>) -> Self {
         Self::SendError(format!("sending token failed: {e}"))
+    }
+}
+
+impl From<surrealdb::Error> for MuniBotError {
+    fn from(value: surrealdb::Error) -> Self {
+        Self::DbError(value)
     }
 }
 

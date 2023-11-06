@@ -33,6 +33,7 @@ pub trait TwitchMessageHandler: Send {
 pub enum TwitchHandlerError {
     SendMessage(MuniBotTwitchIRCError),
     TwitchIRCError(MuniBotTwitchIRCError),
+    DbError(surrealdb::Error),
 }
 
 impl From<MuniBotTwitchIRCError> for TwitchHandlerError {
@@ -41,11 +42,18 @@ impl From<MuniBotTwitchIRCError> for TwitchHandlerError {
     }
 }
 
+impl From<surrealdb::Error> for TwitchHandlerError {
+    fn from(e: surrealdb::Error) -> Self {
+        Self::DbError(e)
+    }
+}
+
 impl Display for TwitchHandlerError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             TwitchHandlerError::SendMessage(e) => write!(f, "message send failure! {e}"),
             TwitchHandlerError::TwitchIRCError(e) => write!(f, "irc error :< {e}"),
+            TwitchHandlerError::DbError(e) => write!(f, "database error :( {e}"),
         }
     }
 }
