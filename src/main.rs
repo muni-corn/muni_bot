@@ -30,9 +30,9 @@ async fn main() -> Result<(), MuniBotError> {
     match std::env::var("TWITCH_TOKEN") {
         Ok(twitch_token) => {
             // start twitch
-            let twitch_handle = TwitchBot::new()
+            let twitch_handle = TwitchBot::new(twitch_token)
                 .await
-                .start("muni_corn".to_owned(), twitch_token);
+                .start("muni_corn".to_owned());
 
             // start discord
             let discord_handlers: DiscordHandlerCollection =

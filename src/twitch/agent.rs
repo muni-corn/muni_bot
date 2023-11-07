@@ -16,6 +16,11 @@ impl<C: LoginCredentials> TwitchAgent<C> {
         }
     }
 
+    /// Get the credentials used by this agent
+    pub fn get_credentials(&self) -> &C {
+        &self.creds
+    }
+
     /// Get the channel info for the given broadcaster ID
     pub async fn get_channel_info(
         &mut self,

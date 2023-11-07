@@ -6,22 +6,26 @@ use twitch_irc::{
 };
 
 use crate::handlers::{
-    bonk::BonkHandler, greeting::GreetingHandler, lurk::LurkHandler, raid_msg::RaidMsgHandler,
-    socials::SocialsHandler, quotes::QuotesHandler,
+    bonk::BonkHandler, greeting::GreetingHandler, lurk::LurkHandler, quotes::QuotesHandler,
+    raid_msg::RaidMsgHandler, socials::SocialsHandler,
 };
 
-use super::handler::{TwitchHandlerError, TwitchMessageHandler};
+use super::{handler::{TwitchHandlerError, TwitchMessageHandler}, agent::TwitchAgent};
 
 pub type MuniBotTwitchIRCClient = TwitchIRCClient<SecureTCPTransport, StaticLoginCredentials>;
 pub type MuniBotTwitchIRCError = twitch_irc::Error<SecureTCPTransport, StaticLoginCredentials>;
 
 pub struct TwitchBot {
+    agent: TwitchAgent<StaticLoginCredentials>,
     message_handlers: Vec<Box<dyn TwitchMessageHandler>>,
 }
 
 impl TwitchBot {
-    pub async fn new() -> Self {
+    pub async fn new(token: String) -> Self {
+        let credentials = StaticLoginCredentials::new("muni__bot".to_owned(), Some(token));
+
         Self {
+            agent: TwitchAgent::new(credentials),
             message_handlers: vec![
                 Box::new(QuotesHandler::new().await.unwrap()),
                 Box::new(BonkHandler),
@@ -33,9 +37,8 @@ impl TwitchBot {
         }
     }
 
-    pub fn start(mut self, channel: String, token: String) -> JoinHandle<()> {
-        let credentials = StaticLoginCredentials::new("muni__bot".to_owned(), Some(token));
-        let config = ClientConfig::new_simple(credentials);
+    pub fn start(mut self, channel: String) -> JoinHandle<()> {
+        let config = ClientConfig::new_simple(self.agent.get_credentials().clone());
 
         let (mut incoming_messages, client) = MuniBotTwitchIRCClient::new(config);
 
