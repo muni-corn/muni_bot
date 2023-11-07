@@ -14,9 +14,9 @@ pub mod dice;
 pub mod greeting;
 pub mod lurk;
 pub mod magical;
+pub mod quotes;
 pub mod raid_msg;
 pub mod socials;
-pub mod quotes;
 
 pub type TwitchHandlerCollection = Vec<Arc<Mutex<dyn TwitchMessageHandler>>>;
 pub type DiscordHandlerCollection = Vec<Arc<Mutex<dyn DiscordMessageHandler>>>;

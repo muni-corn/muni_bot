@@ -50,13 +50,13 @@ async fn main() -> Result<(), MuniBotError> {
             // wait for the twitch bot to stop, if ever
             match twitch_handle.await {
                 Ok(_) => println!("twitch bot stopped o.o"),
-                Err(e) => eprintln!("twitch bot died with error: {e}")
+                Err(e) => eprintln!("twitch bot died with error: {e}"),
             }
 
             // wait for the discord bot to stop, if ever
             match discord_handle.await {
                 Ok(_) => println!("discord bot stopped o.o"),
-                Err(e) => eprintln!("discord bot died with error: {e}")
+                Err(e) => eprintln!("discord bot died with error: {e}"),
             }
 
             println!("all bot integrations have stopped. goodbye ^-^");
