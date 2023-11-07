@@ -79,7 +79,6 @@ enum MuniBotError {
     DiscordCommand(DiscordCommandError),
     MissingToken,
     DbError(surrealdb::Error),
-    Other(String),
 }
 
 impl From<serde_json::Error> for MuniBotError {
@@ -121,7 +120,6 @@ impl Display for MuniBotError {
             MuniBotError::DiscordCommand(e) => e.fmt(f),
             MuniBotError::MissingToken => write!(f, "missing token!"),
             MuniBotError::DbError(e) => write!(f, "database error :( {e}"),
-            MuniBotError::Other(e) => e.fmt(f),
         }
     }
 }
