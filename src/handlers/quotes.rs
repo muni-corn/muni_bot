@@ -8,10 +8,11 @@ use surrealdb::{
     opt::auth::Database,
     Surreal,
 };
-use twitch_irc::message::ServerMessage;
+use twitch_irc::{login::StaticLoginCredentials, message::ServerMessage};
 
 use crate::{
     twitch::{
+        agent::TwitchAgent,
         bot::MuniBotTwitchIRCClient,
         handler::{TwitchHandlerError, TwitchMessageHandler},
     },
@@ -142,8 +143,9 @@ impl QuotesHandler {
 impl TwitchMessageHandler for QuotesHandler {
     async fn handle_twitch_message(
         &mut self,
-        client: &MuniBotTwitchIRCClient,
         message: &ServerMessage,
+        client: &MuniBotTwitchIRCClient,
+        agent: &TwitchAgent<StaticLoginCredentials>,
     ) -> Result<bool, TwitchHandlerError> {
         let handled = if let ServerMessage::Privmsg(m) = message && let Some(content) = m.message_text.strip_prefix("!quote").map(str::trim) {
             if content.is_empty() {

@@ -1,7 +1,8 @@
 use async_trait::async_trait;
-use twitch_irc::message::ServerMessage;
+use twitch_irc::{login::StaticLoginCredentials, message::ServerMessage};
 
 use crate::twitch::{
+    agent::TwitchAgent,
     bot::MuniBotTwitchIRCClient,
     handler::{TwitchHandlerError, TwitchMessageHandler},
 };
@@ -12,8 +13,9 @@ pub struct RaidMsgHandler;
 impl TwitchMessageHandler for RaidMsgHandler {
     async fn handle_twitch_message(
         &mut self,
-        client: &MuniBotTwitchIRCClient,
         message: &ServerMessage,
+        client: &MuniBotTwitchIRCClient,
+        _agent: &TwitchAgent<StaticLoginCredentials>,
     ) -> Result<bool, TwitchHandlerError> {
         let handled = if let ServerMessage::Privmsg(m) = message {
             if m.message_text.trim().starts_with("!rmsg") {

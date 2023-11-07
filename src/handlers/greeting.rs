@@ -3,11 +3,12 @@ use once_cell::sync::Lazy;
 use poise::serenity_prelude::{Context, Message};
 use rand::seq::SliceRandom;
 use regex::Regex;
-use twitch_irc::message::ServerMessage;
+use twitch_irc::{login::StaticLoginCredentials, message::ServerMessage};
 
 use crate::{
     discord::handler::{DiscordMessageHandler, DiscordMessageHandlerError},
     twitch::{
+        agent::TwitchAgent,
         bot::MuniBotTwitchIRCClient,
         handler::{TwitchHandlerError, TwitchMessageHandler},
     },
@@ -53,8 +54,9 @@ impl GreetingHandler {
 impl TwitchMessageHandler for GreetingHandler {
     async fn handle_twitch_message(
         &mut self,
-        client: &MuniBotTwitchIRCClient,
         message: &ServerMessage,
+        client: &MuniBotTwitchIRCClient,
+        _agent: &TwitchAgent<StaticLoginCredentials>,
     ) -> Result<bool, TwitchHandlerError> {
         let handled = if let ServerMessage::Privmsg(m) = message {
             if let Some(response) = Self::get_greeting_message(&m.sender.name, &m.message_text) {

@@ -5,7 +5,7 @@ use std::{
 
 use async_trait::async_trait;
 use chrono::Local;
-use twitch_irc::message::ServerMessage;
+use twitch_irc::{login::StaticLoginCredentials, message::ServerMessage};
 
 use crate::{
     discord::{
@@ -13,6 +13,7 @@ use crate::{
         DiscordState,
     },
     twitch::{
+        agent::TwitchAgent,
         bot::MuniBotTwitchIRCClient,
         handler::{TwitchHandlerError, TwitchMessageHandler},
     },
@@ -57,8 +58,9 @@ impl MagicalHandler {
 impl TwitchMessageHandler for MagicalHandler {
     async fn handle_twitch_message(
         &mut self,
-        client: &MuniBotTwitchIRCClient,
         message: &ServerMessage,
+        client: &MuniBotTwitchIRCClient,
+        _agent: &TwitchAgent<StaticLoginCredentials>,
     ) -> Result<bool, TwitchHandlerError> {
         let handled = match message {
             ServerMessage::Privmsg(msg) => {

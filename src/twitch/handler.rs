@@ -1,9 +1,11 @@
 use std::fmt::Display;
 
 use async_trait::async_trait;
-use twitch_irc::message::ServerMessage;
+use twitch_irc::{login::StaticLoginCredentials, message::ServerMessage};
 
 use crate::twitch::bot::{MuniBotTwitchIRCClient, MuniBotTwitchIRCError};
+
+use super::agent::{TwitchAgent, TwitchAgentError};
 
 #[async_trait]
 pub trait TwitchMessageHandler: Send {
@@ -24,8 +26,9 @@ pub trait TwitchMessageHandler: Send {
     /// other handlers).
     async fn handle_twitch_message(
         &mut self,
-        client: &MuniBotTwitchIRCClient,
         message: &ServerMessage,
+        client: &MuniBotTwitchIRCClient,
+        agent: &TwitchAgent<StaticLoginCredentials>,
     ) -> Result<bool, TwitchHandlerError>;
 }
 

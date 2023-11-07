@@ -1,9 +1,10 @@
 use std::collections::HashSet;
 
 use async_trait::async_trait;
-use twitch_irc::message::ServerMessage;
+use twitch_irc::{login::StaticLoginCredentials, message::ServerMessage};
 
 use crate::twitch::{
+    agent::TwitchAgent,
     bot::MuniBotTwitchIRCClient,
     handler::{TwitchHandlerError, TwitchMessageHandler},
 };
@@ -78,8 +79,9 @@ impl ContentWarningHandler {
 impl TwitchMessageHandler for ContentWarningHandler {
     async fn handle_twitch_message(
         &mut self,
-        client: &MuniBotTwitchIRCClient,
         message: &ServerMessage,
+        client: &MuniBotTwitchIRCClient,
+        _agent: &TwitchAgent<StaticLoginCredentials>,
     ) -> Result<bool, TwitchHandlerError> {
         let handled = match message {
             ServerMessage::Privmsg(m) => {

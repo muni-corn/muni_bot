@@ -10,22 +10,21 @@ use crate::handlers::{
     raid_msg::RaidMsgHandler, socials::SocialsHandler,
 };
 
-use super::{handler::{TwitchHandlerError, TwitchMessageHandler}, agent::TwitchAgent};
+use super::{
+    agent::TwitchAgent,
+    handler::{TwitchHandlerError, TwitchMessageHandler},
+};
 
 pub type MuniBotTwitchIRCClient = TwitchIRCClient<SecureTCPTransport, StaticLoginCredentials>;
 pub type MuniBotTwitchIRCError = twitch_irc::Error<SecureTCPTransport, StaticLoginCredentials>;
 
 pub struct TwitchBot {
-    agent: TwitchAgent<StaticLoginCredentials>,
     message_handlers: Vec<Box<dyn TwitchMessageHandler>>,
 }
 
 impl TwitchBot {
-    pub async fn new(token: String) -> Self {
-        let credentials = StaticLoginCredentials::new("muni__bot".to_owned(), Some(token));
-
+    pub async fn new() -> Self {
         Self {
-            agent: TwitchAgent::new(credentials),
             message_handlers: vec![
                 Box::new(QuotesHandler::new().await.unwrap()),
                 Box::new(BonkHandler),
@@ -37,8 +36,10 @@ impl TwitchBot {
         }
     }
 
-    pub fn start(mut self, channel: String) -> JoinHandle<()> {
-        let config = ClientConfig::new_simple(self.agent.get_credentials().clone());
+    pub fn start(mut self, channel: String, token: String) -> JoinHandle<()> {
+        let credentials = StaticLoginCredentials::new("muni__bot".to_owned(), Some(token));
+        let config = ClientConfig::new_simple(credentials.clone());
+        let agent = TwitchAgent::new(credentials);
 
         let (mut incoming_messages, client) = MuniBotTwitchIRCClient::new(config);
 
@@ -52,7 +53,7 @@ impl TwitchBot {
                 .unwrap();
 
             while let Some(message) = incoming_messages.recv().await {
-                if let Err(e) = self.handle_twitch_message(&client, &message).await {
+                if let Err(e) = self.handle_twitch_message(&message, &client, &agent).await {
                     eprintln!("error in message handler! {e}");
                 }
             }
@@ -64,14 +65,15 @@ impl TwitchBot {
 impl TwitchMessageHandler for TwitchBot {
     async fn handle_twitch_message(
         &mut self,
-        client: &MuniBotTwitchIRCClient,
         message: &ServerMessage,
+        client: &MuniBotTwitchIRCClient,
+        agent: &TwitchAgent<StaticLoginCredentials>,
     ) -> Result<bool, TwitchHandlerError> {
         for message_handler in self.message_handlers.iter_mut() {
             // try to handle the message. if the handler determines the message was handled, we'll
             // stop
             if message_handler
-                .handle_twitch_message(client, message)
+                .handle_twitch_message(message, client, agent)
                 .await?
             {
                 return Ok(true);
