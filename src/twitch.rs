@@ -3,6 +3,7 @@ use std::{borrow::Cow, str::FromStr};
 use twitch_oauth2::Scope;
 use url::Url;
 
+pub mod agent;
 pub mod bot;
 pub mod handler;
 pub mod token_storage;
