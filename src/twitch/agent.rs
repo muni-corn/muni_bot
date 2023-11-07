@@ -6,8 +6,6 @@ use std::{
 use serde::Deserialize;
 use twitch_irc::login::LoginCredentials;
 
-use crate::MuniBotError;
-
 pub struct TwitchAgent<C: LoginCredentials> {
     client: reqwest::Client,
     creds: C,
@@ -31,6 +29,11 @@ impl<C: LoginCredentials> TwitchAgent<C> {
         &self,
         broadcaster_id: &str,
     ) -> Result<ChannelInfo, TwitchAgentError> {
+        #[derive(Debug, Deserialize)]
+        struct Data {
+            data: Vec<ChannelInfo>,
+        }
+
         // get token from credentials
         self.creds
             .get_credentials()
@@ -41,14 +44,30 @@ impl<C: LoginCredentials> TwitchAgent<C> {
             .ok_or_else(|| TwitchAgentError::MissingCredentials)
             // map to use the token and create a Future to make the api call
             .map(|t| async move {
-                self.client
+                // make the api call
+                let resp = self
+                    .client
                     .get("https://api.twitch.tv/helix/channels")
                     .query(&[("broadcaster_id", broadcaster_id)])
                     .bearer_auth(t)
+                    .header("Client-Id", std::env::var("TWITCH_CLIENT_ID").unwrap())
                     .send()
+                    .await?;
+
+                dbg!(&resp);
+
+                // parse to object
+                resp.json::<Data>()
                     .await?
-                    .json()
-                    .await
+                    // get the first (and only) channel info
+                    .data
+                    .pop()
+                    // transform Option to Result
+                    .ok_or_else(|| {
+                        TwitchAgentError::Other(
+                            "the requested channel info wasn't found".to_string(),
+                        )
+                    })
             })?
             // await the Future
             .await
@@ -67,6 +86,7 @@ pub enum TwitchAgentError {
     CredentialsError(String),
     MissingCredentials,
     ReqwestError(reqwest::Error),
+    Other(String),
 }
 
 impl From<reqwest::Error> for TwitchAgentError {
@@ -83,6 +103,7 @@ impl Display for TwitchAgentError {
             }
             TwitchAgentError::MissingCredentials => write!(f, "twitch credentials went missing"),
             TwitchAgentError::ReqwestError(e) => write!(f, "twitch agent request error: {e}"),
+            TwitchAgentError::Other(e) => write!(f, "twitch agent error: {e}"),
         }
     }
 }
