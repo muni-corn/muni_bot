@@ -154,12 +154,14 @@ impl TwitchMessageHandler for QuotesHandler {
             } else if let Ok(n) = content.parse::<i32>() {
                 self.recall_quote(client, &m.channel_login, Some(n)).await?;
             } else {
+                let channel_info = agent.get_channel_info(&m.channel_id).await?;
+
                     let new_quote = Quote {
                         created_at: Local::now(),
                         quote: content.to_string(),
-                        invoker: m.sender.login.to_string(),
-                        stream_category: "".to_string(), // TODO
-                        stream_title: "".to_string(), // TODO
+                        invoker: m.sender.id.to_string(),
+                        stream_category: channel_info.game_name,
+                        stream_title: channel_info.title,
                     };
 
                     let quote_count = self.add_new_quote(&new_quote).await?;
