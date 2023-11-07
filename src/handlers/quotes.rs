@@ -53,9 +53,7 @@ impl QuotesHandler {
         })
         .await?;
 
-        Ok(Self {
-            db: Surreal::new::<Ws>(&database_url).await?,
-        })
+        Ok(Self { db })
     }
 
     /// Add a new quote to the database, returning the new count of quotes
