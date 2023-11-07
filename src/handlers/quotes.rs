@@ -62,15 +62,15 @@ impl QuotesHandler {
         new_quote: &Quote,
     ) -> Result<u32, TwitchHandlerError> {
         self.db
-            .create::<Vec<Quote>>("new_quote")
+            .create::<Vec<Quote>>(QUOTE_TABLE)
             .content(new_quote)
             .await?;
 
         let count = self
             .db
-            .query(format!("SELECT VALUE count() AS count FROM {QUOTE_TABLE};"))
+            .query(format!("SELECT count() FROM {QUOTE_TABLE} GROUP ALL;"))
             .await?
-            .take::<Option<u32>>(0)?
+            .take::<Option<u32>>((0, "count"))?
             .unwrap_or(0);
 
         Ok(count)
@@ -88,12 +88,12 @@ impl QuotesHandler {
             let mut response = self
                 .db
                 .query(format!(
-                    "SELECT id from {QUOTE_TABLE}
+                    "SELECT * from {QUOTE_TABLE}
                      ORDER BY created_at
                      LIMIT 1
                      START $n;",
                 ))
-                .bind(("n", n))
+                .bind(("n", n - 1))
                 .await?;
 
             if let Some(quote) = response.take::<Option<Quote>>(0)? {
@@ -116,7 +116,7 @@ impl QuotesHandler {
             let mut response = self
                 .db
                 .query(format!(
-                    "SELECT id from {QUOTE_TABLE}
+                    "SELECT * FROM {QUOTE_TABLE}
                      ORDER BY rand()
                      LIMIT 1;",
                 ))
@@ -154,16 +154,16 @@ impl TwitchMessageHandler for QuotesHandler {
             } else {
                 let channel_info = agent.get_channel_info(&m.channel_id).await?;
 
-                    let new_quote = Quote {
-                        created_at: Local::now(),
-                        quote: content.to_string(),
-                        invoker: m.sender.id.to_string(),
-                        stream_category: channel_info.game_name,
-                        stream_title: channel_info.title,
-                    };
+                let new_quote = Quote {
+                    created_at: Local::now(),
+                    quote: content.to_string(),
+                    invoker: m.sender.id.to_string(),
+                    stream_category: channel_info.game_name,
+                    stream_title: channel_info.title,
+                };
 
-                    let quote_count = self.add_new_quote(&new_quote).await?;
-                    self.send_twitch_message(client, &m.channel_login, &format!("quote #{quote_count} is in! recorded in the muni history books forever")).await?;
+                let quote_count = self.add_new_quote(&new_quote).await?;
+                self.send_twitch_message(client, &m.channel_login, &format!("quote #{quote_count} is in! recorded in the muni history books forever")).await?;
             }
             true
         } else {
