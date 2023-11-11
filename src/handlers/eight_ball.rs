@@ -3,7 +3,10 @@ use std::{
     hash::{Hash, Hasher},
 };
 
-use poise::{serenity_prelude::UserId, Context};
+use poise::{
+    serenity_prelude::{MessageBuilder, UserId},
+    Context,
+};
 
 use crate::{
     discord::{
@@ -41,16 +44,19 @@ async fn eight_ball(
     ctx: Context<'_, DiscordState, MuniBotError>,
     question: String,
 ) -> Result<(), MuniBotError> {
-    ctx.say(EightBallProvider::get_response(ctx.author().id, &question))
-        .await
-        .map_err(|e| DiscordCommandError {
-            message: format!("couldn't send message: {}", e),
-            command_identifier: "magical".to_string(),
-        })?;
+    let eight_ball_response = EightBallProvider::get_response(ctx.author().id, &question);
+    let message = MessageBuilder::new()
+        .push_quote_line(question)
+        .push(eight_ball_response)
+        .build();
+    ctx.say(message).await.map_err(|e| DiscordCommandError {
+        message: format!("couldn't send message: {}", e),
+        command_identifier: "magical".to_string(),
+    })?;
     Ok(())
 }
 
-const EIGHT_BALL_RESPONSES: [&str; 18] = [
+const EIGHT_BALL_RESPONSES: [&str; 33] = [
     "yes!",
     "yeah!",
     "sure!",
@@ -69,6 +75,21 @@ const EIGHT_BALL_RESPONSES: [&str; 18] = [
     "i can't answer that right now.",
     "could you try rephrasing?",
     "that's up to you!",
+    "i don't know :3",
+    "ask muni!",
+    "am i qualified to answer that?",
+    "i'm just a silly bot, i can't answer that :3",
+    "is that what you want?",
+    "what do you want the answer to be?",
+    "good question! i'll think about it.",
+    "mmmm ask again later",
+    "wouldn't you like to know~",
+    "i think you know the answer to that :3",
+    "i'll answer that later~",
+    "that's a silly question! cutie x3",
+    "*bonk*",
+    "eep! could you ask that later?",
+    "maybe a dice roll could decide...?",
 ];
 
 impl DiscordCommandProvider for EightBallProvider {
