@@ -108,15 +108,16 @@ impl DiscordMessageHandler for GreetingHandler {
     }
 }
 
-const HELLO_TEMPLATES: [&str; 10] = [
+const HELLO_TEMPLATES: [&str; 11] = [
     "hi, {name}!<3",
     "hello, {name}! happy to see you!",
     "hey {name}:)",
-    "hi {name}!! how are you?",
+    "hi {name}!! how are ya?",
     "{name}!! how are you doing?",
     "heyyy {name} uwu",
-    "hi {name}! it's good to see you!",
+    "hi {name}! it's good to see you! :3",
     "{name} helloooooo:)",
     "hiiiii {name}",
     "hi {name}<3",
+    "hi {name}! you look wonderful today ;3"
 ];
