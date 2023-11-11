@@ -33,9 +33,16 @@ impl EightBallProvider {
         to_hash.hash(&mut hash_state);
         let hashed = hash_state.finish();
 
+        // determine if certain or uncertain responses should be used
+        let choices = if ((hashed % 100) as f64) < CHANCE_OF_CERTAINTY * 100.0 {
+            &CERTAIN_RESPONSES[..]
+        } else {
+            &UNCERTAIN_RESPONSES[..]
+        };
+
         // use the hash to determine and return the response
-        let i = hashed % EIGHT_BALL_RESPONSES.len() as u64;
-        EIGHT_BALL_RESPONSES[i as usize]
+        let i = hashed % choices.len() as u64;
+        choices[i as usize]
     }
 }
 
@@ -56,21 +63,29 @@ async fn eight_ball(
     Ok(())
 }
 
-const EIGHT_BALL_RESPONSES: [&str; 33] = [
+const CHANCE_OF_CERTAINTY: f64 = 0.7;
+const CERTAIN_RESPONSES: [&str; 9] = [
     "yes!",
     "yeah!",
     "sure!",
-    "most likely!",
-    "if you're hoping so, then sure :>",
     "no!",
     "no...",
     "nope!",
-    "not likely.",
-    "...maybe we could talk about this a different time.",
+    "it is certain uwu",
+    "yuh huh!",
+    "nuh uh!",
+];
+const UNCERTAIN_RESPONSES: [&str; 29] = [
+    "yeah...?",
+    "no...?",
     "maybe?",
     "maybe not",
     "probably?",
     "probably not?",
+    "most likely!",
+    "not likely.",
+    "if you're hoping so, then sure :>",
+    "...maybe we could talk about this a different time.",
     "eh... i'm not sure.",
     "i can't answer that right now.",
     "could you try rephrasing?",
