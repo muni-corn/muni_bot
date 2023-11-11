@@ -11,8 +11,8 @@ use twitch_irc::login::UserAccessToken;
 
 use crate::{
     handlers::{
-        bot_affection::BotAffectionProvider, dice::DiceHandler, greeting::GreetingHandler,
-        DiscordHandlerCollection,
+        bot_affection::BotAffectionProvider, dice::DiceHandler, eight_ball::EightBallProvider,
+        greeting::GreetingHandler, DiscordHandlerCollection,
     },
     twitch::get_basic_auth_url,
 };
@@ -41,6 +41,7 @@ async fn main() -> Result<(), MuniBotError> {
                 Box::new(DiceHandler),
                 Box::new(BotAffectionProvider),
                 Box::new(MagicalHandler),
+                Box::new(EightBallProvider),
             ];
             let discord_handle = tokio::spawn(start_discord_integration(
                 discord_handlers,
