@@ -1,5 +1,6 @@
 #![feature(decl_macro)]
 #![feature(let_chains)]
+#![feature(async_fn_in_trait)]
 
 use std::{fmt::Display, sync::Arc};
 
