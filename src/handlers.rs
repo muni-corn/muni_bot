@@ -11,13 +11,13 @@ pub mod bonk;
 pub mod bot_affection;
 pub mod content_warning;
 pub mod dice;
+pub mod eight_ball;
 pub mod greeting;
 pub mod lurk;
 pub mod magical;
 pub mod quotes;
 pub mod raid_msg;
 pub mod socials;
-pub mod eight_ball;
 
 pub type TwitchHandlerCollection = Vec<Arc<Mutex<dyn TwitchMessageHandler>>>;
 pub type DiscordHandlerCollection = Vec<Arc<Mutex<dyn DiscordMessageHandler>>>;
