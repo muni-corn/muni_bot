@@ -31,7 +31,7 @@
 
         nativeBuildInputs = builtins.attrValues {
           inherit rust;
-          inherit (pkgs) pkg-config unqlite clang diesel-cli glibc;
+          inherit (pkgs) pkg-config clang diesel-cli glibc;
         };
         buildInputs = with pkgs; [libressl_3_6];
       in {
