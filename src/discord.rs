@@ -4,6 +4,8 @@ pub mod handler;
 use std::env;
 
 use dotenvy::dotenv;
+use poise::Prefix;
+use poise::PrefixFrameworkOptions;
 use poise::samples::register_globally;
 use poise::serenity_prelude as serenity;
 use poise::Event;
@@ -33,6 +35,11 @@ pub async fn start_discord_integration(
             Box::pin(event_handler(_ctx, event, _framework, _data))
         },
         commands,
+        prefix_options: PrefixFrameworkOptions {
+            prefix: Some("~".to_string()),
+            additional_prefixes: vec![Prefix::Literal("!")],
+            ..Default::default()
+        },
         ..Default::default()
     };
 
