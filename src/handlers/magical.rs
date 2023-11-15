@@ -26,11 +26,10 @@ impl MagicalHandler {
     fn get_magic_amount(user_id: &str) -> u8 {
         // we determine a user's magicalness based on the current date and their user id.
         let today = Local::now().date_naive();
-        let date_user_id = format!("{today}{user_id}");
 
         // hash the value
         let mut hash_state = DefaultHasher::new();
-        date_user_id.hash(&mut hash_state);
+        (today, user_id).hash(&mut hash_state);
         let hashed = hash_state.finish();
 
         // a number between 0 and 100
