@@ -33,8 +33,8 @@ impl MagicalHandler {
         date_user_id.hash(&mut hash_state);
         let hashed = hash_state.finish();
 
-        // a number between 1 and 100
-        let x = hashed % 100 + 1;
+        // a number between 0 and 100
+        let x = hashed % 101;
 
         // give a cubic-interpolated value between 1 and 100, favoring higher numbers, without
         // floating point arithmetic :>
