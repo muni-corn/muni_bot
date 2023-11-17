@@ -4,7 +4,7 @@ use rand::{seq::SliceRandom, Rng};
 use crate::{
     discord::{
         commands::{DiscordCommandError, DiscordCommandProvider},
-        DiscordState,
+        DiscordCommand, DiscordContext,
     },
     MuniBotError,
 };
@@ -35,7 +35,7 @@ impl DiceHandler {
 /// Roll a die.
 #[poise::command(slash_command, prefix_command)]
 async fn roll(
-    ctx: poise::Context<'_, DiscordState, MuniBotError>,
+    ctx: DiscordContext<'_>,
     #[description = "number of sides on the die you want to roll"] sides: u8,
     #[description = "specify what you're rolling for"] purpose: Option<String>,
 ) -> Result<(), MuniBotError> {
@@ -55,7 +55,7 @@ async fn roll(
 }
 
 impl DiscordCommandProvider for DiceHandler {
-    fn commands(&self) -> Vec<poise::Command<DiscordState, MuniBotError>> {
+    fn commands(&self) -> Vec<DiscordCommand> {
         vec![roll()]
     }
 }

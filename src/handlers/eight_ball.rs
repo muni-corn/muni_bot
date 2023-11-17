@@ -1,10 +1,10 @@
-use poise::{serenity_prelude::MessageBuilder, Context};
+use poise::serenity_prelude::MessageBuilder;
 use rand::seq::SliceRandom;
 
 use crate::{
     discord::{
         commands::{DiscordCommandError, DiscordCommandProvider},
-        DiscordState,
+        DiscordCommand, DiscordContext,
     },
     MuniBotError,
 };
@@ -29,7 +29,7 @@ impl EightBallProvider {
 /// Have the bot ask the magic eight ball to predict the future with questionable accuracy!
 #[poise::command(prefix_command, track_edits, slash_command)]
 async fn eight_ball(
-    ctx: Context<'_, DiscordState, MuniBotError>,
+    ctx: DiscordContext<'_>,
     #[description = "A yes-or-no question about the future."] question: String,
 ) -> Result<(), MuniBotError> {
     let shake_message = EightBallProvider::get_shake_message();
@@ -99,7 +99,7 @@ const EIGHT_BALL_RESPONSES: [&str; 20] = [
 ];
 
 impl DiscordCommandProvider for EightBallProvider {
-    fn commands(&self) -> Vec<poise::Command<DiscordState, crate::MuniBotError>> {
+    fn commands(&self) -> Vec<DiscordCommand> {
         vec![eight_ball()]
     }
 }

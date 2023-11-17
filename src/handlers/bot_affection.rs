@@ -4,7 +4,7 @@ use rand::{seq::SliceRandom, Rng};
 use crate::{
     discord::{
         commands::{DiscordCommandError, DiscordCommandProvider},
-        DiscordState,
+        DiscordContext, MutableDiscordState,
     },
     MuniBotError,
 };
@@ -72,7 +72,7 @@ impl BotAffectionProvider {
     }
 
     async fn handle_generic_affection(
-        ctx: poise::Context<'_, DiscordState, MuniBotError>,
+        ctx: DiscordContext<'_>,
         prefixes: ResponseSelection<'_>,
         actions: ResponseSelection<'_>,
     ) -> Result<(), MuniBotError> {
@@ -97,7 +97,9 @@ fn get_str_or_empty(mut rng: impl Rng, s: &str, p: f64) -> &str {
 
 /// Boop the bot!
 #[poise::command(slash_command, prefix_command)]
-async fn boop(ctx: poise::Context<'_, DiscordState, MuniBotError>) -> Result<(), MuniBotError> {
+async fn boop(
+    ctx: poise::Context<'_, MutableDiscordState, MuniBotError>,
+) -> Result<(), MuniBotError> {
     // rarely throw a fake error message
     if rand::thread_rng().gen_bool(BOOP_ERROR_CHANCE) {
         ctx.say(
@@ -134,7 +136,7 @@ async fn boop(ctx: poise::Context<'_, DiscordState, MuniBotError>) -> Result<(),
 
 /// Nuzzle the good bot!
 #[poise::command(slash_command, prefix_command)]
-async fn nuzzle(ctx: poise::Context<'_, DiscordState, MuniBotError>) -> Result<(), MuniBotError> {
+async fn nuzzle(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
     BotAffectionProvider::handle_generic_affection(
         ctx,
         ResponseSelection::Rare(&NUZZLE_PREFIXES, 0.5),
@@ -145,7 +147,7 @@ async fn nuzzle(ctx: poise::Context<'_, DiscordState, MuniBotError>) -> Result<(
 
 /// Smooch the bot ;3
 #[poise::command(slash_command, prefix_command)]
-async fn kiss(ctx: poise::Context<'_, DiscordState, MuniBotError>) -> Result<(), MuniBotError> {
+async fn kiss(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
     // VERY rarely will the boot smooch back.
     if rand::thread_rng().gen_bool(0.00001) {
         ctx.say("smooch~")
@@ -166,7 +168,7 @@ async fn kiss(ctx: poise::Context<'_, DiscordState, MuniBotError>) -> Result<(),
 }
 
 impl DiscordCommandProvider for BotAffectionProvider {
-    fn commands(&self) -> Vec<poise::Command<DiscordState, MuniBotError>> {
+    fn commands(&self) -> Vec<poise::Command<MutableDiscordState, MuniBotError>> {
         vec![boop(), nuzzle(), kiss()]
     }
 }
