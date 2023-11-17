@@ -26,10 +26,11 @@ impl EightBallProvider {
     }
 }
 
+/// Have the bot ask the magic eight ball to predict the future with questionable accuracy!
 #[poise::command(prefix_command, track_edits, slash_command)]
 async fn eight_ball(
     ctx: Context<'_, DiscordState, MuniBotError>,
-    question: String,
+    #[description = "A yes-or-no question about the future."] question: String,
 ) -> Result<(), MuniBotError> {
     let shake_message = EightBallProvider::get_shake_message();
     let eight_ball_response = EightBallProvider::get_response();
