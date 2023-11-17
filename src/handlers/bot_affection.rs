@@ -9,7 +9,7 @@ use crate::{
     MuniBotError,
 };
 
-const NUZZLE_PREFIXES: [&str; 5] = ["*giggle!* ", "eee hehe! ", "hehehe! ", "aaa! ", "eep! "];
+const NUZZLE_PREFIXES: [&str; 5] = ["*giggle!*", "eee hehe!", "hehehe!", "aaa!", "eep!"];
 const NUZZLE_ACTIONS: [&str; 5] = [
     "nuzzle",
     "nuzzleeeee",
@@ -18,7 +18,7 @@ const NUZZLE_ACTIONS: [&str; 5] = [
     "nuzznuzz",
 ];
 
-const BOOP_PREFIXES: [&str; 4] = ["ACK! ", "ack! ", "eep! ", "meep! "];
+const BOOP_PREFIXES: [&str; 4] = ["ACK!", "ack!", "eep!", "meep!"];
 const BOOP_ACTIONS: [&str; 2] = ["boops back", "@~@ bzzzt"];
 const BOOP_ERROR_CHANCE: f64 = 0.01;
 const BOOP_ERROR_MESSAGE: &str =
@@ -49,7 +49,7 @@ impl BotAffectionProvider {
 
         // start the message with a prefix, if decided
         if let Some(prefix) = prefixes.pick(&mut rng) {
-            msg.push(prefix);
+            msg.push(format!("{prefix} "));
         }
 
         // start by choosing an action
