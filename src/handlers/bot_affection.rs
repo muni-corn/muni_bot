@@ -107,6 +107,7 @@ impl BotAffectionProvider {
     }
 }
 
+/// Returns a string with the given probability, or an empty string.
 fn get_str_or_empty(mut rng: impl Rng, s: &str, p: f64) -> &str {
     if rng.gen_bool(p) {
         s
