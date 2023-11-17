@@ -25,8 +25,28 @@ const BOOP_ERROR_MESSAGE: &str =
     "thread 'boop handler' panicked at 'your boop has broken the bot!!', src/handlers/bot_affection.rs:60:9
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace";
 
-const KISS_PREFIXES: [&str; 7] = [
-    "ooooo~ ", "oh! ", "meep~! ", "uwu~ ", "ehehe~ ", "mmm~ ", "owo~ ",
+const PAT_PREFIXES: [&str; 3] = ["eep!", "hehe!", "meep!"];
+const PAT_ACTIONS: [&str; 4] = ["leans into pats", "happy bot noises", "purrs", "is patted"];
+
+const HUG_PREFIXES: [&str; 4] = ["❤❤❤~", "hehe! love ya too~", "hehe~", "huggleeee~"];
+const HUG_ACTIONS: [&str; 6] = [
+    "hugs back",
+    "returns hugs",
+    "returns soft hugs",
+    "snuggles",
+    "huggles",
+    "gibs hugs",
+];
+
+const KISS_PREFIXES: [&str; 8] = [
+    "ooooo~",
+    "oh!",
+    "meep~!",
+    "uwu~",
+    "ehehe~",
+    "mmm~",
+    "owo~",
+    "owo th-thank you!~",
 ];
 const KISS_ACTIONS: [&str; 5] = [
     "nuzzles in return",
@@ -167,9 +187,31 @@ async fn kiss(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
     }
 }
 
+/// Pat the bot! >w<
+#[poise::command(slash_command, prefix_command)]
+async fn pat(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
+    BotAffectionProvider::handle_generic_affection(
+        ctx,
+        ResponseSelection::Always(&PAT_PREFIXES),
+        ResponseSelection::Always(&PAT_ACTIONS),
+    )
+    .await
+}
+
+/// Hug the bot! <3
+#[poise::command(slash_command, prefix_command)]
+async fn hug(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
+    BotAffectionProvider::handle_generic_affection(
+        ctx,
+        ResponseSelection::Always(&HUG_PREFIXES),
+        ResponseSelection::Always(&HUG_ACTIONS),
+    )
+    .await
+}
+
 impl DiscordCommandProvider for BotAffectionProvider {
     fn commands(&self) -> Vec<poise::Command<MutableDiscordState, MuniBotError>> {
-        vec![boop(), nuzzle(), kiss()]
+        vec![boop(), nuzzle(), kiss(), pat(), hug()]
     }
 }
 
