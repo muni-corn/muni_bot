@@ -119,5 +119,5 @@ const HELLO_TEMPLATES: [&str; 11] = [
     "{name} helloooooo:)",
     "hiiiii {name}",
     "hi {name}<3",
-    "hi {name}! you look wonderful today ;3"
+    "hi {name}! you look wonderful today ;3",
 ];
