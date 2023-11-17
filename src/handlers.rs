@@ -11,6 +11,7 @@ pub mod bonk;
 pub mod bot_affection;
 pub mod content_warning;
 pub mod dice;
+pub mod economy;
 pub mod eight_ball;
 pub mod greeting;
 pub mod lift;

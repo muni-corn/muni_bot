@@ -15,8 +15,9 @@ use twitch_irc::login::UserAccessToken;
 
 use crate::{
     handlers::{
-        bot_affection::BotAffectionProvider, dice::DiceHandler, eight_ball::EightBallProvider,
-        greeting::GreetingHandler, ventriloquize::VentriloquizeProvider, DiscordHandlerCollection,
+        bot_affection::BotAffectionProvider, dice::DiceHandler, economy::EconomyProvider,
+        eight_ball::EightBallProvider, greeting::GreetingHandler,
+        ventriloquize::VentriloquizeProvider, DiscordHandlerCollection,
     },
     twitch::get_basic_auth_url,
 };
@@ -39,8 +40,10 @@ async fn main() -> Result<(), MuniBotError> {
                 .start("muni_corn".to_owned(), twitch_token);
 
             // start discord
-            let discord_handlers: DiscordHandlerCollection =
-                vec![Arc::new(Mutex::new(GreetingHandler))];
+            let discord_handlers: DiscordHandlerCollection = vec![
+                Arc::new(Mutex::new(GreetingHandler)),
+                Arc::new(Mutex::new(EconomyProvider)),
+            ];
             let discord_command_providers: DiscordCommandProviderCollection = vec![
                 Box::new(DiceHandler),
                 Box::new(BotAffectionProvider),
