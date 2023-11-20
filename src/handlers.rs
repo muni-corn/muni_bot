@@ -18,6 +18,7 @@ pub mod lurk;
 pub mod magical;
 pub mod quotes;
 pub mod raid_msg;
+pub mod shoutout;
 pub mod socials;
 
 pub type TwitchHandlerCollection = Vec<Arc<Mutex<dyn TwitchMessageHandler>>>;

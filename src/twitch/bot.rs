@@ -6,8 +6,9 @@ use twitch_irc::{
 };
 
 use crate::handlers::{
-    bonk::BonkHandler, greeting::GreetingHandler, lurk::LurkHandler, quotes::QuotesHandler,
-    raid_msg::RaidMsgHandler, socials::SocialsHandler, lift::LiftHandler,
+    bonk::BonkHandler, greeting::GreetingHandler, lift::LiftHandler, lurk::LurkHandler,
+    quotes::QuotesHandler, raid_msg::RaidMsgHandler, shoutout::ShoutoutHandler,
+    socials::SocialsHandler,
 };
 
 use super::{
@@ -33,6 +34,7 @@ impl TwitchBot {
                 Box::new(LurkHandler),
                 Box::new(GreetingHandler),
                 Box::new(LiftHandler::new()),
+                Box::new(ShoutoutHandler),
             ],
         }
     }

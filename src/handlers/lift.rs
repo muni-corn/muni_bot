@@ -1,4 +1,4 @@
-use std::time::{Instant, Duration};
+use std::time::{Duration, Instant};
 
 use twitch_irc::{
     login::StaticLoginCredentials,
