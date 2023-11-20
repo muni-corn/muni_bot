@@ -13,6 +13,7 @@ pub mod content_warning;
 pub mod dice;
 pub mod eight_ball;
 pub mod greeting;
+pub mod lift;
 pub mod lurk;
 pub mod magical;
 pub mod quotes;
