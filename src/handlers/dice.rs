@@ -77,11 +77,9 @@ const CRITICAL_FAILURE_SUFFIXES: [&str; 6] = [
     " lol",
 ];
 
-const CRITICAL_SUCCESS_SUFFIXES: [&str; 7] = [
-    "! impressive ;3",
-    "! HECK YEAH",
-    " LET'S GOOOOOOO",
-    " WOOOOOO",
+const CRITICAL_SUCCESS_SUFFIXES: [&str; 5] = [
+    "!! impressive ;3",
+    "!! 🎉🎉",
     "!! >u<",
     "!! :D ",
     "!! >:D ",
