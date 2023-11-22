@@ -38,7 +38,7 @@ async fn eight_ball(
         .push_quote_line_safe(question)
         .push_line("")
         .push_italic_line(shake_message)
-        .push(format!("🎱 \"{}\"", eight_ball_response))
+        .push(format!("the eight ball says, \"{}\"", eight_ball_response))
         .build();
 
     ctx.say(message).await.map_err(|e| DiscordCommandError {
