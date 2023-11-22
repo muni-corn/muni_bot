@@ -39,21 +39,21 @@ const HUG_ACTIONS: [&str; 6] = [
 ];
 
 const KISS_PREFIXES: [&str; 8] = [
-    "ooooo~",
     "oh!",
     "meep~!",
     "uwu~",
     "ehehe~",
-    "mmm~",
     "owo~",
-    "owo th-thank you!~",
+    "owo th-thank you~",
+    "h-huh??",
+    "oh my!",
 ];
 const KISS_ACTIONS: [&str; 5] = [
-    "nuzzles in return",
     "blushes",
     "blushyblush",
-    "smirks",
     "giggles",
+    "hides face",
+    "/)///(\\"
 ];
 
 const CHANCE_OF_EXCLAMATION: f64 = 0.5;
