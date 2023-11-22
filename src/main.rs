@@ -13,7 +13,7 @@ use twitch_irc::login::UserAccessToken;
 use crate::{
     handlers::{
         bot_affection::BotAffectionProvider, dice::DiceHandler, eight_ball::EightBallProvider,
-        greeting::GreetingHandler, DiscordHandlerCollection,
+        greeting::GreetingHandler, ventriloquize::VentriloquizeProvider, DiscordHandlerCollection,
     },
     twitch::get_basic_auth_url,
 };
@@ -43,6 +43,7 @@ async fn main() -> Result<(), MuniBotError> {
                 Box::new(BotAffectionProvider),
                 Box::new(MagicalHandler),
                 Box::new(EightBallProvider),
+                Box::new(VentriloquizeProvider),
             ];
             let discord_handle = tokio::spawn(start_discord_integration(
                 discord_handlers,
@@ -81,6 +82,7 @@ enum MuniBotError {
     DiscordCommand(DiscordCommandError),
     MissingToken,
     DbError(surrealdb::Error),
+    Other(String),
 }
 
 impl From<serde_json::Error> for MuniBotError {
@@ -122,6 +124,7 @@ impl Display for MuniBotError {
             MuniBotError::DiscordCommand(e) => e.fmt(f),
             MuniBotError::MissingToken => write!(f, "missing token!"),
             MuniBotError::DbError(e) => write!(f, "database error :( {e}"),
+            MuniBotError::Other(e) => write!(f, "error :( {e}"),
         }
     }
 }
