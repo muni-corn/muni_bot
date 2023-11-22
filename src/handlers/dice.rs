@@ -33,7 +33,7 @@ impl DiceHandler {
 }
 
 /// Roll a die.
-#[poise::command(slash_command, prefix_command)]
+#[poise::command(slash_command, prefix_command, track_edits)]
 async fn roll(
     ctx: DiscordContext<'_>,
     #[description = "number of sides on the die you want to roll"] sides: u8,
