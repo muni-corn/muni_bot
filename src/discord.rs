@@ -7,6 +7,7 @@ use dotenvy::dotenv;
 use poise::{
     samples::register_globally, serenity_prelude as serenity, Event, Prefix, PrefixFrameworkOptions,
 };
+use surrealdb::{engine::remote::ws, opt::auth::Database, Surreal};
 use tokio::sync::Mutex;
 
 use crate::{handlers::DiscordHandlerCollection, MuniBotError};
@@ -15,10 +16,29 @@ use self::commands::DiscordCommandProvider;
 
 pub struct DiscordState {
     handlers: DiscordHandlerCollection,
+    pub db: Surreal<ws::Client>,
 }
+impl DiscordState {
+    pub async fn new(handlers: DiscordHandlerCollection) -> Result<Self, MuniBotError> {
+        let database_url = env::var("DATABASE_URL").expect("expected DATABASE_URL to be set"); // TODO: map to MuniBotError::MissingEnv
+        let db = Surreal::new::<ws::Ws>(&database_url).await?;
+        db.signin(Database {
+            namespace: "muni_bot",
+            database: "muni_bot",
+            username: &env::var("DATABASE_USER").expect("expected DATABASE_USER to be set"),
+            password: &env::var("DATABASE_PASS").expect("expected DATABASE_PASS to be set"),
+        })
+        .await?;
+
+        Ok(Self { handlers, db })
+    }
+}
+
 pub type MutableDiscordState = Arc<Mutex<DiscordState>>;
-pub type DiscordContext<'a> = poise::Context<'a, MutableDiscordState, MuniBotError>;
 pub type DiscordCommand = poise::Command<MutableDiscordState, MuniBotError>;
+pub type DiscordContext<'a> = poise::Context<'a, MutableDiscordState, MuniBotError>;
+pub type DiscordFrameworkContext<'a> =
+    poise::FrameworkContext<'a, MutableDiscordState, MuniBotError>;
 
 pub async fn start_discord_integration(
     handlers: DiscordHandlerCollection,
@@ -32,8 +52,8 @@ pub async fn start_discord_integration(
         .collect();
 
     let options = poise::FrameworkOptions::<MutableDiscordState, MuniBotError> {
-        event_handler: |_ctx, event, _framework, _data| {
-            Box::pin(event_handler(_ctx, event, _framework, _data))
+        event_handler: |ctx, event, framework, data| {
+            Box::pin(event_handler(ctx, event, framework, data))
         },
         commands,
         prefix_options: PrefixFrameworkOptions {
@@ -49,9 +69,7 @@ pub async fn start_discord_integration(
             env::var("DISCORD_TOKEN")
                 .expect("no token provided for discord! i can't run without it :("),
         )
-        .setup(move |_ctx, _ready, _framework| {
-            Box::pin(on_ready(_ctx, _ready, _framework, handlers))
-        })
+        .setup(move |ctx, ready, framework| Box::pin(on_ready(ctx, ready, framework, handlers)))
         .options(options)
         .intents(
             serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT,
@@ -76,19 +94,20 @@ async fn on_ready(
     ctx.set_activity(serenity::Activity::watching("you sleep uwu"))
         .await;
 
-    Ok(Arc::new(Mutex::new(DiscordState { handlers })))
+    Ok(Arc::new(Mutex::new(DiscordState::new(handlers).await?)))
 }
 
 async fn event_handler(
     context: &serenity::Context,
     event: &Event<'_>,
-    _framework: poise::FrameworkContext<'_, MutableDiscordState, MuniBotError>,
+    framework_context: DiscordFrameworkContext<'_>,
     data: &MutableDiscordState,
 ) -> Result<(), MuniBotError> {
     if let Event::Message { new_message } = event {
         for handler in data.lock().await.handlers.iter() {
             let mut locked_handler = handler.lock().await;
-            let handled_future = locked_handler.handle_discord_message(context, new_message);
+            let handled_future =
+                locked_handler.handle_discord_message(context, framework_context, new_message);
             match handled_future.await {
                 Ok(true) => break,
                 Ok(false) => continue,

@@ -6,7 +6,10 @@ use regex::Regex;
 use twitch_irc::{login::StaticLoginCredentials, message::ServerMessage};
 
 use crate::{
-    discord::handler::{DiscordMessageHandler, DiscordMessageHandlerError},
+    discord::{
+        handler::{DiscordMessageHandler, DiscordMessageHandlerError},
+        DiscordFrameworkContext,
+    },
     twitch::{
         agent::TwitchAgent,
         bot::MuniBotTwitchIRCClient,
@@ -83,6 +86,7 @@ impl DiscordMessageHandler for GreetingHandler {
     async fn handle_discord_message(
         &mut self,
         context: &Context,
+        framework: DiscordFrameworkContext<'_>,
         msg: &Message,
     ) -> Result<bool, DiscordMessageHandlerError> {
         let author_name = msg

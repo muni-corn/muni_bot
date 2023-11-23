@@ -10,7 +10,8 @@ pub trait DiscordMessageHandler: Sync + Send {
     fn name(&self) -> &'static str;
     async fn handle_discord_message(
         &mut self,
-        context: &Context,
+        context: &serenity::Context,
+        framework: DiscordFrameworkContext<'_>,
         msg: &Message,
     ) -> Result<bool, DiscordMessageHandlerError>;
 }

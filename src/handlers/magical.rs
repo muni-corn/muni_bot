@@ -10,7 +10,7 @@ use twitch_irc::{login::StaticLoginCredentials, message::ServerMessage};
 use crate::{
     discord::{
         commands::{DiscordCommandError, DiscordCommandProvider},
-        DiscordCommand, DiscordContext, DiscordState,
+        DiscordCommand, DiscordContext,
     },
     twitch::{
         agent::TwitchAgent,
