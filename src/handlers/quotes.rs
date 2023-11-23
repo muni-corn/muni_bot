@@ -88,7 +88,7 @@ impl QuotesHandler {
             let mut response = self
                 .db
                 .query(format!(
-                    "SELECT * from {QUOTE_TABLE}
+                    "SELECT * FROM {QUOTE_TABLE}
                      ORDER BY created_at
                      LIMIT 1
                      START $n;",
