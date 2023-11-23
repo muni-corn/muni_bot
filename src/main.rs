@@ -6,6 +6,7 @@ use std::{fmt::Display, sync::Arc};
 
 use discord::{commands::DiscordCommandError, start_discord_integration};
 use handlers::{magical::MagicalHandler, DiscordCommandProviderCollection};
+use poise::serenity_prelude as serenity;
 use tokio::sync::{mpsc::error::SendError, Mutex};
 use twitch::bot::TwitchBot;
 use twitch_irc::login::UserAccessToken;
@@ -112,6 +113,12 @@ impl From<DiscordCommandError> for MuniBotError {
 impl From<surrealdb::Error> for MuniBotError {
     fn from(value: surrealdb::Error) -> Self {
         Self::DbError(value)
+    }
+}
+
+impl From<serenity::Error> for MuniBotError {
+    fn from(e: serenity::Error) -> Self {
+        Self::Other(format!("error in serenity: {e}"))
     }
 }
 

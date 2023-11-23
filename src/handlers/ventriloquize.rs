@@ -13,38 +13,32 @@ use crate::{
 pub struct VentriloquizeProvider;
 
 #[poise::command(slash_command, hide_in_help, check = "is_muni")]
-async fn ventriloquize(ctx: DiscordContext<'_>, message: String) -> Result<(), MuniBotError> {
-    // start typing to look like muni_bot is actually typing
-    let typing_opt = ctx
-        .channel_id()
-        .start_typing(&ctx.serenity_context().http)
-        .ok();
+async fn ventriloquize<'a, 'b: 'a>(
+    ctx: DiscordContext<'b>,
+    message: String,
+) -> Result<(), MuniBotError> {
+    let channel_id = ctx.channel_id();
+    let http = ctx.serenity_context().http.to_owned();
 
-    // wait a minute to simulate typing
-    if let Some(typing) = typing_opt {
-        thread::sleep(Duration::from_millis(message.len() as u64 * 10));
-        typing.stop();
-    }
+    // notification the command invoker
+    ctx.send(move |f| f.ephemeral(true).content("beep boop..."))
+        .await?;
 
-    // send the message
-    let send_result = ctx
-        .channel_id()
-        .send_message(&ctx.serenity_context().http, |m| m.content(message))
-        .await;
+    tokio::spawn(async move {
+        // start typing to look like muni_bot is actually typing
+        let typing_opt = channel_id.start_typing(&http).ok();
 
-    // notify the command invoker of the result
-    ctx.send(move |f| {
-        let notification = match send_result {
-            Ok(_) => "done!".to_string(),
-            Err(e) => format!("failed to send message: {e}"),
-        };
-        f.ephemeral(true).content(notification)
-    })
-    .await
-    .map_err(|e| DiscordCommandError {
-        message: format!("failed to send ventriloquized message: {e}"),
-        command_identifier: "ventriloquize".to_string(),
-    })?;
+        // wait a minute to simulate typing
+        if let Some(typing) = typing_opt {
+            thread::sleep(Duration::from_millis(message.len() as u64 * 25));
+            typing.stop();
+        }
+
+        // send the message
+        if let Err(e) = channel_id.send_message(&http, |m| m.content(message)).await {
+            eprintln!("couldn't send ventriloquization: {e}");
+        }
+    });
 
     Ok(())
 }
