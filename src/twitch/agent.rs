@@ -49,8 +49,6 @@ impl<C: LoginCredentials> TwitchAgent<C> {
                     .send()
                     .await?;
 
-                dbg!(&resp);
-
                 // parse to object
                 resp.json::<Data>()
                     .await?
