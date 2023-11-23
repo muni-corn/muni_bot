@@ -1,14 +1,13 @@
 pub mod commands;
 pub mod handler;
 
-use std::{env, sync::Arc};
+use std::env;
 
 use dotenvy::dotenv;
 use poise::{
     samples::register_globally, serenity_prelude as serenity, Event, Prefix, PrefixFrameworkOptions,
 };
 use surrealdb::{engine::remote::ws, opt::auth::Database, Surreal};
-use tokio::sync::Mutex;
 
 use crate::{handlers::DiscordHandlerCollection, MuniBotError};
 
@@ -34,11 +33,9 @@ impl DiscordState {
     }
 }
 
-pub type MutableDiscordState = Arc<Mutex<DiscordState>>;
-pub type DiscordCommand = poise::Command<MutableDiscordState, MuniBotError>;
-pub type DiscordContext<'a> = poise::Context<'a, MutableDiscordState, MuniBotError>;
-pub type DiscordFrameworkContext<'a> =
-    poise::FrameworkContext<'a, MutableDiscordState, MuniBotError>;
+pub type DiscordCommand = poise::Command<DiscordState, MuniBotError>;
+pub type DiscordContext<'a> = poise::Context<'a, DiscordState, MuniBotError>;
+pub type DiscordFrameworkContext<'a> = poise::FrameworkContext<'a, DiscordState, MuniBotError>;
 
 pub async fn start_discord_integration(
     handlers: DiscordHandlerCollection,
@@ -51,7 +48,7 @@ pub async fn start_discord_integration(
         .flat_map(|provider| provider.commands())
         .collect();
 
-    let options = poise::FrameworkOptions::<MutableDiscordState, MuniBotError> {
+    let options = poise::FrameworkOptions::<DiscordState, MuniBotError> {
         event_handler: |ctx, event, framework, data| {
             Box::pin(event_handler(ctx, event, framework, data))
         },
@@ -64,7 +61,7 @@ pub async fn start_discord_integration(
         ..Default::default()
     };
 
-    poise::Framework::<MutableDiscordState, MuniBotError>::builder()
+    poise::Framework::<DiscordState, MuniBotError>::builder()
         .token(
             env::var("DISCORD_TOKEN")
                 .expect("no token provided for discord! i can't run without it :("),
@@ -82,9 +79,9 @@ pub async fn start_discord_integration(
 async fn on_ready(
     ctx: &serenity::Context,
     ready: &serenity::Ready,
-    framework: &poise::Framework<MutableDiscordState, MuniBotError>,
+    framework: &poise::Framework<DiscordState, MuniBotError>,
     handlers: DiscordHandlerCollection,
-) -> Result<MutableDiscordState, MuniBotError> {
+) -> Result<DiscordState, MuniBotError> {
     println!("Logged in as {}", ready.user.name);
 
     register_globally(ctx, &framework.options().commands)
@@ -94,17 +91,17 @@ async fn on_ready(
     ctx.set_activity(serenity::Activity::watching("you sleep uwu"))
         .await;
 
-    Ok(Arc::new(Mutex::new(DiscordState::new(handlers).await?)))
+    DiscordState::new(handlers).await
 }
 
 async fn event_handler(
     context: &serenity::Context,
     event: &Event<'_>,
     framework_context: DiscordFrameworkContext<'_>,
-    data: &MutableDiscordState,
+    data: &DiscordState,
 ) -> Result<(), MuniBotError> {
     if let Event::Message { new_message } = event {
-        for handler in data.lock().await.handlers.iter() {
+        for handler in data.handlers.iter() {
             let mut locked_handler = handler.lock().await;
             let handled_future =
                 locked_handler.handle_discord_message(context, framework_context, new_message);

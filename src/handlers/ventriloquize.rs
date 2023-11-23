@@ -1,11 +1,11 @@
 use std::{thread, time::Duration};
 
-use poise::{serenity_prelude::MessageBuilder, Command};
+use poise::Command;
 
 use crate::{
     discord::{
-        commands::{DiscordCommandError, DiscordCommandProvider},
-        DiscordContext, MutableDiscordState,
+        commands::DiscordCommandProvider,
+        DiscordContext, DiscordState,
     },
     MuniBotError,
 };
@@ -44,7 +44,7 @@ async fn ventriloquize<'a, 'b: 'a>(
 }
 
 impl DiscordCommandProvider for VentriloquizeProvider {
-    fn commands(&self) -> Vec<Command<MutableDiscordState, MuniBotError>> {
+    fn commands(&self) -> Vec<Command<DiscordState, MuniBotError>> {
         vec![ventriloquize()]
     }
 }

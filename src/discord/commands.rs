@@ -5,10 +5,10 @@ use std::{
 
 use crate::MuniBotError;
 
-use super::MutableDiscordState;
+use super::DiscordState;
 
 pub trait DiscordCommandProvider: Send {
-    fn commands(&self) -> Vec<poise::Command<MutableDiscordState, MuniBotError>>;
+    fn commands(&self) -> Vec<poise::Command<DiscordState, MuniBotError>>;
 }
 
 #[derive(Debug)]

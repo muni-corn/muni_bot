@@ -4,7 +4,7 @@ use rand::{seq::SliceRandom, Rng};
 use crate::{
     discord::{
         commands::{DiscordCommandError, DiscordCommandProvider},
-        DiscordContext, MutableDiscordState,
+        DiscordContext, DiscordState, DiscordCommand,
     },
     MuniBotError,
 };
@@ -119,7 +119,7 @@ fn get_str_or_empty(mut rng: impl Rng, s: &str, p: f64) -> &str {
 /// Boop the bot!
 #[poise::command(slash_command, prefix_command)]
 async fn boop(
-    ctx: poise::Context<'_, MutableDiscordState, MuniBotError>,
+    ctx: poise::Context<'_, DiscordState, MuniBotError>,
 ) -> Result<(), MuniBotError> {
     // rarely throw a fake error message
     if rand::thread_rng().gen_bool(BOOP_ERROR_CHANCE) {
@@ -211,7 +211,7 @@ async fn hug(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
 }
 
 impl DiscordCommandProvider for BotAffectionProvider {
-    fn commands(&self) -> Vec<poise::Command<MutableDiscordState, MuniBotError>> {
+    fn commands(&self) -> Vec<DiscordCommand> {
         vec![boop(), nuzzle(), kiss(), pat(), hug()]
     }
 }
