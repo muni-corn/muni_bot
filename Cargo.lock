@@ -1743,6 +1743,7 @@ dependencies = [
  "serde",
  "serde_json",
  "surrealdb",
+ "thiserror",
  "tokio",
  "twitch-irc",
  "twitch_oauth2",

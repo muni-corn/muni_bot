@@ -97,7 +97,7 @@ impl DiscordMessageHandler for GreetingHandler {
                 .await
                 .map_err(|e| DiscordMessageHandlerError {
                     message: e.to_string(),
-                    handler_name: self.name().to_string(),
+                    handler_name: self.name()
                 })?;
             true
         } else {

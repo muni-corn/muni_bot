@@ -1,10 +1,9 @@
-use std::{
-    error::Error,
-    fmt::{self, Display},
-};
+use thiserror::Error;
 
 use async_trait::async_trait;
-use poise::serenity_prelude::{Context, Message};
+use poise::serenity_prelude::{self as serenity, Message};
+
+use super::DiscordFrameworkContext;
 
 #[async_trait]
 pub trait DiscordMessageHandler: Sync + Send {
@@ -16,18 +15,9 @@ pub trait DiscordMessageHandler: Sync + Send {
     ) -> Result<bool, DiscordMessageHandlerError>;
 }
 
-#[derive(Debug)]
+#[derive(Error, Debug)]
+#[error("error in discord handler {handler_name}: {message}")]
 pub struct DiscordMessageHandlerError {
+    pub handler_name: &'static str,
     pub message: String,
-    pub handler_name: String,
 }
-impl Display for DiscordMessageHandlerError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "the {} discord message handler encountered an error: {}",
-            self.handler_name, self.message
-        )
-    }
-}
-impl Error for DiscordMessageHandlerError {}
