@@ -86,7 +86,7 @@ impl DiscordMessageHandler for GreetingHandler {
     async fn handle_discord_message(
         &mut self,
         context: &Context,
-        framework: DiscordFrameworkContext<'_>,
+        _framework: DiscordFrameworkContext<'_>,
         msg: &Message,
     ) -> Result<bool, DiscordMessageHandlerError> {
         let author_name = msg
