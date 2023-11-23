@@ -50,11 +50,6 @@ impl TwitchBot {
         client.join(channel.clone()).unwrap();
 
         tokio::spawn(async move {
-            client
-                .say(channel.to_owned(), "i'm here!".to_owned())
-                .await
-                .unwrap();
-
             while let Some(message) = incoming_messages.recv().await {
                 if let Err(e) = self.handle_twitch_message(&message, &client, &agent).await {
                     eprintln!("error in message handler! {e}");
