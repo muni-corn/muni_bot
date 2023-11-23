@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use num_format::{Locale, ToFormattedString};
 use poise::serenity_prelude::{Context, Message};
 
 use crate::{
@@ -92,9 +93,10 @@ async fn wallet(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
                 command_identifier: "wallet".to_string(),
             })?;
 
+        // send the wallet balance
         ctx.reply(format!(
             "hey {author_name}! you have **{}** coins in your wallet.",
-            wallet.balance()
+            wallet.balance().to_formatted_string(&Locale::en)
         ))
         .await
         .map_err(|e| DiscordCommandError {
