@@ -73,3 +73,43 @@ impl DiscordMessageHandler for EconomyProvider {
     }
 }
 
+impl DiscordCommandProvider for EconomyProvider {
+    fn commands(&self) -> Vec<DiscordCommand> {
+        vec![wallet()]
+    }
+}
+
+#[poise::command(slash_command, prefix_command)]
+async fn wallet(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
+    if let Some(guild_id) = ctx.guild_id() {
+        let author_name = display_name_from_command_context(ctx).await;
+
+        let db = &ctx.data().db;
+        let wallet = Wallet::get_from_db(db, guild_id, ctx.author().id)
+            .await
+            .map_err(|e| DiscordCommandError {
+                message: format!("error getting wallet from db: {e}"),
+                command_identifier: "wallet".to_string(),
+            })?;
+
+        ctx.reply(format!(
+            "hey {author_name}! you have **{}** coins in your wallet.",
+            wallet.balance()
+        ))
+        .await
+        .map_err(|e| DiscordCommandError {
+            message: format!("error sending message: {e}"),
+            command_identifier: "wallet".to_string(),
+        })?;
+
+        Ok(())
+    } else {
+        ctx.say("this command can only be used in a server! each server has their own economy. use this command in a server you're in to check your balance there! ^w^")
+            .await.map_err(|e| DiscordCommandError {
+                message: format!("error sending message: {e}"),
+                command_identifier: "wallet".to_string(),
+            })?;
+
+        Ok(())
+    }
+}

@@ -50,6 +50,7 @@ async fn main() -> Result<(), MuniBotError> {
                 Box::new(MagicalHandler),
                 Box::new(EightBallProvider),
                 Box::new(VentriloquizeProvider),
+                Box::new(EconomyProvider),
             ];
             let discord_handle = tokio::spawn(start_discord_integration(
                 discord_handlers,
