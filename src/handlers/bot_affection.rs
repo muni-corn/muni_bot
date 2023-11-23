@@ -4,7 +4,7 @@ use rand::{seq::SliceRandom, Rng};
 use crate::{
     discord::{
         commands::{DiscordCommandError, DiscordCommandProvider},
-        DiscordContext, DiscordState, DiscordCommand,
+        DiscordCommand, DiscordContext, DiscordState,
     },
     MuniBotError,
 };
@@ -53,7 +53,7 @@ const KISS_ACTIONS: [&str; 5] = [
     "blushyblush",
     "giggles",
     "hides face",
-    "/)///(\\"
+    "/)///(\\",
 ];
 
 const CHANCE_OF_EXCLAMATION: f64 = 0.5;
@@ -118,9 +118,7 @@ fn get_str_or_empty(mut rng: impl Rng, s: &str, p: f64) -> &str {
 
 /// Boop the bot!
 #[poise::command(slash_command, prefix_command)]
-async fn boop(
-    ctx: poise::Context<'_, DiscordState, MuniBotError>,
-) -> Result<(), MuniBotError> {
+async fn boop(ctx: poise::Context<'_, DiscordState, MuniBotError>) -> Result<(), MuniBotError> {
     // rarely throw a fake error message
     if rand::thread_rng().gen_bool(BOOP_ERROR_CHANCE) {
         ctx.say(

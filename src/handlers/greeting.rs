@@ -8,7 +8,8 @@ use twitch_irc::{login::StaticLoginCredentials, message::ServerMessage};
 use crate::{
     discord::{
         handler::{DiscordMessageHandler, DiscordMessageHandlerError},
-        DiscordFrameworkContext, utils::display_name_from_message,
+        utils::display_name_from_message,
+        DiscordFrameworkContext,
     },
     twitch::{
         agent::TwitchAgent,
@@ -98,7 +99,7 @@ impl DiscordMessageHandler for GreetingHandler {
                 .await
                 .map_err(|e| DiscordMessageHandlerError {
                     message: e.to_string(),
-                    handler_name: self.name()
+                    handler_name: self.name(),
                 })?;
             true
         } else {

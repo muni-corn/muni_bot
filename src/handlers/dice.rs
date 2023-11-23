@@ -77,13 +77,8 @@ const CRITICAL_FAILURE_SUFFIXES: [&str; 6] = [
     " lol",
 ];
 
-const CRITICAL_SUCCESS_SUFFIXES: [&str; 5] = [
-    "!! impressive ;3",
-    "!! 🎉🎉",
-    "!! >u<",
-    "!! :D ",
-    "!! >:D ",
-];
+const CRITICAL_SUCCESS_SUFFIXES: [&str; 5] =
+    ["!! impressive ;3", "!! 🎉🎉", "!! >u<", "!! :D ", "!! >:D "];
 
 fn number_to_message(result: u8, sides: u8) -> RollResult {
     let mut rng = rand::thread_rng();

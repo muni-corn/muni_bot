@@ -3,10 +3,7 @@ use std::{thread, time::Duration};
 use poise::Command;
 
 use crate::{
-    discord::{
-        commands::DiscordCommandProvider,
-        DiscordContext, DiscordState,
-    },
+    discord::{commands::DiscordCommandProvider, DiscordContext, DiscordState},
     MuniBotError,
 };
 
