@@ -21,7 +21,8 @@ pub struct EconomyProvider;
 impl EconomyProvider {
     fn calc_salary(msg: &Message) -> u64 {
         // determine a salary based on words
-        msg.content
+        let valid_char_count: i32 = msg
+            .content
             .split_whitespace()
             .filter_map(|w| {
                 // ignore words containing symbols
@@ -30,12 +31,15 @@ impl EconomyProvider {
                 } else if w.len() > 2 {
                     // pay one unit per character, up to 10 units per word,
                     // and only for words greater than 2 characters
-                    Some(w.len().min(10) as u64)
+                    Some(w.len().min(10) as i32)
                 } else {
                     None
                 }
             })
-            .sum()
+            .sum();
+
+        // use a sigmoid function to curb bigger salaries (to mitigate copypasta spam)
+        (2000.0 / (1.0 + 1.002_f64.powi(-valid_char_count))) as u64 - 1000
     }
 }
 
