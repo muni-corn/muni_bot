@@ -1,5 +1,6 @@
 pub mod commands;
 pub mod handler;
+pub mod utils;
 
 use std::env;
 

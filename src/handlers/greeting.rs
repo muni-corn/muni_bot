@@ -8,7 +8,7 @@ use twitch_irc::{login::StaticLoginCredentials, message::ServerMessage};
 use crate::{
     discord::{
         handler::{DiscordMessageHandler, DiscordMessageHandlerError},
-        DiscordFrameworkContext,
+        DiscordFrameworkContext, utils::display_name_from_message,
     },
     twitch::{
         agent::TwitchAgent,
@@ -89,10 +89,7 @@ impl DiscordMessageHandler for GreetingHandler {
         _framework: DiscordFrameworkContext<'_>,
         msg: &Message,
     ) -> Result<bool, DiscordMessageHandlerError> {
-        let author_name = msg
-            .author_nick(&context.http)
-            .await
-            .unwrap_or_else(|| msg.author.name.clone());
+        let author_name = display_name_from_message(msg, &context.http).await;
 
         let handled = if let Some(response) = Self::get_greeting_message(&author_name, &msg.content)
         {
