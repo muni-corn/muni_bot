@@ -106,6 +106,6 @@ enum MuniBotError {
 
 impl From<DiscordCommandError> for MuniBotError {
     fn from(e: DiscordCommandError) -> Self {
-        Self::DiscordCommand("".to_string(), "".to_string())
+        Self::DiscordCommand(e.command_identifier.to_string(), format!("{e}"))
     }
 }
