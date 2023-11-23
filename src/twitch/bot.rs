@@ -48,6 +48,7 @@ impl TwitchBot {
 
         // join a channel. this will panic if the passed channel login name is malformed.
         client.join(channel.clone()).unwrap();
+        println!("joined twitch channel {}", channel);
 
         tokio::spawn(async move {
             while let Some(message) = incoming_messages.recv().await {
