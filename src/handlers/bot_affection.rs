@@ -186,7 +186,7 @@ async fn nuzzle(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
 async fn kiss(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
     // VERY rarely will the boot smooch back.
     if rand::thread_rng().gen_bool(0.00001) {
-        ctx.say("smooch~")
+        ctx.say("*smooches back~*")
             .await
             .map_err(|e| DiscordCommandError {
                 message: format!("couldn't send message :( {e}"),
