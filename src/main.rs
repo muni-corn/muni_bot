@@ -23,7 +23,6 @@ use crate::{
 };
 
 mod discord;
-
 mod handlers;
 mod twitch;
 

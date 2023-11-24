@@ -7,6 +7,7 @@ use crate::{
     twitch::handler::TwitchMessageHandler,
 };
 
+pub mod affection;
 pub mod bonk;
 pub mod bot_affection;
 pub mod content_warning;

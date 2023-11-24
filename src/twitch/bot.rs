@@ -6,8 +6,8 @@ use twitch_irc::{
 };
 
 use crate::handlers::{
-    bonk::BonkHandler, greeting::GreetingHandler, lift::LiftHandler, lurk::LurkHandler,
-    quotes::QuotesHandler, raid_msg::RaidMsgHandler, shoutout::ShoutoutHandler,
+    affection::AffectionHandler, bonk::BonkHandler, greeting::GreetingHandler, lift::LiftHandler,
+    lurk::LurkHandler, quotes::QuotesHandler, raid_msg::RaidMsgHandler, shoutout::ShoutoutHandler,
     socials::SocialsHandler,
 };
 
@@ -35,6 +35,7 @@ impl TwitchBot {
                 Box::new(GreetingHandler),
                 Box::new(LiftHandler::new()),
                 Box::new(ShoutoutHandler),
+                Box::new(AffectionHandler),
             ],
         }
     }
