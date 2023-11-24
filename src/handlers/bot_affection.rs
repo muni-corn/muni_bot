@@ -56,6 +56,21 @@ const KISS_ACTIONS: [&str; 5] = [
     "/)///(\\",
 ];
 
+const BITE_PREFIXES: [&str; 6] = [
+    "OW",
+    "OWIE",
+    "OUCH >.<",
+    "HEY D:<",
+    "ow!! i hope that was a love bite >:c",
+    "OW. why do i even have pain receptors ;-;",
+];
+const BITE_ACTIONS: [&str; 4] = [
+    "lightly nomfs back",
+    "nibbles",
+    "aggressive nuzzle",
+    "bites back",
+];
+
 const CHANCE_OF_EXCLAMATION: f64 = 0.5;
 const CHANCE_OF_TILDE: f64 = 0.25;
 const CHANCE_OF_HEART: f64 = 0.1;
@@ -84,6 +99,8 @@ impl BotAffectionProvider {
         }
 
         let result = msg.build().trim().to_string();
+
+        // if the result is empty, return a default message
         if result.is_empty() {
             "o///o".to_string()
         } else {
@@ -208,9 +225,20 @@ async fn hug(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
     .await
 }
 
+/// Bite the bot! >:3
+#[poise::command(slash_command, prefix_command)]
+async fn bite(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
+    BotAffectionProvider::handle_generic_affection(
+        ctx,
+        ResponseSelection::Always(&BITE_PREFIXES),
+        ResponseSelection::Rare(&BITE_ACTIONS, 0.1),
+    )
+    .await
+}
+
 impl DiscordCommandProvider for BotAffectionProvider {
     fn commands(&self) -> Vec<DiscordCommand> {
-        vec![boop(), nuzzle(), kiss(), pat(), hug()]
+        vec![boop(), nuzzle(), kiss(), pat(), hug(), bite()]
     }
 }
 
