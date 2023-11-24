@@ -6,7 +6,9 @@ use std::env;
 
 use dotenvy::dotenv;
 use poise::{
-    samples::register_globally, serenity_prelude as serenity, Event, Prefix, PrefixFrameworkOptions,
+    samples::register_globally,
+    serenity_prelude::{self as serenity, Activity},
+    Event, Prefix, PrefixFrameworkOptions,
 };
 use surrealdb::{engine::remote::ws, opt::auth::Database, Surreal};
 
@@ -83,14 +85,13 @@ async fn on_ready(
     framework: &poise::Framework<DiscordState, MuniBotError>,
     handlers: DiscordHandlerCollection,
 ) -> Result<DiscordState, MuniBotError> {
-    println!("Logged in as {}", ready.user.name);
-
     register_globally(ctx, &framework.options().commands)
         .await
         .expect("failed to register commands in guild");
 
-    ctx.set_activity(serenity::Activity::watching("you sleep uwu"))
-        .await;
+    ctx.set_activity(Activity::watching("you sleep uwu")).await;
+
+    println!("discord: logged in as {} as ready", ready.user.name);
 
     DiscordState::new(handlers).await
 }
