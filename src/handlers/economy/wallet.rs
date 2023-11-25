@@ -73,6 +73,7 @@ impl Wallet {
         Ok(())
     }
 
+    /// Deposits the given amount into the wallet and updates it in the database.
     pub async fn deposit<C: Connection>(
         &mut self,
         db: &Surreal<C>,
@@ -82,6 +83,7 @@ impl Wallet {
         self.update_in_db(db).await
     }
 
+    /// Spends the given amount from the wallet and updates it in the database.
     pub async fn spend<C: Connection>(
         &mut self,
         db: &Surreal<C>,
@@ -94,6 +96,7 @@ impl Wallet {
         self.update_in_db(db).await
     }
 
+    /// The balance of the wallet.
     pub fn balance(&self) -> u64 {
         self.data.balance
     }
