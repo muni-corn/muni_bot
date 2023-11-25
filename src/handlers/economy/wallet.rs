@@ -3,9 +3,7 @@ use serde::{Deserialize, Serialize};
 use surrealdb::{sql::Thing, Connection, Surreal};
 use thiserror::Error;
 
-const GUILD_WALLET_TABLE: &str = "guild_wallet";
-const GUILD_INVENTORY_TABLE: &str = "guild_inventory";
-const GUILD_CURRENCY_NAME_TABLE: &str = "guild_currency_name";
+pub const GUILD_WALLET_TABLE: &str = "guild_wallet";
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct WalletData {

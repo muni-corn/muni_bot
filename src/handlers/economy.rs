@@ -9,11 +9,13 @@ use crate::{
         utils::display_name_from_command_context,
         DiscordCommand, DiscordContext, DiscordFrameworkContext,
     },
+    handlers::economy::payout::{ClaimResult, Payout, PayoutError},
     MuniBotError,
 };
 
 use wallet::Wallet;
 
+mod payout;
 mod wallet;
 
 pub struct EconomyProvider;
@@ -59,17 +61,17 @@ impl DiscordMessageHandler for EconomyProvider {
             let salary = Self::calc_salary(msg);
             let db = &framework.user_data().await.db;
 
-            Wallet::get_from_db(db, guild_id, msg.author.id)
+            Payout::get_from_db(db, guild_id, msg.author.id)
                 .await
                 .map_err(|e| DiscordMessageHandlerError {
                     handler_name: self.name(),
-                    message: format!("error getting wallet from db: {e}"),
+                    message: format!("error getting payout from db: {e}"),
                 })?
                 .deposit(db, salary)
                 .await
                 .map_err(|e| DiscordMessageHandlerError {
                     handler_name: self.name(),
-                    message: format!("error depositing salary: {e}"),
+                    message: format!("error depositing salary into payout: {e}"),
                 })?;
         }
 
@@ -80,7 +82,7 @@ impl DiscordMessageHandler for EconomyProvider {
 
 impl DiscordCommandProvider for EconomyProvider {
     fn commands(&self) -> Vec<DiscordCommand> {
-        vec![wallet()]
+        vec![wallet(), claim()]
     }
 }
 
@@ -114,6 +116,73 @@ async fn wallet(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
             .await.map_err(|e| DiscordCommandError {
                 message: format!("error sending message: {e}"),
                 command_identifier: "wallet".to_string(),
+            })?;
+
+        Ok(())
+    }
+}
+
+#[poise::command(slash_command, prefix_command)]
+async fn claim(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
+    if let Some(guild_id) = ctx.guild_id() {
+        let db = &ctx.data().db;
+
+        let mut payout = Payout::get_from_db(db, guild_id, ctx.author().id)
+            .await
+            .map_err(|e| DiscordCommandError {
+                message: format!("error getting payout from db: {e}"),
+                command_identifier: "claim".to_string(),
+            })?;
+
+        let claim_result = payout.claim_to_wallet(db).await;
+
+        match claim_result {
+            Ok(ClaimResult {
+                amount_claimed,
+                new_balance,
+            }) => {
+                let author_name = display_name_from_command_context(ctx).await;
+                ctx.say(format!(
+                    "hey {author_name}, here are **{}** coins! ^w^ you now have **{}** coins.",
+                    amount_claimed.to_formatted_string(&Locale::en),
+                    new_balance.to_formatted_string(&Locale::en)
+                ))
+                .await
+                .map_err(|e| DiscordCommandError {
+                    message: format!("error sending message: {e}"),
+                    command_identifier: "claim".to_string(),
+                })
+            }
+            Err(PayoutError::TooSoon) => {
+                let timestamp = payout.next_payout_time().timestamp();
+                ctx.say(format!(
+                    "you can't claim your payout yet! you can claim it again <t:{timestamp}:R>."
+                ))
+                .await
+                .map_err(|e| DiscordCommandError {
+                    message: format!("error sending message: {e}"),
+                    command_identifier: "claim".to_string(),
+                })
+            }
+            Err(PayoutError::NothingToClaim) => ctx
+                .say("your payout is empty at the moment. try again later!")
+                .await
+                .map_err(|e| DiscordCommandError {
+                    message: format!("error sending message: {e}"),
+                    command_identifier: "claim".to_string(),
+                }),
+            Err(e) => Err(DiscordCommandError {
+                message: format!("error claiming payout: {e}"),
+                command_identifier: "claim".to_string(),
+            }),
+        }?;
+
+        Ok(())
+    } else {
+        ctx.say("this command can only be used in a server! go claim your payout from me in a server that i share with you ^w^")
+            .await.map_err(|e| DiscordCommandError {
+                message: format!("error sending message: {e}"),
+                command_identifier: "claim".to_string(),
             })?;
 
         Ok(())
