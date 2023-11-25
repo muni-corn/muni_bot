@@ -91,7 +91,7 @@ async fn on_ready(
 
     ctx.set_activity(Activity::watching("you sleep uwu")).await;
 
-    println!("discord: logged in as {} as ready", ready.user.name);
+    println!("discord: logged in as {}", ready.user.name);
 
     DiscordState::new(handlers).await
 }
