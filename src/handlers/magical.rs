@@ -9,8 +9,8 @@ use twitch_irc::{login::StaticLoginCredentials, message::ServerMessage};
 
 use crate::{
     discord::{
-        commands::{DiscordCommandError, DiscordCommandProvider},
-        DiscordCommand, DiscordContext,
+        commands::DiscordCommandProvider,
+        DiscordCommand, DiscordContext, utils::display_name_from_command_context,
     },
     twitch::{
         agent::TwitchAgent,
@@ -85,25 +85,13 @@ impl TwitchMessageHandler for MagicalHandler {
 /// Check your magicalness today.
 #[poise::command(prefix_command, slash_command)]
 async fn magical(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
-    let author = ctx.author();
-    let nick = if let Some(guild_id) = ctx.guild_id() {
-        author
-            .nick_in(ctx.http(), guild_id)
-            .await
-            .unwrap_or_else(|| author.name.clone())
-    } else {
-        author.name.clone()
-    };
+    let nick = display_name_from_command_context(ctx).await;
 
     ctx.say(MagicalHandler::get_message(
         &ctx.author().id.to_string(),
         &nick,
     ))
-    .await
-    .map_err(|e| DiscordCommandError {
-        message: format!("couldn't send message: {}", e),
-        command_identifier: "magical".to_string(),
-    })?;
+    .await?;
 
     Ok(())
 }
