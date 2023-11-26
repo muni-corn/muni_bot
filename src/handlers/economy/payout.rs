@@ -4,6 +4,8 @@ use serde::{Deserialize, Serialize};
 use surrealdb::{sql::Thing, Connection, Surreal};
 use thiserror::Error;
 
+use crate::MuniBotError;
+
 use super::wallet::{Wallet, WalletError};
 
 const GUILD_PAYOUT_TABLE: &str = "guild_payout";
@@ -145,4 +147,10 @@ pub enum PayoutError {
 
     #[error("nothing to claim!")]
     NothingToClaim,
+}
+
+impl From<PayoutError> for MuniBotError {
+    fn from(e: PayoutError) -> Self {
+        MuniBotError::Other(format!("{e}"))
+    }
 }
