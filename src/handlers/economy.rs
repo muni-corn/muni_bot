@@ -88,6 +88,7 @@ impl DiscordCommandProvider for EconomyProvider {
     }
 }
 
+/// check how much money you have.
 #[poise::command(slash_command, prefix_command)]
 async fn wallet(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
     if let Some(guild_id) = ctx.guild_id() {
@@ -115,6 +116,7 @@ async fn wallet(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
     }
 }
 
+/// claim your monies!
 #[poise::command(slash_command, prefix_command)]
 async fn claim(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
     if let Some(guild_id) = ctx.guild_id() {
