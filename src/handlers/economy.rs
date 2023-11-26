@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use num_format::{Locale, ToFormattedString};
-use poise::serenity_prelude::{Context, Message};
+use poise::serenity_prelude::{Context, Message, UserId};
 
 use crate::{
     discord::{
@@ -84,7 +84,7 @@ impl DiscordMessageHandler for EconomyProvider {
 
 impl DiscordCommandProvider for EconomyProvider {
     fn commands(&self) -> Vec<DiscordCommand> {
-        vec![wallet(), claim()]
+        vec![wallet(), claim(), transfer()]
     }
 }
 
@@ -153,8 +153,66 @@ async fn claim(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
             Err(e) => Err(DiscordCommandError {
                 message: format!("error claiming payout: {e}"),
                 command_identifier: "claim".to_string(),
-            }),
-        }?;
+            })?,
+        };
+    } else {
+        ctx.say("this command can only be used in a server! go claim your payout from me in a server that i share with you ^w^")
+            .await?;
+    }
+
+    Ok(())
+}
+
+/// transfer money to someone else.
+#[poise::command(slash_command, prefix_command)]
+async fn transfer(
+    ctx: DiscordContext<'_>,
+    #[description = "the amount you want to send"] amount: u64,
+    #[description = "ping who you want to send funds to"] to: UserId,
+) -> Result<(), MuniBotError> {
+    if let Some(guild_id) = ctx.guild_id() {
+        // check if the author is trying to transfer to themselves
+        if ctx.author().id == to {
+            ctx.say("you can't transfer money to yourself! >:(").await?;
+
+            return Ok(());
+        }
+
+        // get the author and recipient wallets
+        let db = &ctx.data().db;
+        let mut author_wallet = Wallet::get_from_db(db, guild_id, ctx.author().id).await?;
+        let mut recipient_wallet = Wallet::get_from_db(db, guild_id, to).await?;
+
+        // try to spend from the author wallet
+        if let Err(e) = author_wallet.spend(db, amount).await {
+            match e {
+                WalletError::InsufficientFunds => {
+                    let message = format!("you want to transfer **{}** coins, but you only have **{}** coins in your wallet :<", amount.to_formatted_string(&Locale::en), author_wallet.balance().to_formatted_string(&Locale::en));
+                    ctx.say(message).await?;
+
+                    return Ok(());
+                }
+                _ => {
+                    return Err(DiscordCommandError {
+                        message: format!("error spending from author wallet: {e}"),
+                        command_identifier: "give".to_string(),
+                    }
+                    .into())
+                }
+            }
+        }
+
+        // deposit into the recipient wallet
+        recipient_wallet.deposit(db, amount).await?;
+
+        // send a confirmation message
+        ctx.say(format!(
+            "**{}** coins have been transferred to <@{}>! ^w^ you have **{}** coins left.",
+            amount.to_formatted_string(&Locale::en),
+            to,
+            author_wallet.balance().to_formatted_string(&Locale::en)
+        ))
+        .await?;
 
         Ok(())
     } else {
