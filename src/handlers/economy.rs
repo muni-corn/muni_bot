@@ -15,6 +15,8 @@ use crate::{
 
 use wallet::Wallet;
 
+use self::wallet::WalletError;
+
 mod payout;
 mod wallet;
 
@@ -92,23 +94,14 @@ async fn wallet(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
         let author_name = display_name_from_command_context(ctx).await;
 
         let db = &ctx.data().db;
-        let wallet = Wallet::get_from_db(db, guild_id, ctx.author().id)
-            .await
-            .map_err(|e| DiscordCommandError {
-                message: format!("error getting wallet from db: {e}"),
-                command_identifier: "wallet".to_string(),
-            })?;
+        let wallet = Wallet::get_from_db(db, guild_id, ctx.author().id).await?;
 
         // send the wallet balance
         ctx.reply(format!(
             "hey {author_name}! you have **{}** coins in your wallet.",
             wallet.balance().to_formatted_string(&Locale::en)
         ))
-        .await
-        .map_err(|e| DiscordCommandError {
-            message: format!("error sending message: {e}"),
-            command_identifier: "wallet".to_string(),
-        })?;
+        .await?;
 
         Ok(())
     } else {
@@ -127,12 +120,7 @@ async fn claim(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
     if let Some(guild_id) = ctx.guild_id() {
         let db = &ctx.data().db;
 
-        let mut payout = Payout::get_from_db(db, guild_id, ctx.author().id)
-            .await
-            .map_err(|e| DiscordCommandError {
-                message: format!("error getting payout from db: {e}"),
-                command_identifier: "claim".to_string(),
-            })?;
+        let mut payout = Payout::get_from_db(db, guild_id, ctx.author().id).await?;
 
         let claim_result = payout.claim_to_wallet(db).await;
 
@@ -147,30 +135,19 @@ async fn claim(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
                     amount_claimed.to_formatted_string(&Locale::en),
                     new_balance.to_formatted_string(&Locale::en)
                 ))
-                .await
-                .map_err(|e| DiscordCommandError {
-                    message: format!("error sending message: {e}"),
-                    command_identifier: "claim".to_string(),
-                })
+                .await?
             }
             Err(PayoutError::TooSoon) => {
                 let timestamp = payout.next_payout_time().timestamp();
                 ctx.say(format!(
                     "you can't claim your payout yet! you can claim it again <t:{timestamp}:R>."
                 ))
-                .await
-                .map_err(|e| DiscordCommandError {
-                    message: format!("error sending message: {e}"),
-                    command_identifier: "claim".to_string(),
-                })
+                .await?
             }
-            Err(PayoutError::NothingToClaim) => ctx
-                .say("your payout is empty at the moment. try again later!")
-                .await
-                .map_err(|e| DiscordCommandError {
-                    message: format!("error sending message: {e}"),
-                    command_identifier: "claim".to_string(),
-                }),
+            Err(PayoutError::NothingToClaim) => {
+                ctx.say("your payout is empty at the moment. try again later!")
+                    .await?
+            }
             Err(e) => Err(DiscordCommandError {
                 message: format!("error claiming payout: {e}"),
                 command_identifier: "claim".to_string(),
@@ -179,11 +156,8 @@ async fn claim(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
 
         Ok(())
     } else {
-        ctx.say("this command can only be used in a server! go claim your payout from me in a server that i share with you ^w^")
-            .await.map_err(|e| DiscordCommandError {
-                message: format!("error sending message: {e}"),
-                command_identifier: "claim".to_string(),
-            })?;
+        ctx.say("this command can only be used in a server! visit a server i share with you to transfer coins to someone else ^w^")
+            .await?;
 
         Ok(())
     }
