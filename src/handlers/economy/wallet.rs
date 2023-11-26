@@ -91,7 +91,8 @@ impl Wallet {
         db: &Surreal<C>,
         amount: u64,
     ) -> Result<(), WalletError> {
-        self.data
+        self.data.balance = self
+            .data
             .balance
             .checked_sub(amount)
             .ok_or(WalletError::InsufficientFunds)?;
