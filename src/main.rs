@@ -100,7 +100,7 @@ enum MuniBotError {
     #[error("error with database :< {0}")]
     DbError(#[from] surrealdb::Error),
 
-    #[error("caught a serenity error: {0}")]
+    #[error("error in discord framework :< {0}")]
     SerenityError(#[from] serenity::Error),
 
     #[error("something different went wrong :< {0}")]
