@@ -2,37 +2,42 @@
   description = "muni_bot";
 
   inputs = {
-    naersk.url = "github:nmattia/naersk/master";
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    rust-overlay.url = "github:oxalica/rust-overlay";
+    fenix.url = "github:nix-community/fenix";
     utils.url = "github:numtide/flake-utils";
+    naersk.url = "github:nmattia/naersk/master";
   };
 
   outputs = {
     self,
     nixpkgs,
+    fenix,
     utils,
     naersk,
-    rust-overlay,
   }: let
     appName = "muni_bot";
 
-    overlays = [(import rust-overlay)];
     out =
       utils.lib.eachDefaultSystem
       (system: let
-        pkgs = import nixpkgs {inherit overlays system;};
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [fenix.overlays.default]; # for rust-analyzer-nightly
+        };
+        fenix' = fenix.packages.${system};
 
-        rust = pkgs.rust-bin.nightly.latest.default;
-        naersk-lib = naersk.lib."${system}".override {
-          cargo = rust;
-          rustc = rust;
+        rust = fenix'.default;
+        naersk-lib = naersk.lib.${system}.override {
+          inherit (rust) cargo rustc;
         };
 
-        nativeBuildInputs = builtins.attrValues {
-          inherit rust;
-          inherit (pkgs) pkg-config clang diesel-cli glibc;
-        };
+        nativeBuildInputs = with pkgs; [
+          rust.toolchain
+          pkg-config
+          clang
+          diesel-cli
+          glibc
+        ];
         buildInputs = with pkgs; [libressl_3_6];
       in {
         # `nix build`
@@ -57,13 +62,9 @@
           packages =
             nativeBuildInputs
             ++ buildInputs
-            ++ (with pkgs; [
-              cargo-watch
-              clippy
-              rust-analyzer
-              rustfmt
-            ]);
+            ++ (with pkgs; [cargo-watch rust-analyzer-nightly]);
           LIBCLANG_PATH = "${pkgs.libclang.lib}/lib";
+          RUST_SRC_PATH = "${fenix'.complete.rust-src}/lib/rustlib/src/rust/library";
         };
       });
   in
