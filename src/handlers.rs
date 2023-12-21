@@ -23,6 +23,7 @@ pub mod raid_msg;
 pub mod shoutout;
 pub mod socials;
 pub mod ventriloquize;
+pub mod topic_change;
 
 pub type TwitchHandlerCollection = Vec<Arc<Mutex<dyn TwitchMessageHandler>>>;
 pub type DiscordHandlerCollection = Vec<Arc<Mutex<dyn DiscordMessageHandler>>>;

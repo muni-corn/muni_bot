@@ -1,6 +1,5 @@
 #![feature(decl_macro)]
 #![feature(let_chains)]
-#![feature(async_fn_in_trait)]
 
 use std::sync::Arc;
 
@@ -17,7 +16,7 @@ use crate::{
     handlers::{
         bot_affection::BotAffectionProvider, dice::DiceHandler, economy::EconomyProvider,
         eight_ball::EightBallProvider, greeting::GreetingHandler,
-        ventriloquize::VentriloquizeProvider, DiscordHandlerCollection,
+        ventriloquize::VentriloquizeProvider, DiscordHandlerCollection, topic_change::TopicChangeProvider,
     },
     twitch::get_basic_auth_url,
 };
@@ -50,6 +49,7 @@ async fn main() -> Result<(), MuniBotError> {
                 Box::new(EightBallProvider),
                 Box::new(VentriloquizeProvider),
                 Box::new(EconomyProvider),
+                Box::new(TopicChangeProvider),
             ];
             let discord_handle = tokio::spawn(start_discord_integration(
                 discord_handlers,
