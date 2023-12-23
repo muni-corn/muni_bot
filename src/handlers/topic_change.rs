@@ -20,7 +20,7 @@ pub async fn topic_change(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
         .send(|m| {
             m.ephemeral(true).embed(|e| {
                 e.title("please read this before continuing")
-                    .description("if this conversation is making you uncomfortable, this will submit an anonymous request to this channel to change the topic. please only proceed if you genuinely want to change topics and acknowledge that you are not using this feature as a joke.")
+                    .description("if this conversation is making you uncomfortable, this will submit an anonymous request to this channel to change the topic. please only proceed if you genuinely want to change topics and acknowledge that you are not using this feature as a joke. continue?")
                     .color(Color::RED)
             })
             .components(|c| {
@@ -66,7 +66,7 @@ pub async fn topic_change(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
             DENY_TOPIC_CHANGE => {
                 interaction
                     .create_interaction_response(&ctx.serenity_context().http, |r| {
-                        r.kind(InteractionResponseType::UpdateMessage)
+                        r.kind(InteractionResponseType::ChannelMessageWithSource)
                             .interaction_response_data(|d| {
                                 d.content("no problem! send in a request any time.")
                                     .flags(MessageFlags::EPHEMERAL | MessageFlags::SUPPRESS_EMBEDS)
