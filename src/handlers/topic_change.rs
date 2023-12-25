@@ -1,6 +1,5 @@
 use poise::serenity_prelude::{
-    interaction::MessageFlags, ButtonStyle, Color, CreateComponents, CreateEmbed,
-    InteractionApplicationCommandCallbackDataFlags, InteractionResponseType,
+    interaction::MessageFlags, ButtonStyle, Color, InteractionResponseType,
 };
 use std::time::Duration;
 
