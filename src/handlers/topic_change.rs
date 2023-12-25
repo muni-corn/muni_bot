@@ -14,8 +14,10 @@ pub struct TopicChangeProvider;
 pub const APPROVE_TOPIC_CHANGE: &str = "approve_topic_change";
 pub const DENY_TOPIC_CHANGE: &str = "deny_topic_change";
 
+/// request to change the current topic of conversation
 #[poise::command(slash_command, track_edits)]
 pub async fn topic_change(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
+    // send initial warning and confirmation message
     let reply_handle = ctx
         .send(|m| {
             m.ephemeral(true).embed(|e| {
@@ -40,6 +42,7 @@ pub async fn topic_change(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
         })
         .await?;
 
+    // wait for response by button (or timeout after 60 seconds)
     if let Some(interaction) = reply_handle
         .message()
         .await?
@@ -48,6 +51,7 @@ pub async fn topic_change(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
         .await
     {
         match interaction.data.custom_id.as_str() {
+            // if the user approves the topic change, send a message to the channel and respond with acknowledgement
             APPROVE_TOPIC_CHANGE => {
                 interaction
                     .create_interaction_response(ctx.http(), |r| {
@@ -63,6 +67,7 @@ pub async fn topic_change(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
                     )
                     .await?;
             }
+            // if the user denies the topic change, only respond with acknowledgement
             DENY_TOPIC_CHANGE => {
                 interaction
                     .create_interaction_response(&ctx.serenity_context().http, |r| {
