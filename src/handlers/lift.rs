@@ -31,7 +31,10 @@ impl TwitchMessageHandler for LiftHandler {
         client: &MuniBotTwitchIRCClient,
         _agent: &TwitchAgent<StaticLoginCredentials>,
     ) -> Result<bool, TwitchHandlerError> {
-        if let ServerMessage::Privmsg(msg) = message && msg.message_text.starts_with("!liftmuni") && self.last_call.elapsed().as_secs() > 300 {
+        if let ServerMessage::Privmsg(msg) = message
+            && msg.message_text.starts_with("!liftmuni")
+            && self.last_call.elapsed().as_secs() > 300
+        {
             self.send_twitch_message(client, msg.channel_login(), "nuh uh. not here. muni is streaming right now. you can't do that while he's streaming.").await?;
             self.last_call = Instant::now();
 

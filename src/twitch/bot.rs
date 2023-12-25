@@ -7,8 +7,8 @@ use twitch_irc::{
 
 use crate::handlers::{
     affection::AffectionHandler, bonk::BonkHandler, greeting::GreetingHandler, lift::LiftHandler,
-    lurk::LurkHandler, quotes::QuotesHandler, raid_msg::RaidMsgHandler, shoutout::ShoutoutHandler,
-    socials::SocialsHandler, magical::MagicalHandler,
+    lurk::LurkHandler, magical::MagicalHandler, quotes::QuotesHandler, raid_msg::RaidMsgHandler,
+    shoutout::ShoutoutHandler, socials::SocialsHandler,
 };
 
 use super::{

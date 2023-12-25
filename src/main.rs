@@ -16,7 +16,8 @@ use crate::{
     handlers::{
         bot_affection::BotAffectionProvider, dice::DiceHandler, economy::EconomyProvider,
         eight_ball::EightBallProvider, greeting::GreetingHandler,
-        ventriloquize::VentriloquizeProvider, DiscordHandlerCollection, topic_change::TopicChangeProvider,
+        topic_change::TopicChangeProvider, ventriloquize::VentriloquizeProvider,
+        DiscordHandlerCollection,
     },
     twitch::get_basic_auth_url,
 };

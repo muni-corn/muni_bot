@@ -145,7 +145,9 @@ impl TwitchMessageHandler for QuotesHandler {
         client: &MuniBotTwitchIRCClient,
         agent: &TwitchAgent<StaticLoginCredentials>,
     ) -> Result<bool, TwitchHandlerError> {
-        let handled = if let ServerMessage::Privmsg(m) = message && let Some(content) = m.message_text.strip_prefix("!quote").map(str::trim) {
+        let handled = if let ServerMessage::Privmsg(m) = message
+            && let Some(content) = m.message_text.strip_prefix("!quote").map(str::trim)
+        {
             if content.is_empty() {
                 // recall a random quote
                 self.recall_quote(client, &m.channel_login, None).await?;
@@ -163,7 +165,14 @@ impl TwitchMessageHandler for QuotesHandler {
                 };
 
                 let quote_count = self.add_new_quote(&new_quote).await?;
-                self.send_twitch_message(client, &m.channel_login, &format!("quote #{quote_count} is in! recorded in the muni history books forever")).await?;
+                self.send_twitch_message(
+                    client,
+                    &m.channel_login,
+                    &format!(
+                        "quote #{quote_count} is in! recorded in the muni history books forever"
+                    ),
+                )
+                .await?;
             }
             true
         } else {

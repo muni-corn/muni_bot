@@ -66,7 +66,9 @@ impl ContentWarningHandler {
         channel: &str,
         user_name: &str,
     ) -> Result<(), TwitchHandlerError> {
-        if !self.users_greeted.contains(user_name) && let Some(warning) = &self.active_warning {
+        if !self.users_greeted.contains(user_name)
+            && let Some(warning) = &self.active_warning
+        {
             self.send_twitch_message(client, channel, &format!("welcome, {}! just so you know, muni has issued a content/trigger warning for this stream: {}. please take care of yourself! it's okay to leave or mute if this content will make you uncomfortable. and you are loved no matter what!", user_name, warning)).await?;
             self.users_greeted.insert(user_name.to_string());
         }
