@@ -44,9 +44,10 @@ impl MagicalHandler {
         let magic_amount = Self::get_magic_amount(user_id);
         let suffix = match magic_amount {
             x if x <= 1 => ". you can have some of my magic~ :3 <3",
-            69 => ". nice ;3",
-            100 => "!! wow :3",
             x if x < 25 => ". sounds like a good day for some self care <3",
+            69 => ". nice ;3",
+            x if x < 75 => ".",
+            100 => "!! wow :3",
             _ => "!",
         };
         format!("{user_display_name} is {magic_amount}% magical today{suffix}")
