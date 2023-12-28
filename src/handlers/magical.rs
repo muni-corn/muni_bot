@@ -43,7 +43,7 @@ impl MagicalHandler {
     fn get_message(user_id: &str, user_display_name: &str) -> String {
         let magic_amount = Self::get_magic_amount(user_id);
         let suffix = match magic_amount {
-            x if x <= 1 => ". ouch. lol.",
+            x if x <= 1 => ". you can have some of my magic~ :3 <3",
             69 => ". nice ;3",
             100 => "!! wow :3",
             x if x < 25 => ". sounds like a good day for some self care <3",
