@@ -144,36 +144,52 @@ impl TwitchMessageHandler for QuotesHandler {
         client: &MuniBotTwitchIRCClient,
         agent: &TwitchAgent<StaticLoginCredentials>,
     ) -> Result<bool, TwitchHandlerError> {
-        let handled = if let ServerMessage::Privmsg(m) = message
-            && let Some(content) = m.message_text.strip_prefix("!quote").map(str::trim)
-        {
-            if content.is_empty() {
-                // recall a random quote
-                self.recall_quote(client, &m.channel_login, None).await?;
-            } else if let Ok(n) = content.parse::<i32>() {
-                self.recall_quote(client, &m.channel_login, Some(n)).await?;
-            } else {
-                let channel_info = agent.get_channel_info(&m.channel_id).await?;
+        let handled = if let ServerMessage::Privmsg(m) = message {
+            if let Some(content) = m.message_text.strip_prefix("!addquote").map(str::trim) {
+                if content.is_empty() {
+                    self.send_twitch_message(
+                        client,
+                        &m.channel_login,
+                        "i can't add an empty quote!",
+                    )
+                    .await?;
+                } else {
+                    let channel_info = agent.get_channel_info(&m.channel_id).await?;
 
-                let new_quote = Quote {
-                    created_at: Local::now(),
-                    quote: content.to_string(),
-                    invoker: m.sender.id.to_string(),
-                    stream_category: channel_info.game_name,
-                    stream_title: channel_info.title,
-                };
+                    let new_quote = Quote {
+                        created_at: Local::now(),
+                        quote: content.to_string(),
+                        invoker: m.sender.id.to_string(),
+                        stream_category: channel_info.game_name,
+                        stream_title: channel_info.title,
+                    };
 
-                let quote_count = self.add_new_quote(&new_quote).await?;
-                self.send_twitch_message(
-                    client,
-                    &m.channel_login,
-                    &format!(
+                    let quote_count = self.add_new_quote(&new_quote).await?;
+                    self.send_twitch_message(
+                        client,
+                        &m.channel_login,
+                        &format!(
                         "quote #{quote_count} is in! recorded in the muni history books forever"
                     ),
-                )
-                .await?;
+                    )
+                    .await?;
+                }
+
+                true
+            } else if let Some(content) = m.message_text.strip_prefix("!quote").map(str::trim) {
+                if content.is_empty() {
+                    // recall a random quote
+                    self.recall_quote(client, &m.channel_login, None).await?;
+                } else if let Ok(n) = content.parse::<i32>() {
+                    self.recall_quote(client, &m.channel_login, Some(n)).await?;
+                } else if content.len() >= 3 {
+                    // TODO: recall a quote that matches the content
+                }
+
+                true
+            } else {
+                false
             }
-            true
         } else {
             false
         };
