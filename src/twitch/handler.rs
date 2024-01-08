@@ -3,9 +3,8 @@ use std::fmt::Display;
 use async_trait::async_trait;
 use twitch_irc::{login::StaticLoginCredentials, message::ServerMessage};
 
-use crate::twitch::bot::{MuniBotTwitchIRCClient, MuniBotTwitchIRCError};
-
 use super::agent::{TwitchAgent, TwitchAgentError};
+use crate::twitch::bot::{MuniBotTwitchIRCClient, MuniBotTwitchIRCError};
 
 #[async_trait]
 pub trait TwitchMessageHandler: Send {
@@ -21,9 +20,9 @@ pub trait TwitchMessageHandler: Send {
             .map_err(TwitchHandlerError::SendMessage)
     }
 
-    /// Handle a new message from chat. Returns `true` if something was done to handle the message,
-    /// or `false` if the message was ignored (or if the message is allowed to also be handled by
-    /// other handlers).
+    /// Handle a new message from chat. Returns `true` if something was done to
+    /// handle the message, or `false` if the message was ignored (or if the
+    /// message is allowed to also be handled by other handlers).
     async fn handle_twitch_message(
         &mut self,
         message: &ServerMessage,

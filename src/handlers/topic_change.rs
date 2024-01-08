@@ -1,7 +1,8 @@
+use std::time::Duration;
+
 use poise::serenity_prelude::{
     interaction::MessageFlags, ButtonStyle, Color, InteractionResponseType,
 };
-use std::time::Duration;
 
 use crate::{
     discord::{commands::DiscordCommandProvider, DiscordCommand, DiscordContext},
@@ -50,7 +51,8 @@ pub async fn topic_change(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
         .await
     {
         match interaction.data.custom_id.as_str() {
-            // if the user approves the topic change, send a message to the channel and respond with acknowledgement
+            // if the user approves the topic change, send a message to the channel and respond with
+            // acknowledgement
             APPROVE_TOPIC_CHANGE => {
                 interaction
                     .create_interaction_response(ctx.http(), |r| {

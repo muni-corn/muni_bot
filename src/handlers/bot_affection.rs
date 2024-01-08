@@ -246,7 +246,8 @@ enum ResponseSelection<'a> {
     /// A collection of responses that will always have a selection.
     Always(&'a [&'a str]),
 
-    /// A collection of responses that may only happen with the probability specified.
+    /// A collection of responses that may only happen with the probability
+    /// specified.
     Rare(&'a [&'a str], f64),
 }
 

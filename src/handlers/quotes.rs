@@ -3,6 +3,7 @@ use std::env;
 use async_trait::async_trait;
 use chrono::{DateTime, Local};
 use dotenvy::dotenv;
+use serde::{Deserialize, Serialize};
 use surrealdb::{
     engine::remote::ws::{self, Ws},
     opt::auth::Database,
@@ -18,8 +19,6 @@ use crate::{
     },
     MuniBotError,
 };
-
-use serde::{Deserialize, Serialize};
 
 const QUOTE_TABLE: &str = "quote";
 

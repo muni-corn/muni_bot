@@ -1,7 +1,9 @@
 use async_trait::async_trait;
 use num_format::{Locale, ToFormattedString};
 use poise::serenity_prelude::{Context, Message, UserId};
+use wallet::Wallet;
 
+use self::wallet::WalletError;
 use crate::{
     discord::{
         commands::{DiscordCommandError, DiscordCommandProvider},
@@ -12,10 +14,6 @@ use crate::{
     handlers::economy::payout::{ClaimResult, Payout, PayoutError},
     MuniBotError,
 };
-
-use wallet::Wallet;
-
-use self::wallet::WalletError;
 
 mod payout;
 mod wallet;

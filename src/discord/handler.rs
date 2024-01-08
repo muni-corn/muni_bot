@@ -1,7 +1,6 @@
-use thiserror::Error;
-
 use async_trait::async_trait;
 use poise::serenity_prelude::{self as serenity, Message};
+use thiserror::Error;
 
 use super::DiscordFrameworkContext;
 

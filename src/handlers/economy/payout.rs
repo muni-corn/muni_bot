@@ -4,9 +4,8 @@ use serde::{Deserialize, Serialize};
 use surrealdb::{sql::Thing, Connection, Surreal};
 use thiserror::Error;
 
-use crate::MuniBotError;
-
 use super::wallet::{Wallet, WalletError};
+use crate::MuniBotError;
 
 const GUILD_PAYOUT_TABLE: &str = "guild_payout";
 
@@ -34,8 +33,8 @@ pub struct ClaimResult {
 }
 
 impl Payout {
-    /// Retrieves a payout entry from the database. If it exists, the existing one is returned. If
-    /// it doesn't, a new one is created.
+    /// Retrieves a payout entry from the database. If it exists, the existing
+    /// one is returned. If it doesn't, a new one is created.
     pub async fn get_from_db<C: Connection>(
         db: &Surreal<C>,
         guild_id: GuildId,
@@ -86,8 +85,8 @@ impl Payout {
         Ok(())
     }
 
-    /// Drains the payout into the corresponding user's guild wallet. Returns the amount claimed as
-    /// a receipt.
+    /// Drains the payout into the corresponding user's guild wallet. Returns
+    /// the amount claimed as a receipt.
     pub async fn claim_to_wallet<C: Connection>(
         &mut self,
         db: &Surreal<C>,

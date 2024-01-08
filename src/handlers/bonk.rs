@@ -20,7 +20,8 @@ impl TwitchMessageHandler for BonkHandler {
     ) -> Result<bool, TwitchHandlerError> {
         let handled = if let ServerMessage::Privmsg(m) = message {
             if let Some(target) = m.message_text.trim().strip_prefix("!bonk ") {
-                // pick a template and craft message by replacing all {target}s with the message's arguments
+                // pick a template and craft message by replacing all {target}s with the
+                // message's arguments
                 let mut rng = StdRng::from_entropy();
                 let message = BONK_TEMPLATES
                     .choose(&mut rng)

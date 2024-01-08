@@ -3,9 +3,8 @@ use std::{
     fmt::{self, Display},
 };
 
-use crate::MuniBotError;
-
 use super::DiscordState;
+use crate::MuniBotError;
 
 pub trait DiscordCommandProvider: Send {
     fn commands(&self) -> Vec<poise::Command<DiscordState, MuniBotError>>;

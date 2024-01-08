@@ -12,9 +12,8 @@ use poise::{
 };
 use surrealdb::{engine::remote::ws, opt::auth::Database, Surreal};
 
-use crate::{handlers::DiscordHandlerCollection, MuniBotError};
-
 use self::commands::DiscordCommandProvider;
+use crate::{handlers::DiscordHandlerCollection, MuniBotError};
 
 pub struct DiscordState {
     handlers: DiscordHandlerCollection,

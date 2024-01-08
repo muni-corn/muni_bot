@@ -5,15 +5,14 @@ use twitch_irc::{
     TwitchIRCClient,
 };
 
+use super::{
+    agent::TwitchAgent,
+    handler::{TwitchHandlerError, TwitchMessageHandler},
+};
 use crate::handlers::{
     affection::AffectionHandler, bonk::BonkHandler, greeting::GreetingHandler, lift::LiftHandler,
     lurk::LurkHandler, magical::MagicalHandler, quotes::QuotesHandler, raid_msg::RaidMsgHandler,
     shoutout::ShoutoutHandler, socials::SocialsHandler,
-};
-
-use super::{
-    agent::TwitchAgent,
-    handler::{TwitchHandlerError, TwitchMessageHandler},
 };
 
 pub type MuniBotTwitchIRCClient = TwitchIRCClient<SecureTCPTransport, StaticLoginCredentials>;
@@ -48,7 +47,8 @@ impl TwitchBot {
 
         let (mut incoming_messages, client) = MuniBotTwitchIRCClient::new(config);
 
-        // join a channel. this will panic if the passed channel login name is malformed.
+        // join a channel. this will panic if the passed channel login name is
+        // malformed.
         client.join(channel.clone()).unwrap();
         println!("twitch: joined channel {}", channel);
 
@@ -71,8 +71,8 @@ impl TwitchMessageHandler for TwitchBot {
         agent: &TwitchAgent<StaticLoginCredentials>,
     ) -> Result<bool, TwitchHandlerError> {
         for message_handler in self.message_handlers.iter_mut() {
-            // try to handle the message. if the handler determines the message was handled, we'll
-            // stop
+            // try to handle the message. if the handler determines the message was handled,
+            // we'll stop
             if message_handler
                 .handle_twitch_message(message, client, agent)
                 .await?

@@ -26,7 +26,8 @@ impl EightBallProvider {
     }
 }
 
-/// Have the bot ask the magic eight ball to predict the future with questionable accuracy!
+/// Have the bot ask the magic eight ball to predict the future with
+/// questionable accuracy!
 #[poise::command(prefix_command, track_edits, slash_command)]
 async fn eight_ball(
     ctx: DiscordContext<'_>,

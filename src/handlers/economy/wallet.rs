@@ -23,8 +23,8 @@ pub struct Wallet {
 }
 
 impl Wallet {
-    /// Retrieves a wallet from the database. If it exists, the existing one is returned. If it
-    /// doesn't, a new one is created.
+    /// Retrieves a wallet from the database. If it exists, the existing one is
+    /// returned. If it doesn't, a new one is created.
     pub async fn get_from_db<C: Connection>(
         db: &Surreal<C>,
         guild_id: GuildId,
@@ -75,7 +75,8 @@ impl Wallet {
         Ok(())
     }
 
-    /// Deposits the given amount into the wallet and updates it in the database.
+    /// Deposits the given amount into the wallet and updates it in the
+    /// database.
     pub async fn deposit<C: Connection>(
         &mut self,
         db: &Surreal<C>,
