@@ -1,5 +1,6 @@
 #![feature(decl_macro)]
 #![feature(let_chains)]
+#![feature(never_type)]
 
 use std::sync::Arc;
 
