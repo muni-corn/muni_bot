@@ -33,11 +33,6 @@ async fn main() -> Result<(), MuniBotError> {
     // ensure credentials exist
     match std::env::var("TWITCH_TOKEN") {
         Ok(twitch_token) => {
-            // start twitch
-            let twitch_handle = TwitchBot::new()
-                .await
-                .start("muni_corn".to_owned(), twitch_token);
-
             // start discord
             let discord_handlers: DiscordHandlerCollection = vec![
                 Arc::new(Mutex::new(GreetingHandler)),
@@ -57,10 +52,17 @@ async fn main() -> Result<(), MuniBotError> {
                 discord_command_providers,
             ));
 
-            // wait for the twitch bot to stop, if ever
-            match twitch_handle.await {
-                Ok(_) => println!("twitch bot stopped o.o"),
-                Err(e) => eprintln!("twitch bot died with error: {e}"),
+            // start twitch
+            match TwitchBot::new()
+                .await
+                .start("muni_corn".to_owned(), twitch_token)
+            {
+                // wait for the twitch bot to stop, if ever
+                Ok(twitch_handle) => match twitch_handle.await {
+                    Ok(_) => println!("twitch bot stopped o.o"),
+                    Err(e) => eprintln!("twitch bot died with error: {e}"),
+                },
+                Err(e) => eprintln!("twitch bot failed to start :< {e}"),
             }
 
             // wait for the discord bot to stop, if ever

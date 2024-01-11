@@ -1,3 +1,4 @@
+use anyhow::Result;
 use async_trait::async_trait;
 use tokio::task::JoinHandle;
 use twitch_irc::{
@@ -40,25 +41,34 @@ impl TwitchBot {
         }
     }
 
-    pub fn start(mut self, channel: String, token: String) -> JoinHandle<()> {
+    pub fn start(mut self, channel: String, token: String) -> Result<JoinHandle<()>> {
         let credentials = StaticLoginCredentials::new("muni__bot".to_owned(), Some(token));
         let config = ClientConfig::new_simple(credentials.clone());
         let agent = TwitchAgent::new(credentials);
 
         let (mut incoming_messages, client) = MuniBotTwitchIRCClient::new(config);
 
-        // join a channel. this will panic if the passed channel login name is
+        // join a channel. this will error if the passed channel login name is
         // malformed.
-        client.join(channel.clone()).unwrap();
+        if let Err(e) = client.join(channel.clone()) {
+            eprintln!("error joining {}'s twitch channel :( {}", channel, e);
+        }
         println!("twitch: joined channel {}", channel);
 
-        tokio::spawn(async move {
+        let handle = tokio::spawn(async move {
             while let Some(message) = incoming_messages.recv().await {
-                if let Err(e) = self.handle_twitch_message(&message, &client, &agent).await {
+                if let ServerMessage::Notice(notice_msg) = message {
+                    println!(
+                        "notice received from twitch channel {}: {}",
+                        notice_msg.channel_login.unwrap_or("<none>".to_string()),
+                        notice_msg.message_text
+                    );
+                } else if let Err(e) = self.handle_twitch_message(&message, &client, &agent).await {
                     eprintln!("error in message handler! {e}");
                 }
             }
-        })
+        });
+        Ok(handle)
     }
 }
 
