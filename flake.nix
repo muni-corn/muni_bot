@@ -62,7 +62,7 @@
           packages =
             nativeBuildInputs
             ++ buildInputs
-            ++ (with pkgs; [cargo-watch rust-analyzer-nightly]);
+            ++ (with pkgs; [cargo-watch cargo-outdated rust-analyzer-nightly]);
           LIBCLANG_PATH = "${pkgs.libclang.lib}/lib";
           RUST_SRC_PATH = "${fenix'.complete.rust-src}/lib/rustlib/src/rust/library";
         };
