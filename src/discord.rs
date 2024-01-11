@@ -6,9 +6,7 @@ use std::env;
 
 use dotenvy::dotenv;
 use poise::{
-    samples::register_globally,
-    serenity_prelude::{self as serenity, Activity},
-    Event, Prefix, PrefixFrameworkOptions,
+    samples::register_globally, serenity_prelude as serenity, Prefix, PrefixFrameworkOptions,
 };
 use surrealdb::{engine::remote::ws, opt::auth::Database, Surreal};
 
@@ -63,19 +61,21 @@ pub async fn start_discord_integration(
         ..Default::default()
     };
 
-    poise::Framework::<DiscordState, MuniBotError>::builder()
-        .token(
-            env::var("DISCORD_TOKEN")
-                .expect("no token provided for discord! i can't run without it :("),
-        )
+    let token = env::var("DISCORD_TOKEN")
+        .expect("no token provided for discord! i can't run without it :(");
+    let intents =
+        serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT;
+    let framework = poise::Framework::<DiscordState, MuniBotError>::builder()
         .setup(move |ctx, ready, framework| Box::pin(on_ready(ctx, ready, framework, handlers)))
         .options(options)
-        .intents(
-            serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT,
-        )
-        .run()
+        .build();
+
+    // `await`ing builds the client
+    let mut client = serenity::ClientBuilder::new(token, intents)
+        .framework(framework)
         .await
         .unwrap();
+    client.start().await.unwrap();
 }
 
 async fn on_ready(
@@ -88,7 +88,7 @@ async fn on_ready(
         .await
         .expect("failed to register commands in guild");
 
-    ctx.set_activity(Activity::watching("you sleep uwu")).await;
+    ctx.set_activity(Some(serenity::ActivityData::watching("you sleep uwu")));
 
     println!("discord: logged in as {}", ready.user.name);
 
@@ -97,11 +97,11 @@ async fn on_ready(
 
 async fn event_handler(
     context: &serenity::Context,
-    event: &Event<'_>,
+    event: &serenity::FullEvent,
     framework_context: DiscordFrameworkContext<'_>,
     data: &DiscordState,
 ) -> Result<(), MuniBotError> {
-    if let Event::Message { new_message } = event {
+    if let serenity::FullEvent::Message { new_message } = event {
         for handler in data.handlers.iter() {
             let mut locked_handler = handler.lock().await;
             let handled_future =

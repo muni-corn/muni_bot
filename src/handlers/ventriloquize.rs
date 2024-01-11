@@ -1,6 +1,6 @@
 use std::{thread, time::Duration};
 
-use poise::Command;
+use poise::{serenity_prelude::CreateMessage, Command, CreateReply};
 
 use crate::{
     discord::{commands::DiscordCommandProvider, DiscordContext, DiscordState},
@@ -18,21 +18,22 @@ async fn ventriloquize<'a, 'b: 'a>(
     let http = ctx.serenity_context().http.to_owned();
 
     // notification the command invoker
-    ctx.send(move |f| f.ephemeral(true).content("beep boop..."))
-        .await?;
+    let reply = CreateReply::default()
+        .ephemeral(true)
+        .content("beep boop...");
+    ctx.send(reply).await?;
 
     tokio::spawn(async move {
         // start typing to look like muni_bot is actually typing
-        let typing_opt = channel_id.start_typing(&http).ok();
+        let typing = channel_id.start_typing(&http);
 
         // wait a minute to simulate typing
-        if let Some(typing) = typing_opt {
-            thread::sleep(Duration::from_millis(message.len() as u64 * 25));
-            typing.stop();
-        }
+        thread::sleep(Duration::from_millis(message.len() as u64 * 25));
+        typing.stop();
 
         // send the message
-        if let Err(e) = channel_id.send_message(&http, |m| m.content(message)).await {
+        let message = CreateMessage::default().content(message);
+        if let Err(e) = channel_id.send_message(&http, message).await {
             eprintln!("couldn't send ventriloquization: {e}");
         }
     });
@@ -54,5 +55,5 @@ async fn is_muni(ctx: DiscordContext<'_>) -> Result<bool, MuniBotError> {
     })?;
     let mut ventr_allowlist = ventr_allowlist_str.split(',');
 
-    Ok(ventr_allowlist.any(|id| id.trim() == ctx.author().id.0.to_string()))
+    Ok(ventr_allowlist.any(|id| id.trim() == ctx.author().id.get().to_string()))
 }

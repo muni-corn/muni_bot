@@ -122,9 +122,10 @@ impl RollResult {
     fn add_to_message_builder(&self, builder: &mut MessageBuilder) {
         match self {
             RollResult::SingleMessage(msg) => builder.push(msg),
-            RollResult::Full(prefix, result, suffix) => {
-                builder.push(prefix).push_bold(result).push(suffix)
-            }
+            RollResult::Full(prefix, result, suffix) => builder
+                .push(prefix)
+                .push_bold(result.to_string())
+                .push(suffix),
         };
     }
 }
