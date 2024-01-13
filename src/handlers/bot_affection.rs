@@ -71,6 +71,17 @@ const BITE_ACTIONS: [&str; 4] = [
     "bites back",
 ];
 
+const LICK_PREFIXES: [&str; 8] = [
+    "oh--",
+    "uh...",
+    "h-hi.",
+    "c-can i help you?",
+    "is there something you want?",
+    "oh my...",
+    "...do i taste good to you?",
+    "...well i hope i at least taste good",
+];
+
 const CHANCE_OF_EXCLAMATION: f64 = 0.5;
 const CHANCE_OF_TILDE: f64 = 0.25;
 const CHANCE_OF_HEART: f64 = 0.1;
@@ -236,9 +247,20 @@ async fn bite(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
     .await
 }
 
+/// Lick the bot... for whatever reason.
+#[poise::command(slash_command, prefix_command)]
+async fn lick(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
+    BotAffectionProvider::handle_generic_affection(
+        ctx,
+        ResponseSelection::Always(&LICK_PREFIXES),
+        ResponseSelection::Never,
+    )
+    .await
+}
+
 impl DiscordCommandProvider for BotAffectionProvider {
     fn commands(&self) -> Vec<DiscordCommand> {
-        vec![boop(), nuzzle(), kiss(), pat(), hug(), bite()]
+        vec![boop(), nuzzle(), kiss(), pat(), hug(), bite(), lick()]
     }
 }
 
@@ -249,19 +271,17 @@ enum ResponseSelection<'a> {
     /// A collection of responses that may only happen with the probability
     /// specified.
     Rare(&'a [&'a str], f64),
+
+    /// There are no responses to choose from.
+    Never,
 }
 
 impl ResponseSelection<'_> {
     fn pick(&self, mut rng: impl Rng) -> Option<&str> {
         match self {
             Self::Always(opts) => opts.choose(&mut rng).copied(),
-            Self::Rare(opts, p) => {
-                if rng.gen_bool(*p) {
-                    opts.choose(&mut rng).copied()
-                } else {
-                    None
-                }
-            }
+            Self::Rare(opts, p) if rng.gen_bool(*p) => opts.choose(&mut rng).copied(),
+            _ => None,
         }
     }
 }
