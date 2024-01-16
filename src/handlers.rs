@@ -22,6 +22,7 @@ pub mod quotes;
 pub mod raid_msg;
 pub mod shoutout;
 pub mod socials;
+pub mod temperature;
 pub mod topic_change;
 pub mod ventriloquize;
 

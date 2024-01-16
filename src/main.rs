@@ -16,8 +16,8 @@ use crate::{
     handlers::{
         bot_affection::BotAffectionProvider, dice::DiceHandler, economy::EconomyProvider,
         eight_ball::EightBallProvider, greeting::GreetingHandler,
-        topic_change::TopicChangeProvider, ventriloquize::VentriloquizeProvider,
-        DiscordHandlerCollection,
+        temperature::TemperatureConversionProvider, topic_change::TopicChangeProvider,
+        ventriloquize::VentriloquizeProvider, DiscordHandlerCollection,
     },
     twitch::get_basic_auth_url,
 };
@@ -46,6 +46,7 @@ async fn main() -> Result<(), MuniBotError> {
                 Box::new(VentriloquizeProvider),
                 Box::new(EconomyProvider),
                 Box::new(TopicChangeProvider),
+                Box::new(TemperatureConversionProvider),
             ];
             let discord_handle = tokio::spawn(start_discord_integration(
                 discord_handlers,
