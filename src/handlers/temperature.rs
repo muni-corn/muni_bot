@@ -45,11 +45,14 @@ async fn convert_temperature(
 }
 
 fn get_fahrenheit_to_celsius_message(fahrenheit: f32) -> String {
-    format!("{fahrenheit}°F is {}°C :3", (fahrenheit - 32.0) * 5.0 / 9.0)
+    format!(
+        "{fahrenheit}°F is {:.1}°C :3",
+        (fahrenheit - 32.0) * 5.0 / 9.0
+    )
 }
 
 fn get_celsius_to_fahrenheit_message(celsius: f32) -> String {
-    format!("{celsius}°C is {}°F :3", (celsius * 9.0 / 5.0) + 32.0)
+    format!("{celsius}°C is {:.0}°F :3", (celsius * 9.0 / 5.0) + 32.0)
 }
 
 impl DiscordCommandProvider for TemperatureConversionProvider {
