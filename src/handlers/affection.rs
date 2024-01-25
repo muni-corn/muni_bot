@@ -44,6 +44,14 @@ impl TwitchMessageHandler for AffectionHandler {
                 )
                 .await?;
                 true
+            } else if let Some(target) = message_text.strip_prefix("!boop ") {
+                self.send_twitch_message(
+                    client,
+                    &m.channel_login,
+                    &format!("{} has been booped by {}!", target, m.sender.name),
+                )
+                .await?;
+                true
             } else {
                 false
             }
