@@ -93,6 +93,7 @@ impl DiscordMessageHandler for GreetingHandler {
         let author_name = display_name_from_message(msg, &context.http).await;
 
         let handled = if let Some(response) = Self::get_greeting_message(&author_name, &msg.content)
+            && msg.author.id != context.cache.current_user().id
         {
             msg.channel_id
                 .say(&context.http, response)
