@@ -19,7 +19,8 @@ impl TwitchMessageHandler for AffectionHandler {
         _agent: &TwitchAgent<StaticLoginCredentials>,
     ) -> Result<bool, TwitchHandlerError> {
         let handled = if let ServerMessage::Privmsg(m) = message {
-            if let Some(target) = m.message_text.trim().strip_prefix("!hug ") {
+            let message_text = m.message_text.trim();
+            if let Some(target) = message_text.strip_prefix("!hug ") {
                 self.send_twitch_message(
                     client,
                     &m.channel_login,
@@ -27,7 +28,7 @@ impl TwitchMessageHandler for AffectionHandler {
                 )
                 .await?;
                 true
-            } else if let Some(target) = m.message_text.trim().strip_prefix("!glomp ") {
+            } else if let Some(target) = message_text.strip_prefix("!glomp ") {
                 self.send_twitch_message(
                     client,
                     &m.channel_login,
@@ -35,7 +36,7 @@ impl TwitchMessageHandler for AffectionHandler {
                 )
                 .await?;
                 true
-            } else if let Some(target) = m.message_text.trim().strip_prefix("!nuzzle ") {
+            } else if let Some(target) = message_text.strip_prefix("!nuzzle ") {
                 self.send_twitch_message(
                     client,
                     &m.channel_login,
