@@ -195,7 +195,7 @@ async fn nuzzle(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
 /// Smooch the bot ;3
 #[poise::command(slash_command, prefix_command)]
 async fn kiss(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
-    // VERY rarely will the boot smooch back.
+    // VERY rarely will the bot smooch back.
     if rand::thread_rng().gen_bool(0.00001) {
         ctx.say("*smooches back~*")
             .await
