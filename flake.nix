@@ -73,5 +73,7 @@
       overlay = final: prev: {
         ${appName} = self.defaultPackage.${prev.system};
       };
+
+      nixosModules.default = import ./nix/nixos.nix self;
     };
 }
