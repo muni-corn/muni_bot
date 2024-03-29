@@ -41,7 +41,7 @@
         buildInputs = with pkgs; [libressl_3_6];
       in {
         # `nix build`
-        defaultPackage = naersk-lib.buildPackage {
+        packages.default = naersk-lib.buildPackage {
           pname = appName;
           root = builtins.path {
             path = ./.;
@@ -51,14 +51,14 @@
         };
 
         # `nix run`
-        defaultApp = utils.lib.mkApp {
+        apps.default = utils.lib.mkApp {
           name = appName;
-          drv = self.defaultPackage."${system}";
+          drv = self.packages."${system}".default;
           exePath = "/bin/${appName}";
         };
 
         # `nix develop`
-        devShell = pkgs.mkShell {
+        devShells.default = pkgs.mkShell {
           packages =
             nativeBuildInputs
             ++ buildInputs
@@ -70,8 +70,8 @@
   in
     out
     // {
-      overlay = final: prev: {
-        ${appName} = self.defaultPackage.${prev.system};
+      overlays.default = final: prev: {
+        ${appName} = self.packages.${prev.system}.default;
       };
 
       nixosModules.default = import ./nix/nixos.nix self;
