@@ -4,6 +4,8 @@
 
 use std::sync::Arc;
 
+use clap::Parser;
+use config::Config;
 use discord::{commands::DiscordCommandError, start_discord_integration};
 use handlers::{magical::MagicalHandler, DiscordCommandProviderCollection};
 use poise::serenity_prelude as serenity;
@@ -27,9 +29,20 @@ mod discord;
 mod handlers;
 mod twitch;
 
+#[derive(Parser, Debug)]
+struct Args {
+    /// Path to a config file.
+    #[clap(short, long, default_value = "/etc/muni_bot/config.toml")]
+    config_file: String,
+}
+
 #[tokio::main]
 async fn main() -> Result<(), MuniBotError> {
     dotenvy::dotenv().ok();
+
+    let args = Args::parse();
+    let config =
+        Config::read_or_write_default_from(&args.config_file)?;
 
     // ensure credentials exist
     match std::env::var("TWITCH_TOKEN") {
@@ -57,7 +70,7 @@ async fn main() -> Result<(), MuniBotError> {
             // start twitch
             match TwitchBot::new()
                 .await
-                .start("muni_corn".to_owned(), twitch_token)
+                .start("muni_corn".to_owned(), twitch_token, &config)
             {
                 // wait for the twitch bot to stop, if ever
                 Ok(twitch_handle) => match twitch_handle.await {
