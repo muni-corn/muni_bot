@@ -1,4 +1,4 @@
-use std::{fs, path::Path};
+use std::{fs, io::ErrorKind, path::Path};
 
 use poise::serenity_prelude::UserId;
 use serde::{Deserialize, Serialize};
@@ -56,23 +56,30 @@ impl Config {
             })?;
 
             // write the default config string
-            fs::write(p, toml_string).map_err(|e| {
-                MuniBotError::LoadConfig(
-                    format!(
-                        "couldn't write default config to {} (does its parent directory exist?)",
-                        p.display()
-                    ),
-                    e.into(),
-                )
-            })?;
-
-            // notify we wrote the file
-            println!(
-                "~~~
+            if let Err(e) = fs::write(p, toml_string) {
+                eprintln!(
+                    "hi there! i wanted to write my default configuration file to {}, but i can't.",
+                    p.display(),
+                );
+                match e.kind() {
+                    ErrorKind::NotFound => {
+                        eprintln!("does its parent directory exist?\n");
+                    }
+                    ErrorKind::PermissionDenied => {
+                        eprintln!("do you (or i) have permission to write to it?\n");
+                    }
+                    _ => eprintln!("(here's the error: {})\n", e),
+                }
+            } else {
+                // notify we wrote the file
+                println!(
+                    "~~~
   hi! i'm muni_bot! i've written my default configuration file to {} for you :3 <3
-~~~",
-                p.display()
-            );
+~~~
+",
+                    p.display()
+                );
+            }
 
             // and return the config
             Ok(default)
@@ -97,7 +104,8 @@ impl Config {
             println!(
                 "~~~
   hiya! configuration has been read from {} ^u^
-~~~",
+~~~
+",
                 p.display()
             );
 
