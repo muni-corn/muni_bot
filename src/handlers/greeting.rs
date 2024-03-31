@@ -6,6 +6,7 @@ use regex::Regex;
 use twitch_irc::{login::StaticLoginCredentials, message::ServerMessage};
 
 use crate::{
+    config::Config,
     discord::{
         handler::{DiscordMessageHandler, DiscordMessageHandlerError},
         utils::display_name_from_message,
@@ -61,6 +62,7 @@ impl TwitchMessageHandler for GreetingHandler {
         message: &ServerMessage,
         client: &MuniBotTwitchIRCClient,
         _agent: &TwitchAgent<StaticLoginCredentials>,
+        _config: &Config,
     ) -> Result<bool, TwitchHandlerError> {
         let handled = if let ServerMessage::Privmsg(m) = message {
             if let Some(response) = Self::get_greeting_message(&m.sender.name, &m.message_text) {

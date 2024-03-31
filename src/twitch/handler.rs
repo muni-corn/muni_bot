@@ -4,7 +4,10 @@ use async_trait::async_trait;
 use twitch_irc::{login::StaticLoginCredentials, message::ServerMessage};
 
 use super::agent::{TwitchAgent, TwitchAgentError};
-use crate::twitch::bot::{MuniBotTwitchIRCClient, MuniBotTwitchIRCError};
+use crate::{
+    config::Config,
+    twitch::bot::{MuniBotTwitchIRCClient, MuniBotTwitchIRCError},
+};
 
 #[async_trait]
 pub trait TwitchMessageHandler: Send {
@@ -28,6 +31,7 @@ pub trait TwitchMessageHandler: Send {
         message: &ServerMessage,
         client: &MuniBotTwitchIRCClient,
         agent: &TwitchAgent<StaticLoginCredentials>,
+        config: &Config,
     ) -> Result<bool, TwitchHandlerError>;
 }
 

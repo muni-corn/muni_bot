@@ -8,6 +8,7 @@ use chrono::Local;
 use twitch_irc::{login::StaticLoginCredentials, message::ServerMessage};
 
 use crate::{
+    config::Config,
     discord::{
         commands::DiscordCommandProvider, utils::display_name_from_command_context, DiscordCommand,
         DiscordContext,
@@ -62,6 +63,7 @@ impl TwitchMessageHandler for MagicalHandler {
         message: &ServerMessage,
         client: &MuniBotTwitchIRCClient,
         _agent: &TwitchAgent<StaticLoginCredentials>,
+        _config: &Config,
     ) -> Result<bool, TwitchHandlerError> {
         let handled = match message {
             ServerMessage::Privmsg(msg) => {

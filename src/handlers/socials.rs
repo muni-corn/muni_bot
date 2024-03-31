@@ -1,10 +1,13 @@
 use async_trait::async_trait;
 use twitch_irc::{login::StaticLoginCredentials, message::ServerMessage};
 
-use crate::twitch::{
-    agent::TwitchAgent,
-    bot::MuniBotTwitchIRCClient,
-    handler::{TwitchHandlerError, TwitchMessageHandler},
+use crate::{
+    config::Config,
+    twitch::{
+        agent::TwitchAgent,
+        bot::MuniBotTwitchIRCClient,
+        handler::{TwitchHandlerError, TwitchMessageHandler},
+    },
 };
 
 pub struct SocialsHandler;
@@ -16,18 +19,25 @@ impl TwitchMessageHandler for SocialsHandler {
         message: &ServerMessage,
         client: &MuniBotTwitchIRCClient,
         _agent: &TwitchAgent<StaticLoginCredentials>,
+        config: &Config,
     ) -> Result<bool, TwitchHandlerError> {
         let handled = if let ServerMessage::Privmsg(m) = message {
             if m.message_text.trim().starts_with("!discord") {
-                self.send_twitch_message(
-                    client,
-                    &m.channel_login,
-                    &format!(
-                        "join the herd's discord server here! {} we have treats:)",
-                        include_str!("../../discord_link.txt")
-                    ),
-                )
-                .await?;
+                if let Some(invite_link) = config.discord.invite_link.as_ref() {
+                    self.send_twitch_message(
+                        client,
+                        &m.channel_login,
+                        &format!("join the herd's discord server here! {}", invite_link),
+                    )
+                    .await?;
+                } else {
+                    self.send_twitch_message(
+                        client,
+                        &m.channel_login,
+                        "the discord comand is enabled, but no invite link has been configured >.>",
+                    )
+                    .await?;
+                }
                 true
             } else {
                 false

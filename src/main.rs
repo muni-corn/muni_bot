@@ -22,6 +22,7 @@ use crate::{
     twitch::get_basic_auth_url,
 };
 
+mod config;
 mod discord;
 mod handlers;
 mod twitch;
@@ -106,6 +107,9 @@ enum MuniBotError {
 
     #[error("error in discord framework :< {0}")]
     SerenityError(#[from] serenity::Error),
+
+    #[error("error loading config :< {0}, {1}")]
+    LoadConfig(String, anyhow::Error),
 
     #[error("something different went wrong :< {0}")]
     Other(String),

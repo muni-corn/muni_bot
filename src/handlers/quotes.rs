@@ -12,6 +12,7 @@ use surrealdb::{
 use twitch_irc::{login::StaticLoginCredentials, message::ServerMessage};
 
 use crate::{
+    config::Config,
     twitch::{
         agent::TwitchAgent,
         bot::MuniBotTwitchIRCClient,
@@ -143,6 +144,7 @@ impl TwitchMessageHandler for QuotesHandler {
         message: &ServerMessage,
         client: &MuniBotTwitchIRCClient,
         agent: &TwitchAgent<StaticLoginCredentials>,
+        _config: &Config,
     ) -> Result<bool, TwitchHandlerError> {
         let handled = if let ServerMessage::Privmsg(m) = message {
             if let Some(content) = m.message_text.strip_prefix("!addquote").map(str::trim) {

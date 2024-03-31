@@ -2,10 +2,13 @@ use async_trait::async_trait;
 use rand::{rngs::StdRng, seq::SliceRandom, SeedableRng};
 use twitch_irc::{login::StaticLoginCredentials, message::ServerMessage};
 
-use crate::twitch::{
-    agent::TwitchAgent,
-    bot::MuniBotTwitchIRCClient,
-    handler::{TwitchHandlerError, TwitchMessageHandler},
+use crate::{
+    config::Config,
+    twitch::{
+        agent::TwitchAgent,
+        bot::MuniBotTwitchIRCClient,
+        handler::{TwitchHandlerError, TwitchMessageHandler},
+    },
 };
 
 pub struct BonkHandler;
@@ -17,6 +20,7 @@ impl TwitchMessageHandler for BonkHandler {
         message: &ServerMessage,
         client: &MuniBotTwitchIRCClient,
         _agent: &TwitchAgent<StaticLoginCredentials>,
+        _config: &Config,
     ) -> Result<bool, TwitchHandlerError> {
         let handled = if let ServerMessage::Privmsg(m) = message {
             if let Some(target) = m.message_text.trim().strip_prefix("!bonk ") {
