@@ -47,25 +47,7 @@ async fn main() -> Result<(), MuniBotError> {
     // ensure credentials exist
     match std::env::var("TWITCH_TOKEN") {
         Ok(twitch_token) => {
-            // start discord
-            let discord_handlers: DiscordHandlerCollection = vec![
-                Arc::new(Mutex::new(GreetingHandler)),
-                Arc::new(Mutex::new(EconomyProvider)),
-            ];
-            let discord_command_providers: DiscordCommandProviderCollection = vec![
-                Box::new(DiceHandler),
-                Box::new(BotAffectionProvider),
-                Box::new(MagicalHandler),
-                Box::new(EightBallProvider),
-                Box::new(VentriloquizeProvider),
-                Box::new(EconomyProvider),
-                Box::new(TopicChangeProvider),
-                Box::new(TemperatureConversionProvider),
-            ];
-            let discord_handle = tokio::spawn(start_discord_integration(
-                discord_handlers,
-                discord_command_providers,
-            ));
+            let discord_handle = start_discord();
 
             // start twitch
             match TwitchBot::new()
@@ -96,6 +78,29 @@ async fn main() -> Result<(), MuniBotError> {
             Err(MuniBotError::MissingToken)
         }
     }
+}
+
+fn start_discord() -> tokio::task::JoinHandle<()> {
+    // start discord
+    let discord_handlers: DiscordHandlerCollection = vec![
+        Arc::new(Mutex::new(GreetingHandler)),
+        Arc::new(Mutex::new(EconomyProvider)),
+    ];
+    let discord_command_providers: DiscordCommandProviderCollection = vec![
+        Box::new(DiceHandler),
+        Box::new(BotAffectionProvider),
+        Box::new(MagicalHandler),
+        Box::new(EightBallProvider),
+        Box::new(VentriloquizeProvider),
+        Box::new(EconomyProvider),
+        Box::new(TopicChangeProvider),
+        Box::new(TemperatureConversionProvider),
+    ];
+
+    tokio::spawn(start_discord_integration(
+        discord_handlers,
+        discord_command_providers,
+    ))
 }
 
 #[derive(Error, Debug)]
