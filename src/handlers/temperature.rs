@@ -18,9 +18,7 @@ async fn convert_temperature(
         .take_while(|c| c.is_ascii_digit() || *c == '.' || *c == '-')
         .collect::<String>()
         .parse::<f32>()
-        .map_err(|e| {
-            MuniBotError::Other(format!("couldn't parse temperature: {e}"))
-        })?;
+        .map_err(|e| MuniBotError::Other(format!("couldn't parse temperature: {e}")))?;
 
     let unit = temperature.chars().find(|c| *c == 'f' || *c == 'c');
 
