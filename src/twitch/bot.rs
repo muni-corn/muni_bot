@@ -27,10 +27,10 @@ pub struct TwitchBot {
 }
 
 impl TwitchBot {
-    pub async fn new() -> Self {
+    pub async fn new(config: Config) -> Self {
         Self {
             message_handlers: vec![
-                Box::new(QuotesHandler::new().await.unwrap()),
+                Box::new(QuotesHandler::new(&config.db).await.unwrap()),
                 Box::new(BonkHandler),
                 Box::new(SocialsHandler),
                 Box::new(RaidMsgHandler),

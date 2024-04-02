@@ -12,7 +12,7 @@ use surrealdb::{
 use twitch_irc::{login::StaticLoginCredentials, message::ServerMessage};
 
 use crate::{
-    config::Config,
+    config::{Config, DbConfig},
     twitch::{
         agent::TwitchAgent,
         bot::MuniBotTwitchIRCClient,
@@ -40,15 +40,14 @@ pub struct QuotesHandler {
 
 impl QuotesHandler {
     /// Create a new QuotesHandler, connecting to the database.
-    pub async fn new() -> Result<Self, MuniBotError> {
+    pub async fn new(db_config: &DbConfig) -> Result<Self, MuniBotError> {
         dotenv().ok(); // TODO: map to MuniBotError::DotenvError
 
-        let database_url = env::var("DATABASE_URL").expect("expected DATABASE_URL to be set"); // TODO: map to MuniBotError::MissingEnv
-        let db = Surreal::new::<Ws>(&database_url).await?;
+        let db = Surreal::new::<Ws>(&db_config.url).await?;
         db.signin(Database {
             namespace: "muni_bot",
             database: "muni_bot",
-            username: &env::var("DATABASE_USER").expect("expected DATABASE_USER to be set"),
+            username: &db_config.user,
             password: &env::var("DATABASE_PASS").expect("expected DATABASE_PASS to be set"),
         })
         .await?;

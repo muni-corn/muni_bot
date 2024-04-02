@@ -41,16 +41,15 @@ async fn main() -> Result<(), MuniBotError> {
     dotenvy::dotenv().ok();
 
     let args = Args::parse();
-    let config =
-        Config::read_or_write_default_from(&args.config_file)?;
+    let config = Config::read_or_write_default_from(&args.config_file)?;
 
     // ensure credentials exist
     match std::env::var("TWITCH_TOKEN") {
         Ok(twitch_token) => {
-            let discord_handle = start_discord(config.discord.clone());
+            let discord_handle = start_discord(config.clone());
 
             // start twitch
-            match TwitchBot::new()
+            match TwitchBot::new(config.clone())
                 .await
                 .start("muni_corn".to_owned(), twitch_token, &config)
             {
@@ -80,7 +79,7 @@ async fn main() -> Result<(), MuniBotError> {
     }
 }
 
-fn start_discord(config: config::DiscordConfig) -> tokio::task::JoinHandle<()> {
+fn start_discord(config: Config) -> tokio::task::JoinHandle<()> {
     // start discord
     let discord_handlers: DiscordHandlerCollection = vec![
         Arc::new(Mutex::new(GreetingHandler)),
