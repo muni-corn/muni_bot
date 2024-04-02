@@ -5,18 +5,22 @@ self: {
   ...
 }: let
   inherit (lib) mkEnableOption mkOption types;
+
+  toml = pkgs.formats.toml {};
+
+  defaultSettings = {
+    db = {
+      url = "127.0.0.1:7654";
+      user = "muni_bot";
+    };
+  };
 in {
   options.services.muni_bot = {
     enable = mkEnableOption "muni_bot";
-    databaseUrl = mkOption {
-      type = types.str;
-      description = "URL for the surrealdb instance to connect to.";
-      default = "127.0.0.1:7654";
-    };
-    databaseUser = mkOption {
-      type = types.str;
-      description = "Username to login with for the surrealdb instance.";
-      default = "muni_bot";
+    settings = mkOption {
+      type = toml.type;
+      description = "Settings for muni_bot.";
+      default = defaultSettings;
     };
     environmentFile = mkOption {
       type = types.str;
@@ -36,20 +40,16 @@ in {
         self.overlays.default
       ];
 
-      systemd.services.muni_bot = {
+      systemd.services.muni_bot = let
+        configFile = toml.generate "muni_bot.toml" (lib.recursiveUpdate defaultSettings cfg.settings);
+      in {
         enable = true;
 
         description = "muni_bot";
-        environment = {
-          DATABASE_URL = cfg.databaseUrl;
-          DATABASE_USER = cfg.databaseUser;
-        };
         serviceConfig = {
           EnvironmentFile = cfg.environmentFile;
-          ExecStart = "${pkgs.muni_bot}/bin/muni_bot";
+          ExecStart = "${pkgs.muni_bot}/bin/muni_bot --config-file ${configFile}";
           PassEnvironment = [
-            "DATABASE_URL"
-            "DATABASE_USER"
             "DATABASE_PASS"
             "DISCORD_APPLICATION_ID"
             "DISCORD_CLIENT_SECRET"
