@@ -9,7 +9,7 @@ use crate::{
 
 pub struct VentriloquizeProvider;
 
-#[poise::command(slash_command, hide_in_help, check = "is_muni")]
+#[poise::command(slash_command, hide_in_help, check = "is_ventriloquist")]
 async fn ventriloquize<'a, 'b: 'a>(
     ctx: DiscordContext<'b>,
     message: String,
@@ -47,13 +47,11 @@ impl DiscordCommandProvider for VentriloquizeProvider {
     }
 }
 
-async fn is_muni(ctx: DiscordContext<'_>) -> Result<bool, MuniBotError> {
-    let ventr_allowlist_str = std::env::var("VENTR_ALLOWLIST").map_err(|e| {
-        MuniBotError::Other(format!(
-            "couldn't get ventriloquists! (`VENTR_ALLOWLIST` env var): {e}"
-        ))
-    })?;
-    let mut ventr_allowlist = ventr_allowlist_str.split(',');
-
-    Ok(ventr_allowlist.any(|id| id.trim() == ctx.author().id.get().to_string()))
+async fn is_ventriloquist(ctx: DiscordContext<'_>) -> Result<bool, MuniBotError> {
+    Ok(ctx
+        .data()
+        .config
+        .ventriloquists
+        .iter()
+        .any(|id| *id == ctx.author().id))
 }

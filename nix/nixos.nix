@@ -23,7 +23,7 @@ in {
       description = ''
         Path to the environment file for muni_bot containing secrets for database, Discord, and Twitch authentication.
 
-        muni_bot requires the following variables to be set: DATABASE_PASS, DISCORD_APPLICATION_ID, DISCORD_CLIENT_SECRET, DISCORD_PUBLIC_KEY, DISCORD_TOKEN, TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET, TWITCH_TOKEN, and VENTR_ALLOWLIST.
+        muni_bot requires the following variables to be set: DATABASE_PASS, DISCORD_APPLICATION_ID, DISCORD_CLIENT_SECRET, DISCORD_PUBLIC_KEY, DISCORD_TOKEN, TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET, and TWITCH_TOKEN.
       '';
     };
   };
@@ -58,7 +58,6 @@ in {
             "TWITCH_CLIENT_ID"
             "TWITCH_CLIENT_SECRET"
             "TWITCH_TOKEN"
-            "VENTR_ALLOWLIST"
           ];
           Restart = "always";
           RestartSec = 10;

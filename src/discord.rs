@@ -11,14 +11,18 @@ use poise::{
 use surrealdb::{engine::remote::ws, opt::auth::Database, Surreal};
 
 use self::commands::DiscordCommandProvider;
-use crate::{handlers::DiscordHandlerCollection, MuniBotError};
+use crate::{config::DiscordConfig, handlers::DiscordHandlerCollection, MuniBotError};
 
 pub struct DiscordState {
+    pub config: DiscordConfig,
     handlers: DiscordHandlerCollection,
     pub db: Surreal<ws::Client>,
 }
 impl DiscordState {
-    pub async fn new(handlers: DiscordHandlerCollection) -> Result<Self, MuniBotError> {
+    pub async fn new(
+        handlers: DiscordHandlerCollection,
+        config: DiscordConfig,
+    ) -> Result<Self, MuniBotError> {
         let database_url = env::var("DATABASE_URL").expect("expected DATABASE_URL to be set"); // TODO: map to MuniBotError::MissingEnv
         let db = Surreal::new::<ws::Ws>(&database_url).await?;
         db.signin(Database {
@@ -29,7 +33,11 @@ impl DiscordState {
         })
         .await?;
 
-        Ok(Self { handlers, db })
+        Ok(Self {
+            handlers,
+            db,
+            config,
+        })
     }
 }
 
@@ -40,6 +48,7 @@ pub type DiscordFrameworkContext<'a> = poise::FrameworkContext<'a, DiscordState,
 pub async fn start_discord_integration(
     handlers: DiscordHandlerCollection,
     command_providers: Vec<Box<dyn DiscordCommandProvider>>,
+    config: DiscordConfig,
 ) {
     dotenv().ok();
 
@@ -66,7 +75,9 @@ pub async fn start_discord_integration(
     let intents =
         serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT;
     let framework = poise::Framework::<DiscordState, MuniBotError>::builder()
-        .setup(move |ctx, ready, framework| Box::pin(on_ready(ctx, ready, framework, handlers)))
+        .setup(move |ctx, ready, framework| {
+            Box::pin(on_ready(ctx, ready, framework, handlers, config))
+        })
         .options(options)
         .build();
 
@@ -83,6 +94,7 @@ async fn on_ready(
     ready: &serenity::Ready,
     framework: &poise::Framework<DiscordState, MuniBotError>,
     handlers: DiscordHandlerCollection,
+    config: DiscordConfig,
 ) -> Result<DiscordState, MuniBotError> {
     register_globally(ctx, &framework.options().commands)
         .await
@@ -92,7 +104,7 @@ async fn on_ready(
 
     println!("discord: logged in as {}", ready.user.name);
 
-    DiscordState::new(handlers).await
+    DiscordState::new(handlers, config).await
 }
 
 async fn event_handler(

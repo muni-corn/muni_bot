@@ -47,7 +47,7 @@ async fn main() -> Result<(), MuniBotError> {
     // ensure credentials exist
     match std::env::var("TWITCH_TOKEN") {
         Ok(twitch_token) => {
-            let discord_handle = start_discord();
+            let discord_handle = start_discord(config.discord.clone());
 
             // start twitch
             match TwitchBot::new()
@@ -80,7 +80,7 @@ async fn main() -> Result<(), MuniBotError> {
     }
 }
 
-fn start_discord() -> tokio::task::JoinHandle<()> {
+fn start_discord(config: config::DiscordConfig) -> tokio::task::JoinHandle<()> {
     // start discord
     let discord_handlers: DiscordHandlerCollection = vec![
         Arc::new(Mutex::new(GreetingHandler)),
@@ -100,6 +100,7 @@ fn start_discord() -> tokio::task::JoinHandle<()> {
     tokio::spawn(start_discord_integration(
         discord_handlers,
         discord_command_providers,
+        config,
     ))
 }
 
