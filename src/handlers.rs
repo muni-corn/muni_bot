@@ -27,5 +27,5 @@ pub mod topic_change;
 pub mod ventriloquize;
 
 pub type TwitchHandlerCollection = Vec<Arc<Mutex<dyn TwitchMessageHandler>>>;
-pub type DiscordHandlerCollection = Vec<Arc<Mutex<dyn DiscordMessageHandler>>>;
+pub type DiscordMessageHandlerCollection = Vec<Arc<Mutex<dyn DiscordMessageHandler>>>;
 pub type DiscordCommandProviderCollection = Vec<Box<dyn DiscordCommandProvider>>;

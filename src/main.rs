@@ -19,7 +19,7 @@ use crate::{
         bot_affection::BotAffectionProvider, dice::DiceHandler, economy::EconomyProvider,
         eight_ball::EightBallProvider, greeting::GreetingHandler,
         temperature::TemperatureConversionProvider, topic_change::TopicChangeProvider,
-        ventriloquize::VentriloquizeProvider, DiscordHandlerCollection,
+        ventriloquize::VentriloquizeProvider, DiscordMessageHandlerCollection,
     },
     twitch::get_basic_auth_url,
 };
@@ -81,7 +81,7 @@ async fn main() -> Result<(), MuniBotError> {
 
 fn start_discord(config: Config) -> tokio::task::JoinHandle<()> {
     // start discord
-    let discord_handlers: DiscordHandlerCollection = vec![
+    let discord_handlers: DiscordMessageHandlerCollection = vec![
         Arc::new(Mutex::new(GreetingHandler)),
         Arc::new(Mutex::new(EconomyProvider)),
     ];

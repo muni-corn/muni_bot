@@ -13,18 +13,18 @@ use surrealdb::{engine::remote::ws, opt::auth::Database, Surreal};
 use self::commands::DiscordCommandProvider;
 use crate::{
     config::{Config, DiscordConfig},
-    handlers::DiscordHandlerCollection,
+    handlers::DiscordMessageHandlerCollection,
     MuniBotError,
 };
 
 pub struct DiscordState {
     pub config: DiscordConfig,
-    handlers: DiscordHandlerCollection,
+    handlers: DiscordMessageHandlerCollection,
     pub db: Surreal<ws::Client>,
 }
 impl DiscordState {
     pub async fn new(
-        handlers: DiscordHandlerCollection,
+        handlers: DiscordMessageHandlerCollection,
         config: &Config,
     ) -> Result<Self, MuniBotError> {
         let database_url = config.db.url.clone();
@@ -50,7 +50,7 @@ pub type DiscordContext<'a> = poise::Context<'a, DiscordState, MuniBotError>;
 pub type DiscordFrameworkContext<'a> = poise::FrameworkContext<'a, DiscordState, MuniBotError>;
 
 pub async fn start_discord_integration(
-    handlers: DiscordHandlerCollection,
+    handlers: DiscordMessageHandlerCollection,
     command_providers: Vec<Box<dyn DiscordCommandProvider>>,
     config: Config,
 ) {
@@ -97,7 +97,7 @@ async fn on_ready(
     ctx: &serenity::Context,
     ready: &serenity::Ready,
     framework: &poise::Framework<DiscordState, MuniBotError>,
-    handlers: DiscordHandlerCollection,
+    handlers: DiscordMessageHandlerCollection,
     config: Config,
 ) -> Result<DiscordState, MuniBotError> {
     register_globally(ctx, &framework.options().commands)
