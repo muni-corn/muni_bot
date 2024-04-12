@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use poise::serenity_prelude::{self as serenity, Message};
+use poise::serenity_prelude::{self as serenity, FullEvent, Message};
 use thiserror::Error;
 
 use super::DiscordFrameworkContext;
@@ -15,9 +15,26 @@ pub trait DiscordMessageHandler: Sync + Send {
     ) -> Result<bool, DiscordMessageHandlerError>;
 }
 
+#[async_trait]
+pub trait DiscordEventListener: Sync + Send {
+    const NAME: &'static str;
+    async fn handle_discord_event(
+        &mut self,
+        context: &serenity::Context,
+        event: &FullEvent,
+    ) -> Result<(), DiscordEventListenerError>;
+}
+
 #[derive(Error, Debug)]
 #[error("error in discord handler {handler_name}: {message}")]
 pub struct DiscordMessageHandlerError {
     pub handler_name: &'static str,
+    pub message: String,
+}
+
+#[derive(Error, Debug)]
+#[error("error in discord event listener {name}: {message}")]
+pub struct DiscordEventListenerError {
+    pub name: &'static str,
     pub message: String,
 }
