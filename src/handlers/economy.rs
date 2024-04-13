@@ -1,13 +1,13 @@
 use async_trait::async_trait;
 use num_format::{Locale, ToFormattedString};
-use poise::serenity_prelude::{Context, Message, UserId};
+use poise::serenity_prelude::{Context, FullEvent, Message, UserId};
 use wallet::Wallet;
 
 use self::wallet::WalletError;
 use crate::{
     discord::{
         commands::{DiscordCommandError, DiscordCommandProvider},
-        handler::{DiscordMessageHandler, DiscordMessageHandlerError},
+        handler::{DiscordEventHandler, DiscordHandlerError},
         utils::display_name_from_command_context,
         DiscordCommand, DiscordContext, DiscordFrameworkContext,
     },
@@ -46,33 +46,36 @@ impl EconomyProvider {
 }
 
 #[async_trait]
-impl DiscordMessageHandler for EconomyProvider {
+impl DiscordEventHandler for EconomyProvider {
     fn name(&self) -> &'static str {
         "economy"
     }
 
-    async fn handle_discord_message(
+    async fn handle_discord_event(
         &mut self,
         _context: &Context,
         framework: DiscordFrameworkContext<'_>,
-        msg: &Message,
-    ) -> Result<bool, DiscordMessageHandlerError> {
-        if let Some(guild_id) = msg.guild_id {
-            let salary = Self::calc_salary(msg);
-            let db = &framework.user_data().await.db;
+        event: &FullEvent,
+    ) -> Result<bool, DiscordHandlerError> {
+        if let FullEvent::Message { new_message } = event {
+            let msg = new_message;
+            if let Some(guild_id) = msg.guild_id {
+                let salary = Self::calc_salary(msg);
+                let db = &framework.user_data().await.db;
 
-            Payout::get_from_db(db, guild_id, msg.author.id)
-                .await
-                .map_err(|e| DiscordMessageHandlerError {
-                    handler_name: self.name(),
-                    message: format!("error getting payout from db: {e}"),
-                })?
-                .deposit(db, salary)
-                .await
-                .map_err(|e| DiscordMessageHandlerError {
-                    handler_name: self.name(),
-                    message: format!("error depositing salary into payout: {e}"),
-                })?;
+                Payout::get_from_db(db, guild_id, msg.author.id)
+                    .await
+                    .map_err(|e| DiscordHandlerError {
+                        handler_name: self.name(),
+                        message: format!("error getting payout from db: {e}"),
+                    })?
+                    .deposit(db, salary)
+                    .await
+                    .map_err(|e| DiscordHandlerError {
+                        handler_name: self.name(),
+                        message: format!("error depositing salary into payout: {e}"),
+                    })?;
+            }
         }
 
         // return false to allow subsequent handlers to handle this message

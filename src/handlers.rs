@@ -3,7 +3,7 @@ use std::sync::Arc;
 use tokio::sync::Mutex;
 
 use crate::{
-    discord::{commands::DiscordCommandProvider, handler::DiscordMessageHandler},
+    discord::{commands::DiscordCommandProvider, handler::DiscordEventHandler},
     twitch::handler::TwitchMessageHandler,
 };
 
@@ -27,5 +27,5 @@ pub mod topic_change;
 pub mod ventriloquize;
 
 pub type TwitchHandlerCollection = Vec<Arc<Mutex<dyn TwitchMessageHandler>>>;
-pub type DiscordMessageHandlerCollection = Vec<Arc<Mutex<dyn DiscordMessageHandler>>>;
+pub type DiscordMessageHandlerCollection = Vec<Arc<Mutex<dyn DiscordEventHandler>>>;
 pub type DiscordCommandProviderCollection = Vec<Box<dyn DiscordCommandProvider>>;

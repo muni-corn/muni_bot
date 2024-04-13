@@ -117,19 +117,17 @@ async fn event_handler(
     framework_context: DiscordFrameworkContext<'_>,
     data: &DiscordState,
 ) -> Result<(), MuniBotError> {
-    if let serenity::FullEvent::Message { new_message } = event {
-        for handler in data.handlers.iter() {
-            let mut locked_handler = handler.lock().await;
-            let handled_future =
-                locked_handler.handle_discord_message(context, framework_context, new_message);
-            match handled_future.await {
-                Ok(true) => break,
-                Ok(false) => continue,
-                Err(e) => println!(
-                    "discord integration ran into an error executing handlers: {}",
-                    e
-                ),
-            }
+    for handler in data.handlers.iter() {
+        let mut locked_handler = handler.lock().await;
+        let handled_future =
+            locked_handler.handle_discord_event(context, framework_context, event);
+        match handled_future.await {
+            Ok(true) => break,
+            Ok(false) => continue,
+            Err(e) => println!(
+                "discord integration ran into an error executing handlers: {}",
+                e
+            ),
         }
     }
     Ok(())

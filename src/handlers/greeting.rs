@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use once_cell::sync::Lazy;
-use poise::serenity_prelude::{Context, Message};
+use poise::serenity_prelude::{Context, FullEvent};
 use rand::seq::SliceRandom;
 use regex::Regex;
 use twitch_irc::{login::StaticLoginCredentials, message::ServerMessage};
@@ -8,7 +8,7 @@ use twitch_irc::{login::StaticLoginCredentials, message::ServerMessage};
 use crate::{
     config::Config,
     discord::{
-        handler::{DiscordMessageHandler, DiscordMessageHandlerError},
+        handler::{DiscordEventHandler, DiscordHandlerError},
         utils::display_name_from_message,
         DiscordFrameworkContext,
     },
@@ -81,30 +81,35 @@ impl TwitchMessageHandler for GreetingHandler {
 }
 
 #[async_trait]
-impl DiscordMessageHandler for GreetingHandler {
+impl DiscordEventHandler for GreetingHandler {
     fn name(&self) -> &'static str {
         "greeting"
     }
 
-    async fn handle_discord_message(
+    async fn handle_discord_event(
         &mut self,
         context: &Context,
         _framework: DiscordFrameworkContext<'_>,
-        msg: &Message,
-    ) -> Result<bool, DiscordMessageHandlerError> {
-        let author_name = display_name_from_message(msg, &context.http).await;
+        event: &FullEvent,
+    ) -> Result<bool, DiscordHandlerError> {
+        let handled = if let FullEvent::Message { new_message } = event {
+            let msg = new_message;
+            let author_name = display_name_from_message(msg, &context.http).await;
 
-        let handled = if let Some(response) = Self::get_greeting_message(&author_name, &msg.content)
-            && msg.author.id != context.cache.current_user().id
-        {
-            msg.channel_id
-                .say(&context.http, response)
-                .await
-                .map_err(|e| DiscordMessageHandlerError {
-                    message: e.to_string(),
-                    handler_name: self.name(),
-                })?;
-            true
+            if let Some(response) = Self::get_greeting_message(&author_name, &msg.content)
+                && msg.author.id != context.cache.current_user().id
+            {
+                msg.channel_id
+                    .say(&context.http, response)
+                    .await
+                    .map_err(|e| DiscordHandlerError {
+                        message: e.to_string(),
+                        handler_name: self.name(),
+                    })?;
+                true
+            } else {
+                false
+            }
         } else {
             false
         };
