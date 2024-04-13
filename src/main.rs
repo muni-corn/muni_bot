@@ -25,6 +25,7 @@ use crate::{
 };
 
 mod config;
+mod db;
 mod discord;
 mod handlers;
 mod twitch;
