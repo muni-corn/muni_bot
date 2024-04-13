@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use async_trait::async_trait;
 use poise::serenity_prelude::{self as serenity, FullEvent};
 use thiserror::Error;
@@ -20,4 +22,13 @@ pub trait DiscordEventHandler: Sync + Send {
 pub struct DiscordHandlerError {
     pub handler_name: &'static str,
     pub message: String,
+}
+
+impl DiscordHandlerError {
+    pub fn from_display(handler_name: &'static str, error: impl Display) -> Self {
+        Self {
+            handler_name,
+            message: format!("{}", error),
+        }
+    }
 }
