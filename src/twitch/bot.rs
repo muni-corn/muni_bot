@@ -15,7 +15,8 @@ use crate::{
     handlers::{
         affection::AffectionHandler, bonk::BonkHandler, greeting::GreetingHandler,
         lift::LiftHandler, lurk::LurkHandler, magical::MagicalHandler, quotes::QuotesHandler,
-        raid_msg::RaidMsgHandler, shoutout::ShoutoutHandler, socials::SocialsHandler, TwitchHandlerCollection,
+        raid_msg::RaidMsgHandler, shoutout::ShoutoutHandler, socials::SocialsHandler,
+        TwitchHandlerCollection,
     },
 };
 
