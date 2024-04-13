@@ -56,7 +56,7 @@ impl DiscordEventHandler for EconomyProvider {
         _context: &Context,
         framework: DiscordFrameworkContext<'_>,
         event: &FullEvent,
-    ) -> Result<bool, DiscordHandlerError> {
+    ) -> Result<(), DiscordHandlerError> {
         if let FullEvent::Message { new_message } = event {
             let msg = new_message;
             if let Some(guild_id) = msg.guild_id {
@@ -78,8 +78,7 @@ impl DiscordEventHandler for EconomyProvider {
             }
         }
 
-        // return false to allow subsequent handlers to handle this message
-        Ok(false)
+        Ok(())
     }
 }
 

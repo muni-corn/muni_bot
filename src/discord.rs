@@ -119,15 +119,12 @@ async fn event_handler(
 ) -> Result<(), MuniBotError> {
     for handler in data.handlers.iter() {
         let mut locked_handler = handler.lock().await;
-        let handled_future =
-            locked_handler.handle_discord_event(context, framework_context, event);
-        match handled_future.await {
-            Ok(true) => break,
-            Ok(false) => continue,
-            Err(e) => println!(
+        let handled_future = locked_handler.handle_discord_event(context, framework_context, event);
+        if let Err(e) = handled_future.await {
+            eprintln!(
                 "discord integration ran into an error executing handlers: {}",
                 e
-            ),
+            );
         }
     }
     Ok(())

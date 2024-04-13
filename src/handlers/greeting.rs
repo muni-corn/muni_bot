@@ -91,8 +91,8 @@ impl DiscordEventHandler for GreetingHandler {
         context: &Context,
         _framework: DiscordFrameworkContext<'_>,
         event: &FullEvent,
-    ) -> Result<bool, DiscordHandlerError> {
-        let handled = if let FullEvent::Message { new_message } = event {
+    ) -> Result<(), DiscordHandlerError> {
+        if let FullEvent::Message { new_message } = event {
             let msg = new_message;
             let author_name = display_name_from_message(msg, &context.http).await;
 
@@ -106,15 +106,10 @@ impl DiscordEventHandler for GreetingHandler {
                         message: e.to_string(),
                         handler_name: self.name(),
                     })?;
-                true
-            } else {
-                false
             }
-        } else {
-            false
         };
 
-        Ok(handled)
+        Ok(())
     }
 }
 

@@ -12,7 +12,7 @@ pub trait DiscordEventHandler: Sync + Send {
         context: &serenity::Context,
         framework: DiscordFrameworkContext<'_>,
         event: &FullEvent,
-    ) -> Result<bool, DiscordHandlerError>;
+    ) -> Result<(), DiscordHandlerError>;
 }
 
 #[derive(Error, Debug)]
