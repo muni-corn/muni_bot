@@ -26,6 +26,6 @@ pub mod temperature;
 pub mod topic_change;
 pub mod ventriloquize;
 
-pub type TwitchHandlerCollection = Vec<Arc<Mutex<dyn TwitchMessageHandler>>>;
+pub type TwitchHandlerCollection = Vec<Box<dyn TwitchMessageHandler>>;
 pub type DiscordMessageHandlerCollection = Vec<Arc<Mutex<dyn DiscordEventHandler>>>;
 pub type DiscordCommandProviderCollection = Vec<Box<dyn DiscordCommandProvider>>;

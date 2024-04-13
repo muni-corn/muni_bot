@@ -15,7 +15,7 @@ use crate::{
     handlers::{
         affection::AffectionHandler, bonk::BonkHandler, greeting::GreetingHandler,
         lift::LiftHandler, lurk::LurkHandler, magical::MagicalHandler, quotes::QuotesHandler,
-        raid_msg::RaidMsgHandler, shoutout::ShoutoutHandler, socials::SocialsHandler,
+        raid_msg::RaidMsgHandler, shoutout::ShoutoutHandler, socials::SocialsHandler, TwitchHandlerCollection,
     },
 };
 
@@ -23,7 +23,7 @@ pub type MuniBotTwitchIRCClient = TwitchIRCClient<SecureTCPTransport, StaticLogi
 pub type MuniBotTwitchIRCError = twitch_irc::Error<SecureTCPTransport, StaticLoginCredentials>;
 
 pub struct TwitchBot {
-    message_handlers: Vec<Box<dyn TwitchMessageHandler>>,
+    message_handlers: TwitchHandlerCollection,
 }
 
 impl TwitchBot {
