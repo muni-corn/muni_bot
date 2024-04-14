@@ -404,7 +404,7 @@ impl DiscordEventHandler for LoggingHandler {
                             if let Some(name) = name {
                                 msg.push(" with custom emoji ")
                                     .push_bold(name)
-                                    .push(", id ")
+                                    .push(" id ")
                                     .push_mono(id.to_string());
                             } else {
                                 msg.push(" with custom emoji id ").push_mono(id.to_string());
@@ -466,7 +466,7 @@ impl DiscordEventHandler for LoggingHandler {
                             if let Some(name) = name {
                                 msg.push(" with custom emoji ")
                                     .push_bold(name)
-                                    .push(", id ")
+                                    .push(" id ")
                                     .push_mono(id.to_string());
                             } else {
                                 msg.push(" with custom emoji id ").push_mono(id.to_string());
