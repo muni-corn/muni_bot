@@ -1,3 +1,4 @@
+pub mod admin;
 pub mod commands;
 pub mod handler;
 pub mod utils;
@@ -10,7 +11,7 @@ use poise::{
 };
 use surrealdb::{engine::remote::ws, opt::auth::Database, Surreal};
 
-use self::commands::DiscordCommandProvider;
+use self::{admin::AdminCommandProvider, commands::DiscordCommandProvider};
 use crate::{
     config::{Config, DiscordConfig},
     handlers::DiscordMessageHandlerCollection,
@@ -56,10 +57,13 @@ pub async fn start_discord_integration(
 ) {
     dotenv().ok();
 
-    let commands = command_providers
+    let mut commands: Vec<DiscordCommand> = command_providers
         .iter()
         .flat_map(|provider| provider.commands())
         .collect();
+
+    // always add admin commands
+    commands.append(&mut AdminCommandProvider.commands());
 
     let options = poise::FrameworkOptions::<DiscordState, MuniBotError> {
         event_handler: |ctx, event, framework, data| {
