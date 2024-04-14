@@ -369,19 +369,20 @@ impl DiscordEventHandler for LoggingHandler {
                 new,
                 event,
             } => {
-                dbg!(&old_if_available);
-                dbg!(&new);
-                dbg!(&event);
-                if let Some(guild_id) = event.guild_id {
-                    let mut fields = vec![];
-                    if let Some(old) = old_if_available {
-                        fields.push(("old".into(), old.content.clone(), false));
-                    }
-                    if let Some(new) = new {
-                        fields.push(("new".into(), new.content.clone(), false));
-                    }
-                    fields.push(("event".into(), format!("{:?}", event), false));
-                    send(guild_id, embed_with_fields("message edited", "", fields)).await
+                if let (Some(old), Some(new)) = (old_if_available, new)
+                    && let Some(guild_id) = event.guild_id
+                {
+                    let msg = MessageBuilder::new()
+                        .push("in ")
+                        .push(event.channel_id.mention().to_string())
+                        .build();
+
+                    let fields = vec![
+                        ("old".into(), old.content.clone(), false),
+                        ("new".into(), new.content.clone(), false),
+                    ];
+
+                    send(guild_id, embed_with_fields("message edited", &msg, fields)).await
                 } else {
                     Ok(())
                 }
