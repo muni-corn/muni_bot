@@ -390,9 +390,59 @@ impl DiscordEventHandler for LoggingHandler {
 
             FullEvent::ReactionRemove { removed_reaction } => {
                 if let Some(guild_id) = removed_reaction.guild_id {
+                    let mut msg = MessageBuilder::new();
+
+                    msg.push("in ")
+                        .push(removed_reaction.channel_id.mention().to_string())
+                        .build();
+
+                    match &removed_reaction.emoji {
+                        ReactionType::Unicode(emoji) => {
+                            msg.push(" with unicode emoji ").push(emoji);
+                        }
+                        ReactionType::Custom { id, name, .. } => {
+                            if let Some(name) = name {
+                                msg.push(" with custom emoji ")
+                                    .push_bold(name)
+                                    .push(", id ")
+                                    .push_mono(id.to_string());
+                            } else {
+                                msg.push(" with custom emoji id ").push_mono(id.to_string());
+                            }
+                        }
+                        _ => {}
+                    }
+
+                    if let Some(user_id) = removed_reaction.user_id {
+                        msg.push(" from ").push(user_id.mention().to_string());
+                    }
+
+                    send(guild_id, simple_embed("reaction removed", &msg.build())).await
+                } else {
+                    Ok(())
+                }
+            }
+
+            FullEvent::ReactionRemoveAll {
+                channel_id,
+                removed_from_message_id,
+            } => {
+                let channel = channel_id
+                    .to_channel(&context.http)
+                    .await
+                    .map_err(|e| DiscordHandlerError::from_display(self.name(), e))?;
+
+                if let Some(guild_channel) = channel.guild() {
+                    let msg = MessageBuilder::new()
+                        .push("on message id ")
+                        .push_mono(removed_from_message_id.to_string())
+                        .push(" in ")
+                        .push(channel_id.mention().to_string())
+                        .build();
+
                     send(
-                        guild_id,
-                        simple_embed("reaction removed", &format!("{:?}", removed_reaction)),
+                        guild_channel.guild_id,
+                        simple_embed("all reactions removed", &msg),
                     )
                     .await
                 } else {
@@ -402,11 +452,34 @@ impl DiscordEventHandler for LoggingHandler {
 
             FullEvent::ReactionRemoveEmoji { removed_reactions } => {
                 if let Some(guild_id) = removed_reactions.guild_id {
-                    send(
-                        guild_id,
-                        simple_embed("reaction removed", &format!("{:?}", removed_reactions)),
-                    )
-                    .await
+                    let mut msg = MessageBuilder::new();
+
+                    msg.push("in ")
+                        .push(removed_reactions.channel_id.mention().to_string())
+                        .build();
+
+                    match &removed_reactions.emoji {
+                        ReactionType::Unicode(emoji) => {
+                            msg.push(" with unicode emoji ").push(emoji);
+                        }
+                        ReactionType::Custom { id, name, .. } => {
+                            if let Some(name) = name {
+                                msg.push(" with custom emoji ")
+                                    .push_bold(name)
+                                    .push(", id ")
+                                    .push_mono(id.to_string());
+                            } else {
+                                msg.push(" with custom emoji id ").push_mono(id.to_string());
+                            }
+                        }
+                        _ => {}
+                    }
+
+                    if let Some(user_id) = removed_reactions.user_id {
+                        msg.push(" from ").push(user_id.mention().to_string());
+                    }
+
+                    send(guild_id, simple_embed("reaction removed", &msg.build())).await
                 } else {
                     Ok(())
                 }
