@@ -304,7 +304,12 @@ impl DiscordEventHandler for LoggingHandler {
                 deleted_message_id,
                 guild_id,
             } => {
+                let mut msg = MessageBuilder::new();
                 let mut fields = vec![];
+
+                msg.push("a message in ")
+                    .push(channel_id.mention().to_string())
+                    .push(" was deleted");
 
                 if let Some(cache) = context.cache() {
                     if let Some(deleted_message) = cache.message(channel_id, deleted_message_id) {
@@ -314,31 +319,16 @@ impl DiscordEventHandler for LoggingHandler {
                             false,
                         ));
                     } else {
-                        fields.push((
-                            "couldn't retrieve content".into(),
-                            "the message wasn't found in the cache.".into(),
-                            false,
-                        ));
+                        msg.push(". its content could not be found in the cache.");
                     }
                 } else {
-                    fields.push((
-                        "couldn't retrieve content".into(),
-                        "the cache isn't available".into(),
-                        false,
-                    ));
+                    msg.push(". there is no cache to retrieve message content from.");
                 }
 
                 if let Some(guild_id) = guild_id {
                     send(
                         *guild_id,
-                        embed_with_fields(
-                            "message deleted",
-                            &format!(
-                                "message {} in <#{}> was deleted",
-                                deleted_message_id, channel_id
-                            ),
-                            fields,
-                        ),
+                        embed_with_fields("message deleted", &msg.build(), fields),
                     )
                     .await
                 } else {
