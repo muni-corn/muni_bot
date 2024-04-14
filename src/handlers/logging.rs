@@ -491,6 +491,10 @@ impl DiscordEventHandler for LoggingHandler {
                 id,
                 guild_id,
             } => {
+                if old == status {
+                    return Ok(());
+                }
+
                 let mut msg = MessageBuilder::new();
 
                 msg.push("from ");
