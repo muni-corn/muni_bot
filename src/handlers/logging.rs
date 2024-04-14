@@ -491,21 +491,31 @@ impl DiscordEventHandler for LoggingHandler {
                 id,
                 guild_id,
             } => {
-                let mut fields = vec![];
-                if let Some(old) = old {
-                    fields.push(("old".to_string(), format!("{:?}", old), false));
+                let mut msg = MessageBuilder::new();
+
+                msg.push("from ");
+                if let Some(old) = old
+                    && !old.is_empty()
+                {
+                    msg.push_bold(old.to_string());
+                } else {
+                    msg.push("nothing");
                 }
-                if let Some(status) = status {
-                    fields.push(("new".to_string(), format!("{:?}", status), false));
+
+                msg.push(" to ");
+                if let Some(status) = status
+                    && !status.is_empty()
+                {
+                    msg.push_bold(status.to_string());
+                } else {
+                    msg.push("nothing");
                 }
+
+                msg.push(" in ").push(id.mention().to_string()).build();
 
                 send(
                     *guild_id,
-                    embed_with_fields(
-                        "voice channel status updated",
-                        &format!("in <#{}>", id),
-                        fields,
-                    ),
+                    simple_embed("voice channel status updated", &msg.build()),
                 )
                 .await
             }
