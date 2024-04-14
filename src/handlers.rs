@@ -16,6 +16,7 @@ pub mod economy;
 pub mod eight_ball;
 pub mod greeting;
 pub mod lift;
+pub mod logging;
 pub mod lurk;
 pub mod magical;
 pub mod quotes;

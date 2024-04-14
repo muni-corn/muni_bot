@@ -7,7 +7,7 @@ use std::sync::Arc;
 use clap::Parser;
 use config::Config;
 use discord::{commands::DiscordCommandError, start_discord_integration};
-use handlers::{magical::MagicalHandler, DiscordCommandProviderCollection};
+use handlers::{magical::MagicalHandler, DiscordCommandProviderCollection, logging::LoggingHandler};
 use poise::serenity_prelude as serenity;
 use thiserror::Error;
 use tokio::sync::{mpsc::error::SendError, Mutex};
@@ -86,6 +86,7 @@ fn start_discord(config: Config) -> tokio::task::JoinHandle<()> {
     let discord_handlers: DiscordMessageHandlerCollection = vec![
         Arc::new(Mutex::new(GreetingHandler)),
         Arc::new(Mutex::new(EconomyProvider)),
+        Arc::new(Mutex::new(LoggingHandler)),
     ];
     let discord_command_providers: DiscordCommandProviderCollection = vec![
         Box::new(DiceHandler),
