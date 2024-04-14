@@ -532,8 +532,8 @@ impl LoggingHandler {
     const NAME: &'static str = "logging";
 
     fn map_result<T>(r: anyhow::Result<T>) -> Result<(), DiscordHandlerError> {
-        r.map(|_| ())
-            .map_err(|e| DiscordHandlerError::from_display(Self::NAME, e))
+        r.map_err(|e| DiscordHandlerError::from_display(Self::NAME, e))?;
+        Ok(())
     }
 }
 
