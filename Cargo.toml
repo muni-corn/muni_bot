@@ -13,7 +13,7 @@ clap = { version = "4.5.4", features = ["derive"] }
 dotenvy = "0.15"
 num-format = "0.4"
 once_cell = "1.18"
-poise = "0.6"
+poise = { version = "0.6", features = ["cache"] }
 rand = { version = "0.8", features = ["std_rng"] }
 regex = "1"
 reqwest = "0.11"

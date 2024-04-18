@@ -7,7 +7,9 @@ use std::env;
 
 use dotenvy::dotenv;
 use poise::{
-    samples::register_globally, serenity_prelude as serenity, Prefix, PrefixFrameworkOptions,
+    samples::register_globally,
+    serenity_prelude::{self as serenity, Settings},
+    Prefix, PrefixFrameworkOptions,
 };
 use surrealdb::{engine::remote::ws, opt::auth::Database, Surreal};
 
@@ -89,8 +91,13 @@ pub async fn start_discord_integration(
         .options(options)
         .build();
 
+    // create cache settings
+    let mut cache_settings = Settings::default();
+    cache_settings.max_messages = 10000;
+
     // `await`ing builds the client
     let mut client = serenity::ClientBuilder::new(token, intents)
+        .cache_settings(cache_settings)
         .framework(framework)
         .await
         .unwrap();
