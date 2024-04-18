@@ -276,7 +276,7 @@ impl DiscordEventHandler for LoggingHandler {
                         .push(format!(", for channel <#{}>", data.channel_id))
                         .push(", with ")
                         .push_bold(format!("{} uses", max_uses))
-                        .push(", and a lifetime of")
+                        .push(", and a lifetime of ")
                         .push_bold(format!("{} seconds", data.max_age));
 
                     send(guild_id, simple_embed(title, &msg.build())).await
