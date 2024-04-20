@@ -1,3 +1,5 @@
+use std::future::Future;
+
 use async_trait::async_trait;
 use poise::serenity_prelude::{self as serenity, *};
 use serde::{Deserialize, Serialize};
@@ -368,25 +370,7 @@ impl DiscordEventHandler for LoggingHandler {
                 old_if_available,
                 new,
                 event,
-            } => {
-                if let (Some(old), Some(new)) = (old_if_available, new)
-                    && let Some(guild_id) = event.guild_id
-                {
-                    let msg = MessageBuilder::new()
-                        .push("in ")
-                        .push(event.channel_id.mention().to_string())
-                        .build();
-
-                    let fields = vec![
-                        ("old".into(), old.content.clone(), false),
-                        ("new".into(), new.content.clone(), false),
-                    ];
-
-                    send(guild_id, embed_with_fields("message edited", &msg, fields)).await
-                } else {
-                    Ok(())
-                }
-            }
+            } => handle_message_update(send, old_if_available, new, event).await,
 
             FullEvent::ReactionRemove { removed_reaction } => {
                 if let Some(guild_id) = removed_reaction.guild_id {
@@ -650,4 +634,34 @@ fn embed_with_fields(
     }
 
     embed
+}
+
+async fn handle_message_update<F, X>(
+    send: F,
+    old_if_available: &Option<Message>,
+    new: &Option<Message>,
+    event: &MessageUpdateEvent,
+) -> Result<(), DiscordHandlerError>
+where
+    F: Fn(GuildId, CreateEmbed) -> X,
+    X: Future<Output = Result<(), DiscordHandlerError>>,
+{
+    if let (Some(old), Some(new)) = (old_if_available, new)
+        && let Some(guild_id) = event.guild_id
+        && old.content != new.content
+    {
+        let msg = MessageBuilder::new()
+            .push("in ")
+            .push(event.channel_id.mention().to_string())
+            .build();
+
+        let fields = vec![
+            ("old".into(), old.content.clone(), false),
+            ("new".into(), new.content.clone(), false),
+        ];
+
+        send(guild_id, embed_with_fields("message edited", &msg, fields)).await
+    } else {
+        Ok(())
+    }
 }
