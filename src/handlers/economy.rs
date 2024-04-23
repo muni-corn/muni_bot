@@ -178,6 +178,13 @@ async fn transfer(
             return Ok(());
         }
 
+        // ensure they're sending anything at all
+        if amount == 0 {
+            ctx.say("you've transferred thin air.").await?;
+
+            return Ok(());
+        }
+
         // get the author and recipient wallets
         let db = &ctx.data().db;
         let mut author_wallet = Wallet::get_from_db(db, guild_id, ctx.author().id).await?;
@@ -195,7 +202,7 @@ async fn transfer(
                 _ => {
                     return Err(DiscordCommandError {
                         message: format!("error spending from author wallet: {e}"),
-                        command_identifier: "give".to_string(),
+                        command_identifier: "transfer".to_string(),
                     }
                     .into())
                 }

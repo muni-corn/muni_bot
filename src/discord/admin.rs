@@ -1,6 +1,6 @@
 use poise::serenity_prelude::ChannelId;
 
-use super::{DiscordContext, DiscordCommandProvider, DiscordCommand};
+use super::{DiscordCommand, DiscordCommandProvider, DiscordContext};
 use crate::{db::DbItem, handlers::logging::LoggingChannel, MuniBotError};
 
 pub struct AdminCommandProvider;
@@ -20,8 +20,9 @@ impl DiscordCommandProvider for AdminCommandProvider {
     ephemeral
 )]
 async fn admin(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
-    let mut msg =
-        String::from("hi :3 this command has subcommands for managing my server administration tools.");
+    let mut msg = String::from(
+        "hi :3 this command has subcommands for managing my server administration tools.",
+    );
     if ctx.guild_id().is_some() {
         msg.push_str(" perhaps you meant to use one of them?");
     } else {

@@ -7,7 +7,9 @@ use std::sync::Arc;
 use clap::Parser;
 use config::Config;
 use discord::{commands::DiscordCommandError, start_discord_integration};
-use handlers::{magical::MagicalHandler, DiscordCommandProviderCollection, logging::LoggingHandler};
+use handlers::{
+    logging::LoggingHandler, magical::MagicalHandler, DiscordCommandProviderCollection,
+};
 use poise::serenity_prelude as serenity;
 use thiserror::Error;
 use tokio::sync::{mpsc::error::SendError, Mutex};
