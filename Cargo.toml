@@ -11,6 +11,8 @@ async-trait = "0.1"
 chrono = "0.4"
 clap = { version = "4.5.4", features = ["derive"] }
 dotenvy = "0.15"
+env_logger = "0.11.3"
+log = "0.4.21"
 num-format = "0.4"
 once_cell = "1.18"
 poise = { version = "0.6", features = ["cache"] }
