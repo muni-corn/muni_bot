@@ -18,6 +18,7 @@ pub struct ContentWarningHandler {
 }
 
 impl ContentWarningHandler {
+    #[allow(dead_code)]
     pub fn new() -> Self {
         Self {
             active_warning: None,
