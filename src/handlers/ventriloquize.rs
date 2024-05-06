@@ -1,5 +1,6 @@
 use std::{thread, time::Duration};
 
+use log::error;
 use poise::{serenity_prelude::CreateMessage, Command, CreateReply};
 
 use crate::{
@@ -34,7 +35,7 @@ async fn ventriloquize<'a, 'b: 'a>(
         // send the message
         let message = CreateMessage::default().content(message);
         if let Err(e) = channel_id.send_message(&http, message).await {
-            eprintln!("couldn't send ventriloquization: {e}");
+            error!("couldn't send ventriloquization: {e}");
         }
     });
 

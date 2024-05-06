@@ -1,5 +1,6 @@
 use anyhow::Result;
 use async_trait::async_trait;
+use log::{error, info, warn};
 use tokio::task::JoinHandle;
 use twitch_irc::{
     login::StaticLoginCredentials, message::ServerMessage, ClientConfig, SecureTCPTransport,
@@ -60,15 +61,15 @@ impl TwitchBot {
         // join a channel. this will error if the passed channel login name is
         // malformed.
         if let Err(e) = client.join(channel.clone()) {
-            eprintln!("error joining {}'s twitch channel :( {}", channel, e);
+            error!("error joining {}'s twitch channel :( {}", channel, e);
         }
-        println!("twitch: joined channel {}", channel);
+        info!("twitch: joined channel {}", channel);
 
         let bot_config_clone = bot_config.clone();
         let handle = tokio::spawn(async move {
             while let Some(message) = incoming_messages.recv().await {
                 if let ServerMessage::Notice(notice_msg) = message {
-                    println!(
+                    warn!(
                         "notice received from twitch channel {}: {}",
                         notice_msg.channel_login.unwrap_or("<none>".to_string()),
                         notice_msg.message_text
@@ -77,7 +78,7 @@ impl TwitchBot {
                     .handle_twitch_message(&message, &client, &agent, &bot_config_clone)
                     .await
                 {
-                    eprintln!("error in message handler! {e}");
+                    error!("error in message handler! {e}");
                 }
             }
         });

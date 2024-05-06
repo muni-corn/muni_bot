@@ -1,5 +1,6 @@
 use std::{fs, io::ErrorKind, path::Path};
 
+use log::{info, warn};
 use poise::serenity_prelude::UserId;
 use serde::{Deserialize, Serialize};
 
@@ -57,22 +58,22 @@ impl Config {
 
             // write the default config string
             if let Err(e) = fs::write(p, toml_string) {
-                eprintln!(
+                warn!(
                     "hi there! i wanted to write my default configuration file to {}, but i can't.",
                     p.display(),
                 );
                 match e.kind() {
                     ErrorKind::NotFound => {
-                        eprintln!("does its parent directory exist?\n");
+                        warn!("does its parent directory exist?\n");
                     }
                     ErrorKind::PermissionDenied => {
-                        eprintln!("do you (or i) have permission to write to it?\n");
+                        warn!("do you (or i) have permission to write to it?\n");
                     }
-                    _ => eprintln!("(here's the error: {})\n", e),
+                    _ => warn!("(here's the error: {})\n", e),
                 }
             } else {
                 // notify we wrote the file
-                println!(
+                info!(
                     "~~~
   hi! i'm muni_bot! i've written my default configuration file to {} for you :3 <3
 ~~~
@@ -101,7 +102,7 @@ impl Config {
             })?;
 
             // notify we read the config
-            println!(
+            info!(
                 "~~~
   hiya! configuration has been read from {} ^u^
 ~~~
