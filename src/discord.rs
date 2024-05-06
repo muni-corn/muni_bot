@@ -6,6 +6,7 @@ pub mod utils;
 use std::env;
 
 use dotenvy::dotenv;
+use log::{error, info};
 use poise::{
     samples::register_globally,
     serenity_prelude::{self as serenity, Settings},
@@ -117,7 +118,7 @@ async fn on_ready(
 
     ctx.set_activity(Some(serenity::ActivityData::watching("you sleep uwu")));
 
-    println!("discord: logged in as {}", ready.user.name);
+    info!("discord: logged in as {}", ready.user.name);
 
     DiscordState::new(handlers, &config).await
 }
@@ -132,7 +133,7 @@ async fn event_handler(
         let mut locked_handler = handler.lock().await;
         let handled_future = locked_handler.handle_discord_event(context, framework_context, event);
         if let Err(e) = handled_future.await {
-            eprintln!(
+            error!(
                 "discord integration ran into an error executing handlers: {}",
                 e
             );

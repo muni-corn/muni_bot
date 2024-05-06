@@ -1,6 +1,8 @@
 use std::sync::Arc;
 
 use clap::Parser;
+use env_logger::Env;
+use log::{error, info, warn};
 use muni_bot::{
     config::Config,
     discord::start_discord_integration,
@@ -26,6 +28,7 @@ struct Args {
 #[tokio::main]
 async fn main() -> Result<(), MuniBotError> {
     dotenvy::dotenv().ok();
+    env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
 
     let args = Args::parse();
     let config = Config::read_or_write_default_from(&args.config_file)?;
@@ -43,25 +46,25 @@ async fn main() -> Result<(), MuniBotError> {
             ) {
                 // wait for the twitch bot to stop, if ever
                 Ok(twitch_handle) => match twitch_handle.await {
-                    Ok(_) => println!("twitch bot stopped o.o"),
-                    Err(e) => eprintln!("twitch bot died with error: {e}"),
+                    Ok(_) => warn!("twitch bot stopped o.o"),
+                    Err(e) => error!("twitch bot died with error: {e}"),
                 },
-                Err(e) => eprintln!("twitch bot failed to start :< {e}"),
+                Err(e) => error!("twitch bot failed to start :< {e}"),
             }
 
             // wait for the discord bot to stop, if ever
             match discord_handle.await {
-                Ok(_) => println!("discord bot stopped o.o"),
-                Err(e) => eprintln!("discord bot died with error: {e}"),
+                Ok(_) => warn!("discord bot stopped o.o"),
+                Err(e) => error!("discord bot died with error: {e}"),
             }
 
-            println!("all bot integrations have stopped. goodbye ^-^");
+            info!("all bot integrations have stopped. goodbye ^-^");
             Ok(())
         }
         Err(e) => {
             let auth_page_url = get_basic_auth_url();
-            println!("no TWITCH_TOKEN found ({e})");
-            println!("visit {auth_page_url} to get a token");
+            error!("no TWITCH_TOKEN found ({e})");
+            info!("visit {auth_page_url} to get a token");
             Err(MuniBotError::MissingToken)
         }
     }
