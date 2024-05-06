@@ -38,7 +38,7 @@
           diesel-cli
           glibc
         ];
-        buildInputs = with pkgs; [libressl_3_6];
+        buildInputs = with pkgs; [libressl];
       in {
         # `nix build`
         packages.default = naersk-lib.buildPackage {
