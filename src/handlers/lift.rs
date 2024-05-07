@@ -26,6 +26,12 @@ impl LiftHandler {
     }
 }
 
+impl Default for LiftHandler {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[async_trait::async_trait]
 impl TwitchMessageHandler for LiftHandler {
     async fn handle_twitch_message(

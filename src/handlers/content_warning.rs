@@ -81,6 +81,12 @@ impl ContentWarningHandler {
     }
 }
 
+impl Default for ContentWarningHandler {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[async_trait]
 impl TwitchMessageHandler for ContentWarningHandler {
     async fn handle_twitch_message(
