@@ -16,7 +16,7 @@ impl TokenStorage for TwitchTokenStorage {
     }
 
     async fn update_token(&mut self, token: &UserAccessToken) -> Result<(), Self::UpdateError> {
-        self.user_access_token = token.to_owned();
+        token.clone_into(&mut self.user_access_token);
         Ok(())
     }
 }
