@@ -70,15 +70,14 @@ impl TwitchBot {
             while let Some(message) = incoming_messages.recv().await {
                 if let ServerMessage::Notice(notice_msg) = message {
                     warn!(
-                        "notice received from twitch channel {}: {}",
-                        notice_msg.channel_login.unwrap_or("<none>".to_string()),
+                        "notice received from twitch: {}",
                         notice_msg.message_text
                     );
                 } else if let Err(e) = self
                     .handle_twitch_message(&message, &client, &agent, &bot_config_clone)
                     .await
                 {
-                    error!("error in message handler! {e}");
+                    error!("error in twitch message handler! {e}");
                 }
             }
         });
