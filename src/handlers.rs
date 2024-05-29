@@ -8,6 +8,7 @@ use crate::{
 };
 
 pub mod affection;
+pub mod autoban;
 pub mod bonk;
 pub mod bot_affection;
 pub mod content_warning;
