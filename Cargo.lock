@@ -1873,6 +1873,7 @@ dependencies = [
  "tokio-tungstenite 0.20.1",
  "toml",
  "twitch-irc",
+ "twitch_api",
  "twitch_oauth2",
  "url",
 ]
@@ -3024,6 +3025,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "serde_path_to_error"
+version = "0.1.16"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "af99884400da37c88f5e9146b7f1fd0fbcae8f6eec4e9da38b67d05486f814a6"
+dependencies = [
+ "itoa",
+ "serde",
+]
+
+[[package]]
 name = "serde_spanned"
 version = "0.6.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3829,6 +3840,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "tower"
+version = "0.4.13"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b8fa9be0de6cf49e536ce1851f987bd21a43b771b09473c3549a6c853db37c1c"
+dependencies = [
+ "tower-layer",
+ "tower-service",
+ "tracing",
+]
+
+[[package]]
+name = "tower-layer"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c20c8dbed6283a09604c3e69b4b7eeb54e298b8a600d4d5ecb5ad39de609f1d0"
+
+[[package]]
 name = "tower-service"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3955,12 +3983,40 @@ dependencies = [
 ]
 
 [[package]]
+name = "twitch_api"
+version = "0.7.0-rc.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "08be17cac4dd00fc643cb21adc349573a4b882e07d296ca5b4b0178343d48b42"
+dependencies = [
+ "aliri_braid",
+ "async-trait",
+ "displaydoc",
+ "futures",
+ "hmac",
+ "http 0.2.12",
+ "hyper",
+ "once_cell",
+ "serde",
+ "serde_json",
+ "serde_path_to_error",
+ "sha2",
+ "thiserror",
+ "tower",
+ "tracing",
+ "twitch_oauth2",
+ "twitch_types",
+ "url",
+ "version_check",
+]
+
+[[package]]
 name = "twitch_oauth2"
 version = "0.12.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "473ca0517fa9510cdf1bfb0d6eba53a7cdd30cfa0ebf870e7cea403387512ada"
 dependencies = [
  "aliri_braid",
+ "async-trait",
  "base64 0.21.7",
  "displaydoc",
  "http 0.2.12",
@@ -3982,6 +4038,7 @@ checksum = "15ebccdc5907cf895c4624502df6e21e38faf4c55d722bd60ceae48178d9f0e9"
 dependencies = [
  "serde",
  "serde_derive",
+ "time",
 ]
 
 [[package]]
