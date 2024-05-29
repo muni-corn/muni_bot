@@ -13,11 +13,11 @@ use crate::{
 pub trait TwitchMessageHandler: Send {
     async fn send_twitch_message(
         &mut self,
-        client: &MuniBotTwitchIRCClient,
+        irc_client: &MuniBotTwitchIRCClient,
         channel_login: &str,
         message: &str,
     ) -> Result<(), TwitchHandlerError> {
-        client
+        irc_client
             .say(channel_login.to_string(), message.to_string())
             .await
             .map_err(TwitchHandlerError::SendMessage)
@@ -29,7 +29,7 @@ pub trait TwitchMessageHandler: Send {
     async fn handle_twitch_message(
         &mut self,
         message: &ServerMessage,
-        client: &MuniBotTwitchIRCClient,
+        irc_client: &MuniBotTwitchIRCClient,
         agent: &TwitchAgent<StaticLoginCredentials>,
         config: &Config,
     ) -> Result<bool, TwitchHandlerError>;

@@ -56,11 +56,11 @@ impl TwitchBot {
         let cred_config = ClientConfig::new_simple(credentials.clone());
         let agent = TwitchAgent::new(credentials);
 
-        let (mut incoming_messages, client) = MuniBotTwitchIRCClient::new(cred_config);
+        let (mut incoming_messages, irc_client) = MuniBotTwitchIRCClient::new(cred_config);
 
         // join a channel. this will error if the passed channel login name is
         // malformed.
-        if let Err(e) = client.join(channel.clone()) {
+        if let Err(e) = irc_client.join(channel.clone()) {
             error!("error joining {}'s twitch channel :( {}", channel, e);
         }
         info!("twitch: joined channel {}", channel);
@@ -74,7 +74,7 @@ impl TwitchBot {
                         notice_msg.message_text
                     );
                 } else if let Err(e) = self
-                    .handle_twitch_message(&message, &client, &agent, &bot_config_clone)
+                    .handle_twitch_message(&message, &irc_client, &agent, &bot_config_clone)
                     .await
                 {
                     error!("error in twitch message handler! {e}");
