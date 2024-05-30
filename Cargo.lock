@@ -3996,13 +3996,13 @@ dependencies = [
  "http 0.2.12",
  "hyper",
  "once_cell",
+ "reqwest",
  "serde",
  "serde_json",
  "serde_path_to_error",
  "sha2",
  "thiserror",
  "tower",
- "tracing",
  "twitch_oauth2",
  "twitch_types",
  "url",
@@ -4022,6 +4022,7 @@ dependencies = [
  "http 0.2.12",
  "once_cell",
  "rand",
+ "reqwest",
  "serde",
  "serde_derive",
  "serde_json",
@@ -4038,7 +4039,6 @@ checksum = "15ebccdc5907cf895c4624502df6e21e38faf4c55d722bd60ceae48178d9f0e9"
 dependencies = [
  "serde",
  "serde_derive",
- "time",
 ]
 
 [[package]]
