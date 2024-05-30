@@ -1,5 +1,4 @@
 use async_trait::async_trait;
-use twitch_api::HelixClient;
 use twitch_irc::{login::StaticLoginCredentials, message::ServerMessage};
 
 use crate::{
@@ -18,15 +17,14 @@ impl TwitchMessageHandler for LurkHandler {
     async fn handle_twitch_message(
         &mut self,
         message: &ServerMessage,
-        irc_client: &MuniBotTwitchIRCClient,
-        _helix_client: &HelixClient<reqwest::Client>,
+        client: &MuniBotTwitchIRCClient,
         _agent: &TwitchAgent<StaticLoginCredentials>,
         _config: &Config,
     ) -> Result<bool, TwitchHandlerError> {
         let handled = if let ServerMessage::Privmsg(m) = message {
             if m.message_text.trim().starts_with("!lurk") {
                 self.send_twitch_message(
-                    irc_client,
+                    client,
                     &m.channel_login,
                     &format!("{} cast an invisibility spell!", m.sender.name),
                 )
@@ -34,7 +32,7 @@ impl TwitchMessageHandler for LurkHandler {
                 true
             } else if m.message_text.trim().starts_with("!unlurk") {
                 self.send_twitch_message(
-                    irc_client,
+                    client,
                     &m.channel_login,
                     &format!(
                         "{}'s invisibility spell wore off. we can see you!",

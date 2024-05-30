@@ -9,7 +9,6 @@ use surrealdb::{
     opt::auth::Database,
     Surreal,
 };
-use twitch_api::HelixClient;
 use twitch_irc::{login::StaticLoginCredentials, message::ServerMessage};
 
 use crate::{
@@ -142,8 +141,7 @@ impl TwitchMessageHandler for QuotesHandler {
     async fn handle_twitch_message(
         &mut self,
         message: &ServerMessage,
-        irc_client: &MuniBotTwitchIRCClient,
-        _helix_client: &HelixClient<reqwest::Client>,
+        client: &MuniBotTwitchIRCClient,
         agent: &TwitchAgent<StaticLoginCredentials>,
         _config: &Config,
     ) -> Result<bool, TwitchHandlerError> {
@@ -151,7 +149,7 @@ impl TwitchMessageHandler for QuotesHandler {
             if let Some(content) = m.message_text.strip_prefix("!addquote").map(str::trim) {
                 if content.is_empty() {
                     self.send_twitch_message(
-                        irc_client,
+                        client,
                         &m.channel_login,
                         "i can't add an empty quote!",
                     )
@@ -169,7 +167,7 @@ impl TwitchMessageHandler for QuotesHandler {
 
                     let quote_count = self.add_new_quote(&new_quote).await?;
                     self.send_twitch_message(
-                        irc_client,
+                        client,
                         &m.channel_login,
                         &format!(
                         "quote #{quote_count} is in! recorded in the muni history books forever"
@@ -182,9 +180,9 @@ impl TwitchMessageHandler for QuotesHandler {
             } else if let Some(content) = m.message_text.strip_prefix("!quote").map(str::trim) {
                 if content.is_empty() {
                     // recall a random quote
-                    self.recall_quote(irc_client, &m.channel_login, None).await?;
+                    self.recall_quote(client, &m.channel_login, None).await?;
                 } else if let Ok(n) = content.parse::<i32>() {
-                    self.recall_quote(irc_client, &m.channel_login, Some(n)).await?;
+                    self.recall_quote(client, &m.channel_login, Some(n)).await?;
                 } else if content.len() >= 3 {
                     // TODO: recall a quote that matches the content
                 }
