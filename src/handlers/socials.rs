@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use twitch_api::HelixClient;
 use twitch_irc::{login::StaticLoginCredentials, message::ServerMessage};
 
 use crate::{
@@ -17,7 +18,8 @@ impl TwitchMessageHandler for SocialsHandler {
     async fn handle_twitch_message(
         &mut self,
         message: &ServerMessage,
-        client: &MuniBotTwitchIRCClient,
+        irc_client: &MuniBotTwitchIRCClient,
+        _helix_client: &HelixClient<reqwest::Client>,
         _agent: &TwitchAgent<StaticLoginCredentials>,
         config: &Config,
     ) -> Result<bool, TwitchHandlerError> {
@@ -25,14 +27,14 @@ impl TwitchMessageHandler for SocialsHandler {
             if m.message_text.trim().starts_with("!discord") {
                 if let Some(invite_link) = config.discord.invite_link.as_ref() {
                     self.send_twitch_message(
-                        client,
+                        irc_client,
                         &m.channel_login,
                         &format!("join the herd's discord server here! {}", invite_link),
                     )
                     .await?;
                 } else {
                     self.send_twitch_message(
-                        client,
+                        irc_client,
                         &m.channel_login,
                         "the discord comand is enabled, but no invite link has been configured >.>",
                     )

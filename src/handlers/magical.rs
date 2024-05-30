@@ -5,6 +5,7 @@ use std::{
 
 use async_trait::async_trait;
 use chrono::Local;
+use twitch_api::HelixClient;
 use twitch_irc::{login::StaticLoginCredentials, message::ServerMessage};
 
 use crate::{
@@ -61,7 +62,8 @@ impl TwitchMessageHandler for MagicalHandler {
     async fn handle_twitch_message(
         &mut self,
         message: &ServerMessage,
-        client: &MuniBotTwitchIRCClient,
+        irc_client: &MuniBotTwitchIRCClient,
+        _helix_client: &HelixClient<reqwest::Client>,
         _agent: &TwitchAgent<StaticLoginCredentials>,
         _config: &Config,
     ) -> Result<bool, TwitchHandlerError> {
@@ -69,7 +71,7 @@ impl TwitchMessageHandler for MagicalHandler {
             ServerMessage::Privmsg(msg) => {
                 if msg.message_text.starts_with("!magical") {
                     self.send_twitch_message(
-                        client,
+                        irc_client,
                         &msg.channel_login,
                         &Self::get_message(&msg.sender.id, &msg.sender.name),
                     )

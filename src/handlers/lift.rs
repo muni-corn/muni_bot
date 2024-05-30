@@ -1,5 +1,6 @@
 use std::time::{Duration, Instant};
 
+use twitch_api::HelixClient;
 use twitch_irc::{
     login::StaticLoginCredentials,
     message::{ReplyToMessage, ServerMessage},
@@ -37,7 +38,8 @@ impl TwitchMessageHandler for LiftHandler {
     async fn handle_twitch_message(
         &mut self,
         message: &ServerMessage,
-        client: &MuniBotTwitchIRCClient,
+        irc_client: &MuniBotTwitchIRCClient,
+        _helix_client: &HelixClient<reqwest::Client>,
         _agent: &TwitchAgent<StaticLoginCredentials>,
         _config: &Config,
     ) -> Result<bool, TwitchHandlerError> {
@@ -45,7 +47,7 @@ impl TwitchMessageHandler for LiftHandler {
             && msg.message_text.starts_with("!liftmuni")
             && self.last_call.elapsed().as_secs() > 300
         {
-            self.send_twitch_message(client, msg.channel_login(), "nuh uh. not here. muni is streaming right now. you can't do that while he's streaming.").await?;
+            self.send_twitch_message(irc_client, msg.channel_login(), "nuh uh. not here. muni is streaming right now. you can't do that while he's streaming.").await?;
             self.last_call = Instant::now();
 
             Ok(true)
