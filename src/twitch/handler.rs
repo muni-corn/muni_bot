@@ -1,6 +1,7 @@
 use std::fmt::Display;
 
 use async_trait::async_trait;
+use twitch_api::HelixClient;
 use twitch_irc::{login::StaticLoginCredentials, message::ServerMessage};
 
 use super::agent::{TwitchAgent, TwitchAgentError};
@@ -30,6 +31,7 @@ pub trait TwitchMessageHandler: Send {
         &mut self,
         message: &ServerMessage,
         irc_client: &MuniBotTwitchIRCClient,
+        helix_client: &HelixClient<reqwest::Client>,
         agent: &TwitchAgent<StaticLoginCredentials>,
         config: &Config,
     ) -> Result<bool, TwitchHandlerError>;

@@ -1,6 +1,7 @@
 use std::collections::HashSet;
 
 use async_trait::async_trait;
+use twitch_api::HelixClient;
 use twitch_irc::{login::StaticLoginCredentials, message::ServerMessage};
 
 use crate::{
@@ -92,7 +93,8 @@ impl TwitchMessageHandler for ContentWarningHandler {
     async fn handle_twitch_message(
         &mut self,
         message: &ServerMessage,
-        client: &MuniBotTwitchIRCClient,
+        irc_client: &MuniBotTwitchIRCClient,
+        _helix_client: &HelixClient<reqwest::Client>,
         _agent: &TwitchAgent<StaticLoginCredentials>,
         _config: &Config,
     ) -> Result<bool, TwitchHandlerError> {
@@ -106,12 +108,12 @@ impl TwitchMessageHandler for ContentWarningHandler {
                 {
                     if m.sender.login == m.channel_login {
                         if content.trim().is_empty() {
-                            self.say_streamer_requested_warning(client, &m.channel_login)
+                            self.say_streamer_requested_warning(irc_client, &m.channel_login)
                                 .await?;
                         } else if content == "clear" || content == "reset" {
                             self.active_warning = None;
                             self.send_twitch_message(
-                                client,
+                                irc_client,
                                 &m.channel_login,
                                 "okay! content/trigger warning has been cleared.",
                             )
@@ -119,15 +121,15 @@ impl TwitchMessageHandler for ContentWarningHandler {
                         } else {
                             self.active_warning = Some(content.to_string());
                             self.users_greeted.clear();
-                            self.send_twitch_message(client, &m.channel_login, &format!("okay! issued a content/trigger warning with the following reason: \"{}\"", content)).await?;
+                            self.send_twitch_message(irc_client, &m.channel_login, &format!("okay! issued a content/trigger warning with the following reason: \"{}\"", content)).await?;
                         }
                     } else {
-                        self.say_user_requested_warning(client, &m.channel_login, &m.sender.name)
+                        self.say_user_requested_warning(irc_client, &m.channel_login, &m.sender.name)
                             .await?;
                     }
                     true
                 } else {
-                    self.greet_user(client, &m.channel_login, &m.sender.name)
+                    self.greet_user(irc_client, &m.channel_login, &m.sender.name)
                         .await?;
                     false
                 }

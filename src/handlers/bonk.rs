@@ -1,5 +1,6 @@
 use async_trait::async_trait;
 use rand::{rngs::StdRng, seq::SliceRandom, SeedableRng};
+use twitch_api::HelixClient;
 use twitch_irc::{login::StaticLoginCredentials, message::ServerMessage};
 
 use crate::{
@@ -18,7 +19,8 @@ impl TwitchMessageHandler for BonkHandler {
     async fn handle_twitch_message(
         &mut self,
         message: &ServerMessage,
-        client: &MuniBotTwitchIRCClient,
+        irc_client: &MuniBotTwitchIRCClient,
+        _helix_client: &HelixClient<reqwest::Client>,
         _agent: &TwitchAgent<StaticLoginCredentials>,
         _config: &Config,
     ) -> Result<bool, TwitchHandlerError> {
@@ -33,7 +35,7 @@ impl TwitchMessageHandler for BonkHandler {
                     .replace("{target}", target);
 
                 // and send!
-                self.send_twitch_message(client, &m.channel_login, &message)
+                self.send_twitch_message(irc_client, &m.channel_login, &message)
                     .await
                     .unwrap();
 

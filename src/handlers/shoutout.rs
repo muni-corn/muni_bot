@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use twitch_api::HelixClient;
 use twitch_irc::{login::StaticLoginCredentials, message::ServerMessage};
 
 use crate::{
@@ -17,7 +18,8 @@ impl TwitchMessageHandler for ShoutoutHandler {
     async fn handle_twitch_message(
         &mut self,
         message: &ServerMessage,
-        client: &MuniBotTwitchIRCClient,
+        irc_client: &MuniBotTwitchIRCClient,
+        _helix_client: &HelixClient<reqwest::Client>,
         _agent: &TwitchAgent<StaticLoginCredentials>,
         _config: &Config,
     ) -> Result<bool, TwitchHandlerError> {
@@ -33,7 +35,7 @@ impl TwitchMessageHandler for ShoutoutHandler {
                 let message = format!("this is a PSA that you NEED to go check out {target} at https://twitch.tv/{target} ! :3 clearly they deserve the shoutout, so go follow them now >:c");
 
                 // send the message
-                self.send_twitch_message(client, &msg.channel_login, &message)
+                self.send_twitch_message(irc_client, &msg.channel_login, &message)
                     .await?;
 
                 Ok(true)
@@ -51,7 +53,7 @@ impl TwitchMessageHandler for ShoutoutHandler {
                     // if the message after adding this link would exceed twitch's character limit
                     // of 500, send the message first and reset it
                     if message.len() + link.len() >= 500 {
-                        self.send_twitch_message(client, &msg.channel_login, &message)
+                        self.send_twitch_message(irc_client, &msg.channel_login, &message)
                             .await?;
                         message = link.trim().to_string();
                     } else {
@@ -60,7 +62,7 @@ impl TwitchMessageHandler for ShoutoutHandler {
                     }
                 }
 
-                self.send_twitch_message(client, &msg.channel_login, &message)
+                self.send_twitch_message(irc_client, &msg.channel_login, &message)
                     .await?;
 
                 Ok(true)
