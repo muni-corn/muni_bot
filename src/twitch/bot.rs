@@ -2,7 +2,6 @@ use anyhow::Result;
 use async_trait::async_trait;
 use log::{error, info, warn};
 use tokio::task::JoinHandle;
-use twitch_api::HelixClient;
 use twitch_irc::{
     login::StaticLoginCredentials, message::ServerMessage, ClientConfig, SecureTCPTransport,
     TwitchIRCClient,
@@ -57,8 +56,6 @@ impl TwitchBot {
         let cred_config = ClientConfig::new_simple(credentials.clone());
         let agent = TwitchAgent::new(credentials);
 
-        let helix_client: HelixClient<reqwest::Client> = HelixClient::default();
-
         let (mut incoming_messages, irc_client) = MuniBotTwitchIRCClient::new(cred_config);
 
         // join a channel. this will error if the passed channel login name is
@@ -77,7 +74,7 @@ impl TwitchBot {
                         notice_msg.message_text
                     );
                 } else if let Err(e) = self
-                    .handle_twitch_message(&message, &irc_client, &helix_client, &agent, &bot_config_clone)
+                    .handle_twitch_message(&message, &irc_client, &agent, &bot_config_clone)
                     .await
                 {
                     error!("error in twitch message handler! {e}");
@@ -93,8 +90,7 @@ impl TwitchMessageHandler for TwitchBot {
     async fn handle_twitch_message(
         &mut self,
         message: &ServerMessage,
-        irc_client: &MuniBotTwitchIRCClient,
-        helix_client: &HelixClient<reqwest::Client>,
+        client: &MuniBotTwitchIRCClient,
         agent: &TwitchAgent<StaticLoginCredentials>,
         config: &Config,
     ) -> Result<bool, TwitchHandlerError> {
@@ -102,7 +98,7 @@ impl TwitchMessageHandler for TwitchBot {
             // try to handle the message. if the handler determines the message was handled,
             // we'll stop
             if message_handler
-                .handle_twitch_message(message, irc_client, helix_client, agent, config)
+                .handle_twitch_message(message, client, agent, config)
                 .await?
             {
                 return Ok(true);
