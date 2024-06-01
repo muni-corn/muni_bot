@@ -9,7 +9,7 @@ use surrealdb::{
     opt::auth::Database,
     Surreal,
 };
-use twitch_irc::{login::StaticLoginCredentials, message::ServerMessage};
+use twitch_irc::message::ServerMessage;
 
 use crate::{
     config::{Config, DbConfig},
@@ -142,7 +142,7 @@ impl TwitchMessageHandler for QuotesHandler {
         &mut self,
         message: &ServerMessage,
         client: &MuniBotTwitchIRCClient,
-        agent: &TwitchAgent<StaticLoginCredentials>,
+        agent: &TwitchAgent,
         _config: &Config,
     ) -> Result<bool, TwitchHandlerError> {
         let handled = if let ServerMessage::Privmsg(m) = message {
@@ -154,14 +154,12 @@ impl TwitchMessageHandler for QuotesHandler {
                         "i can't add an empty quote!",
                     )
                     .await?;
-                } else {
-                    let channel_info = agent.get_channel_info(&m.channel_id).await?;
-
+                } else if let Some(channel_info) = agent.get_channel_info(&m.channel_id).await? {
                     let new_quote = Quote {
                         created_at: Local::now(),
                         quote: content.to_string(),
                         invoker: m.sender.id.to_string(),
-                        stream_category: channel_info.game_name,
+                        stream_category: channel_info.game_name.take(),
                         stream_title: channel_info.title,
                     };
 

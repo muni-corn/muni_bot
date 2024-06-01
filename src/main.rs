@@ -43,7 +43,7 @@ async fn main() -> Result<(), MuniBotError> {
                 "muni_corn".to_owned(),
                 twitch_token,
                 &config,
-            ) {
+            ).await {
                 // wait for the twitch bot to stop, if ever
                 Ok(twitch_handle) => match twitch_handle.await {
                     Ok(_) => warn!("twitch bot stopped o.o"),

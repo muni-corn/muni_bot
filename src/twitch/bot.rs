@@ -18,7 +18,7 @@ use crate::{
         lift::LiftHandler, lurk::LurkHandler, magical::MagicalHandler, quotes::QuotesHandler,
         raid_msg::RaidMsgHandler, shoutout::ShoutoutHandler, socials::SocialsHandler,
         TwitchHandlerCollection,
-    },
+    }, twitch::tokens::TwitchAuth,
 };
 
 pub type MuniBotTwitchIRCClient = TwitchIRCClient<SecureTCPTransport, StaticLoginCredentials>;
@@ -46,15 +46,16 @@ impl TwitchBot {
         }
     }
 
-    pub fn start(
+    pub async fn start(
         mut self,
         channel: String,
         token: String,
         bot_config: &Config,
     ) -> Result<JoinHandle<()>> {
-        let credentials = StaticLoginCredentials::new("muni__bot".to_owned(), Some(token));
+        let credentials = StaticLoginCredentials::new("muni__bot".to_owned(), Some(token.clone()));
         let cred_config = ClientConfig::new_simple(credentials.clone());
-        let agent = TwitchAgent::new(credentials);
+        let twitch_auth = TwitchAuth::new("muni__bot", &token).await?;
+        let agent = TwitchAgent::new(twitch_auth);
 
         let (mut incoming_messages, irc_client) = MuniBotTwitchIRCClient::new(cred_config);
 
@@ -91,7 +92,7 @@ impl TwitchMessageHandler for TwitchBot {
         &mut self,
         message: &ServerMessage,
         client: &MuniBotTwitchIRCClient,
-        agent: &TwitchAgent<StaticLoginCredentials>,
+        agent: &TwitchAgent,
         config: &Config,
     ) -> Result<bool, TwitchHandlerError> {
         for message_handler in self.message_handlers.iter_mut() {

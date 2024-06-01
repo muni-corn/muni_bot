@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use twitch_irc::{login::StaticLoginCredentials, message::ServerMessage};
+use twitch_irc::message::ServerMessage;
 
 use crate::{
     config::Config,
@@ -19,7 +19,7 @@ impl TwitchMessageHandler for AffectionHandler {
         &mut self,
         message: &ServerMessage,
         client: &MuniBotTwitchIRCClient,
-        _agent: &TwitchAgent<StaticLoginCredentials>,
+        _agent: &TwitchAgent,
         _config: &Config,
     ) -> Result<bool, TwitchHandlerError> {
         let handled = if let ServerMessage::Privmsg(m) = message {

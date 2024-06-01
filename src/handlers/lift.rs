@@ -1,9 +1,6 @@
 use std::time::{Duration, Instant};
 
-use twitch_irc::{
-    login::StaticLoginCredentials,
-    message::{ReplyToMessage, ServerMessage},
-};
+use twitch_irc::message::{ReplyToMessage, ServerMessage};
 
 use crate::{
     config::Config,
@@ -38,7 +35,7 @@ impl TwitchMessageHandler for LiftHandler {
         &mut self,
         message: &ServerMessage,
         client: &MuniBotTwitchIRCClient,
-        _agent: &TwitchAgent<StaticLoginCredentials>,
+        _agent: &TwitchAgent,
         _config: &Config,
     ) -> Result<bool, TwitchHandlerError> {
         if let ServerMessage::Privmsg(msg) = message
