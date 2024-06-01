@@ -14,11 +14,12 @@ use super::{
 use crate::{
     config::Config,
     handlers::{
-        affection::AffectionHandler, bonk::BonkHandler, greeting::GreetingHandler,
-        lift::LiftHandler, lurk::LurkHandler, magical::MagicalHandler, quotes::QuotesHandler,
-        raid_msg::RaidMsgHandler, shoutout::ShoutoutHandler, socials::SocialsHandler,
-        TwitchHandlerCollection,
-    }, twitch::tokens::TwitchAuth,
+        affection::AffectionHandler, autoban::AutoBanHandler, bonk::BonkHandler,
+        greeting::GreetingHandler, lift::LiftHandler, lurk::LurkHandler, magical::MagicalHandler,
+        quotes::QuotesHandler, raid_msg::RaidMsgHandler, shoutout::ShoutoutHandler,
+        socials::SocialsHandler, TwitchHandlerCollection,
+    },
+    twitch::tokens::TwitchAuth,
 };
 
 pub type MuniBotTwitchIRCClient = TwitchIRCClient<SecureTCPTransport, StaticLoginCredentials>;
@@ -42,6 +43,7 @@ impl TwitchBot {
                 Box::new(ShoutoutHandler),
                 Box::new(AffectionHandler),
                 Box::new(MagicalHandler),
+                Box::new(AutoBanHandler),
             ],
         }
     }
