@@ -30,6 +30,9 @@ pub struct DiscordConfig {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct TwitchConfig {
+    #[serde(default = "default_twitch_user")]
+    pub twitch_user: String,
+
     #[serde(default)]
     pub raid_msg_all: Option<String>,
 
@@ -128,9 +131,14 @@ impl Default for Config {
                 ventriloquists: vec![],
             },
             twitch: TwitchConfig {
+                twitch_user: default_twitch_user(),
                 raid_msg_all: None,
                 raid_msg_subs: None,
             },
         }
     }
+}
+
+fn default_twitch_user() -> String {
+    "muni__bot".to_owned()
 }
