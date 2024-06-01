@@ -41,6 +41,28 @@ impl<'a> TwitchAgent<'a> {
             .get_channel_from_id(broadcaster_id, self.auth.get_user_token())
             .await?)
     }
+
+    pub async fn get_user_from_login(&self, login: &str) -> Result<Option<User>, TwitchAgentError> {
+        Ok(self
+            .helix_client
+            .get_user_from_login(login, self.auth.get_user_token())
+            .await?)
+    }
+
+    pub async fn ban_user(&self, user_login: &str, reason: &str, broadcaster_id: &UserId) -> Result<(), TwitchAgentError> {
+        let moderator_id = self.get_bot_id();
+        self.helix_client
+            .ban_user(
+                user_login,
+                reason,
+                None,
+                broadcaster_id,
+                moderator_id,
+                self.auth.get_user_token(),
+            )
+            .await?;
+        Ok(())
+    }
 }
 
 #[derive(Debug)]

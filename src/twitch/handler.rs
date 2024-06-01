@@ -41,6 +41,7 @@ pub enum TwitchHandlerError {
     TwitchIRCError(MuniBotTwitchIRCError),
     DbError(surrealdb::Error),
     AgentError(TwitchAgentError),
+    Other(String),
 }
 
 impl From<MuniBotTwitchIRCError> for TwitchHandlerError {
@@ -68,6 +69,7 @@ impl Display for TwitchHandlerError {
             TwitchHandlerError::TwitchIRCError(e) => write!(f, "irc error :< {e}"),
             TwitchHandlerError::DbError(e) => write!(f, "database error :( {e}"),
             TwitchHandlerError::AgentError(e) => write!(f, "twitch agent error: {e}"),
+            TwitchHandlerError::Other(e) => e.fmt(f),
         }
     }
 }
