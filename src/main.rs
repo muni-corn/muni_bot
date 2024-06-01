@@ -39,11 +39,11 @@ async fn main() -> Result<(), MuniBotError> {
             let discord_handle = start_discord(config.clone());
 
             // start twitch
-            match TwitchBot::new(config.clone()).await.start(
-                "muni_corn".to_owned(),
-                twitch_token,
-                &config,
-            ).await {
+            match TwitchBot::new(config.clone())
+                .await
+                .start("muni_corn".to_owned(), twitch_token, &config)
+                .await
+            {
                 // wait for the twitch bot to stop, if ever
                 Ok(twitch_handle) => match twitch_handle.await {
                     Ok(_) => warn!("twitch bot stopped o.o"),
