@@ -1,4 +1,10 @@
-use twitch_api::{helix::channels::ChannelInformation, types::UserId, HelixClient};
+use std::{error::Error, fmt::Display};
+
+use twitch_api::{
+    helix::{channels::ChannelInformation, users::User, ClientRequestError},
+    types::UserId,
+    HelixClient,
+};
 
 use super::tokens::TwitchAuth;
 
@@ -10,10 +16,7 @@ pub struct TwitchAgent<'a> {
 impl<'a> TwitchAgent<'a> {
     pub fn new(auth: TwitchAuth) -> Self {
         let helix_client = HelixClient::default();
-        Self {
-            helix_client,
-            auth,
-        }
+        Self { helix_client, auth }
     }
 
     pub fn get_bot_id(&self) -> &UserId {
@@ -32,10 +35,47 @@ impl<'a> TwitchAgent<'a> {
     pub async fn get_channel_info(
         &self,
         broadcaster_id: &str,
-    ) -> Result<Option<ChannelInformation>, anyhow::Error> {
+    ) -> Result<Option<ChannelInformation>, TwitchAgentError> {
         Ok(self
             .helix_client
             .get_channel_from_id(broadcaster_id, self.auth.get_user_token())
             .await?)
     }
 }
+
+#[derive(Debug)]
+pub enum TwitchAgentError {
+    CredentialsError(String),
+    MissingCredentials,
+    ReqwestError(reqwest::Error),
+    HelixRequestError(ClientRequestError<reqwest::Error>),
+    Other(String),
+}
+
+impl From<reqwest::Error> for TwitchAgentError {
+    fn from(e: reqwest::Error) -> Self {
+        Self::ReqwestError(e)
+    }
+}
+
+impl From<ClientRequestError<reqwest::Error>> for TwitchAgentError {
+    fn from(e: ClientRequestError<reqwest::Error>) -> Self {
+        Self::HelixRequestError(e)
+    }
+}
+
+impl Display for TwitchAgentError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            TwitchAgentError::CredentialsError(e) => {
+                write!(f, "error with twitch credentials: {e}")
+            }
+            TwitchAgentError::MissingCredentials => write!(f, "twitch credentials went missing"),
+            TwitchAgentError::ReqwestError(e) => write!(f, "twitch agent request error: {e}"),
+            TwitchAgentError::Other(e) => write!(f, "twitch agent error: {e}"),
+            TwitchAgentError::HelixRequestError(e) => write!(f, "helix client threw an error: {e}")
+        }
+    }
+}
+
+impl Error for TwitchAgentError {}
