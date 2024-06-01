@@ -3,7 +3,7 @@ use std::fmt::Display;
 use async_trait::async_trait;
 use twitch_irc::message::ServerMessage;
 
-use super::agent::TwitchAgent;
+use super::agent::{TwitchAgent, TwitchAgentError};
 use crate::{
     config::Config,
     twitch::bot::{MuniBotTwitchIRCClient, MuniBotTwitchIRCError},
