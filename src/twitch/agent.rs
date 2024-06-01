@@ -49,7 +49,12 @@ impl<'a> TwitchAgent<'a> {
             .await?)
     }
 
-    pub async fn ban_user(&self, user_login: &str, reason: &str, broadcaster_id: &UserId) -> Result<(), TwitchAgentError> {
+    pub async fn ban_user(
+        &self,
+        user_login: &str,
+        reason: &str,
+        broadcaster_id: &UserId,
+    ) -> Result<(), TwitchAgentError> {
         let moderator_id = self.get_bot_id();
         self.helix_client
             .ban_user(
@@ -95,7 +100,7 @@ impl Display for TwitchAgentError {
             TwitchAgentError::MissingCredentials => write!(f, "twitch credentials went missing"),
             TwitchAgentError::ReqwestError(e) => write!(f, "twitch agent request error: {e}"),
             TwitchAgentError::Other(e) => write!(f, "twitch agent error: {e}"),
-            TwitchAgentError::HelixRequestError(e) => write!(f, "helix client threw an error: {e}")
+            TwitchAgentError::HelixRequestError(e) => write!(f, "helix client threw an error: {e}"),
         }
     }
 }

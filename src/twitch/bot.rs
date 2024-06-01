@@ -70,10 +70,7 @@ impl TwitchBot {
         let handle = tokio::spawn(async move {
             while let Some(message) = incoming_messages.recv().await {
                 if let ServerMessage::Notice(notice_msg) = message {
-                    warn!(
-                        "notice received from twitch: {}",
-                        notice_msg.message_text
-                    );
+                    warn!("notice received from twitch: {}", notice_msg.message_text);
                 } else if let Err(e) = self
                     .handle_twitch_message(&message, &irc_client, &agent, &bot_config_clone)
                     .await
