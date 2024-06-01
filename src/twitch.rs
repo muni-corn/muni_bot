@@ -6,7 +6,7 @@ use url::Url;
 pub mod agent;
 pub mod bot;
 pub mod handler;
-pub mod token_storage;
+pub mod tokens;
 
 pub(crate) const REDIRECT_URI: &str = "http://localhost:6864/twitch";
 

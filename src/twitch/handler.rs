@@ -1,9 +1,9 @@
 use std::fmt::Display;
 
 use async_trait::async_trait;
-use twitch_irc::{login::StaticLoginCredentials, message::ServerMessage};
+use twitch_irc::message::ServerMessage;
 
-use super::agent::{TwitchAgent, TwitchAgentError};
+use super::agent::TwitchAgent;
 use crate::{
     config::Config,
     twitch::bot::{MuniBotTwitchIRCClient, MuniBotTwitchIRCError},
@@ -30,7 +30,7 @@ pub trait TwitchMessageHandler: Send {
         &mut self,
         message: &ServerMessage,
         irc_client: &MuniBotTwitchIRCClient,
-        agent: &TwitchAgent<StaticLoginCredentials>,
+        agent: &TwitchAgent,
         config: &Config,
     ) -> Result<bool, TwitchHandlerError>;
 }
