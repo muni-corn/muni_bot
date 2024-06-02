@@ -12,12 +12,7 @@ use super::{
 };
 use crate::{
     config::Config,
-    handlers::{
-        affection::AffectionHandler, autoban::AutoBanHandler, bonk::BonkHandler,
-        greeting::GreetingHandler, lift::LiftHandler, lurk::LurkHandler, magical::MagicalHandler,
-        quotes::QuotesHandler, shoutout::ShoutoutHandler,
-        socials::SocialsHandler, TwitchHandlerCollection,
-    },
+    handlers::{autoban::AutoBanHandler, TwitchHandlerCollection},
     twitch::tokens::TwitchAuth,
 };
 
@@ -29,20 +24,9 @@ pub struct TwitchBot {
 }
 
 impl TwitchBot {
-    pub async fn new(config: Config) -> Self {
+    pub async fn new() -> Self {
         Self {
-            message_handlers: vec![
-                Box::new(QuotesHandler::new(&config.db).await.unwrap()),
-                Box::new(BonkHandler),
-                Box::new(SocialsHandler),
-                Box::new(LurkHandler),
-                Box::new(GreetingHandler),
-                Box::new(LiftHandler::new()),
-                Box::new(ShoutoutHandler),
-                Box::new(AffectionHandler),
-                Box::new(MagicalHandler),
-                Box::new(AutoBanHandler),
-            ],
+            message_handlers: vec![Box::new(AutoBanHandler)],
         }
     }
 
