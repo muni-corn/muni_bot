@@ -23,7 +23,7 @@ const SCOPE: [Scope; 8] = [
 
 pub fn get_basic_auth_url() -> Url {
     let mut url = Url::from_str("https://id.twitch.tv/oauth2/authorize").unwrap();
-    let client_id = std::env::var("TWITCH_CLIENT_ID").unwrap();
+    let client_id = std::env::var("TWITCH_CLIENT_ID").expect("env var TWITCH_CLIENT_ID is not set");
 
     let auth = vec![
         ("response_type", "token"),
