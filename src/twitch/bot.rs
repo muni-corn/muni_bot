@@ -3,7 +3,8 @@ use async_trait::async_trait;
 use log::{error, info, warn};
 use tokio::task::JoinHandle;
 use twitch_irc::{
-    irc, login::StaticLoginCredentials, message::ServerMessage, ClientConfig, SecureTCPTransport, TwitchIRCClient
+    irc, login::StaticLoginCredentials, message::ServerMessage, ClientConfig, SecureTCPTransport,
+    TwitchIRCClient,
 };
 
 use super::{
@@ -37,7 +38,13 @@ impl TwitchBot {
         let agent = TwitchAgent::new(twitch_auth);
 
         let (mut incoming_messages, irc_client) = MuniBotTwitchIRCClient::new(cred_config);
-        irc_client.send_message(irc!["CAP", "REQ", ":twitch.tv/tags twitch.tv/commands twitch.tv/membership"]).await?;
+        irc_client
+            .send_message(irc![
+                "CAP",
+                "REQ",
+                ":twitch.tv/tags twitch.tv/commands twitch.tv/membership"
+            ])
+            .await?;
 
         // join all the initial channels
         for channel in &bot_config.twitch.initial_channels {
@@ -53,7 +60,10 @@ impl TwitchBot {
             while let Some(message) = incoming_messages.recv().await {
                 if let ServerMessage::Notice(notice_msg) = message {
                     if let Some(channel) = notice_msg.channel_login {
-                        warn!("notice received from {}: {}", channel, notice_msg.message_text);
+                        warn!(
+                            "notice received from {}: {}",
+                            channel, notice_msg.message_text
+                        );
                     } else {
                         warn!("notice received from twitch: {}", notice_msg.message_text);
                     }
