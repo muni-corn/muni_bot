@@ -15,7 +15,7 @@ use crate::{
     handlers::{
         affection::AffectionHandler, autoban::AutoBanHandler, bonk::BonkHandler,
         greeting::GreetingHandler, lift::LiftHandler, lurk::LurkHandler, magical::MagicalHandler,
-        quotes::QuotesHandler, raid_msg::RaidMsgHandler, shoutout::ShoutoutHandler,
+        quotes::QuotesHandler, shoutout::ShoutoutHandler,
         socials::SocialsHandler, TwitchHandlerCollection,
     },
     twitch::tokens::TwitchAuth,
@@ -35,7 +35,6 @@ impl TwitchBot {
                 Box::new(QuotesHandler::new(&config.db).await.unwrap()),
                 Box::new(BonkHandler),
                 Box::new(SocialsHandler),
-                Box::new(RaidMsgHandler),
                 Box::new(LurkHandler),
                 Box::new(GreetingHandler),
                 Box::new(LiftHandler::new()),

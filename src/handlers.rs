@@ -21,7 +21,6 @@ pub mod logging;
 pub mod lurk;
 pub mod magical;
 pub mod quotes;
-pub mod raid_msg;
 pub mod shoutout;
 pub mod socials;
 pub mod temperature;

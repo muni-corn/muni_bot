@@ -34,12 +34,6 @@ pub struct TwitchConfig {
     pub twitch_user: String,
 
     #[serde(default)]
-    pub raid_msg_all: Option<String>,
-
-    #[serde(default)]
-    pub raid_msg_subs: Option<String>,
-
-    #[serde(default)]
     pub initial_channels: Vec<String>,
 }
 
@@ -135,8 +129,6 @@ impl Default for Config {
             },
             twitch: TwitchConfig {
                 twitch_user: default_twitch_user(),
-                raid_msg_all: None,
-                raid_msg_subs: None,
                 initial_channels: Vec::new(),
             },
         }
