@@ -23,43 +23,61 @@ impl TwitchMessageHandler for AutoBanHandler {
         agent: &TwitchAgent,
         _config: &Config,
     ) -> Result<bool, TwitchHandlerError> {
-        let (user_login, channel_login) = match message {
+        let (user_login, channel_login, msg_content) = match message {
             ServerMessage::Join(join_msg) => (
                 join_msg.user_login.as_str(),
                 join_msg.channel_login.as_str(),
+                "",
             ),
             ServerMessage::Privmsg(privmsg) => (
                 privmsg.sender.login.as_str(),
                 privmsg.channel_login.as_str(),
+                privmsg.message_text.as_str(),
             ),
             _ => return Ok(false),
         };
 
         if user_login.starts_with("brandon") || user_login.starts_with("phoenixredtailis") {
-            let Some(broadcaster_id) = agent.get_user_from_login(channel_login).await? else {
-                return Err(TwitchHandlerError::Other(format!(
-                    "could not get broadcaster id for channel {}",
-                    channel_login
-                )));
-            };
-
-            let Some(ban_user_id) = agent.get_user_from_login(user_login).await? else {
-                return Err(TwitchHandlerError::Other(format!(
-                    "could not get user id for user {} on channel {}",
-                    user_login, channel_login
-                )));
-            };
-
-            agent
-                .ban_user(
-                    &ban_user_id.id,
-                    "user is suspected to be an alt of brandontheponybrony",
-                    &broadcaster_id.id,
-                )
-                .await?;
+            yeet_user(
+                agent,
+                user_login,
+                channel_login,
+                "user suspected to be an alt of brandontheponybrony",
+            )
+            .await?;
+            Ok(true)
+        } else if msg_content.starts_with("Cheap viewers on") {
+            yeet_user(agent, user_login, channel_login, "likely viewer scam bot").await?;
             Ok(true)
         } else {
             Ok(false)
         }
     }
+}
+
+async fn yeet_user(
+    agent: &TwitchAgent<'_>,
+    user_login: &str,
+    channel_login: &str,
+    reason: &str,
+) -> Result<(), TwitchHandlerError> {
+    let Some(broadcaster_id) = agent.get_user_from_login(channel_login).await? else {
+        return Err(TwitchHandlerError::Other(format!(
+            "could not get broadcaster id for channel {}",
+            channel_login
+        )));
+    };
+
+    let Some(ban_user_id) = agent.get_user_from_login(user_login).await? else {
+        return Err(TwitchHandlerError::Other(format!(
+            "could not get user id for user {} on channel {}",
+            user_login, channel_login
+        )));
+    };
+
+    agent
+        .ban_user(&ban_user_id.id, reason, &broadcaster_id.id)
+        .await?;
+
+    Ok(())
 }
