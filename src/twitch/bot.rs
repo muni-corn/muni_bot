@@ -3,8 +3,7 @@ use async_trait::async_trait;
 use log::{error, info, warn};
 use tokio::task::JoinHandle;
 use twitch_irc::{
-    login::StaticLoginCredentials, message::ServerMessage, ClientConfig, SecureTCPTransport,
-    TwitchIRCClient,
+    irc, login::StaticLoginCredentials, message::ServerMessage, ClientConfig, SecureTCPTransport, TwitchIRCClient
 };
 
 use super::{
@@ -60,6 +59,7 @@ impl TwitchBot {
         let agent = TwitchAgent::new(twitch_auth);
 
         let (mut incoming_messages, irc_client) = MuniBotTwitchIRCClient::new(cred_config);
+        irc_client.send_message(irc!["CAP", "REQ", ":twitch.tv/tags twitch.tv/commands twitch.tv/membership"]).await?;
 
         // join a channel. this will error if the passed channel login name is
         // malformed.
