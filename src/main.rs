@@ -39,7 +39,7 @@ async fn main() -> Result<(), MuniBotError> {
             let discord_handle = start_discord(config.clone());
 
             // start twitch
-            match TwitchBot::new(config.clone())
+            match TwitchBot::new()
                 .await
                 .start(twitch_token, &config)
                 .await
