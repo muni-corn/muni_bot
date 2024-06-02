@@ -47,12 +47,7 @@ impl TwitchBot {
         }
     }
 
-    pub async fn start(
-        mut self,
-        channel: String,
-        token: String,
-        bot_config: &Config,
-    ) -> Result<JoinHandle<()>> {
+    pub async fn start(mut self, token: String, bot_config: &Config) -> Result<JoinHandle<()>> {
         let credentials = StaticLoginCredentials::new("muni__bot".to_owned(), Some(token.clone()));
         let cred_config = ClientConfig::new_simple(credentials.clone());
         let twitch_auth = TwitchAuth::new("muni__bot", &token).await?;
@@ -61,12 +56,14 @@ impl TwitchBot {
         let (mut incoming_messages, irc_client) = MuniBotTwitchIRCClient::new(cred_config);
         irc_client.send_message(irc!["CAP", "REQ", ":twitch.tv/tags twitch.tv/commands twitch.tv/membership"]).await?;
 
-        // join a channel. this will error if the passed channel login name is
-        // malformed.
-        if let Err(e) = irc_client.join(channel.clone()) {
-            error!("error joining {}'s twitch channel :( {}", channel, e);
+        // join all the initial channels
+        for channel in &bot_config.twitch.initial_channels {
+            self.join_channel(channel, &irc_client).await;
         }
-        info!("twitch: joined channel {}", channel);
+
+        // join our own channel too
+        self.join_channel(&bot_config.twitch.twitch_user, &irc_client)
+            .await;
 
         let bot_config_clone = bot_config.clone();
         let handle = tokio::spawn(async move {
@@ -86,6 +83,15 @@ impl TwitchBot {
             }
         });
         Ok(handle)
+    }
+
+    async fn join_channel(&self, channel: &str, client: &MuniBotTwitchIRCClient) {
+        // join a channel. this will error if the passed channel login name is
+        // malformed.
+        if let Err(e) = client.join(channel.to_string()) {
+            error!("error joining {}'s twitch channel :( {}", channel, e);
+        }
+        info!("twitch: joined channel {}", channel);
     }
 }
 

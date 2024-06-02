@@ -41,7 +41,7 @@ async fn main() -> Result<(), MuniBotError> {
             // start twitch
             match TwitchBot::new(config.clone())
                 .await
-                .start("muni_corn".to_owned(), twitch_token, &config)
+                .start(twitch_token, &config)
                 .await
             {
                 // wait for the twitch bot to stop, if ever
