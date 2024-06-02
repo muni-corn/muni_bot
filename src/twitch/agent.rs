@@ -1,5 +1,6 @@
 use std::{error::Error, fmt::Display};
 
+use log::{debug, info};
 use twitch_api::{
     helix::{channels::ChannelInformation, users::User, ClientRequestError},
     types::UserId,
@@ -51,14 +52,15 @@ impl<'a> TwitchAgent<'a> {
 
     pub async fn ban_user(
         &self,
-        user_login: &str,
+        ban_user_id: &UserId,
         reason: &str,
         broadcaster_id: &UserId,
     ) -> Result<(), TwitchAgentError> {
+        debug!("attempting to ban user {}", ban_user_id);
         let moderator_id = self.get_bot_id();
         self.helix_client
             .ban_user(
-                user_login,
+                ban_user_id,
                 reason,
                 None,
                 broadcaster_id,
@@ -66,6 +68,7 @@ impl<'a> TwitchAgent<'a> {
                 self.auth.get_user_token(),
             )
             .await?;
+        info!("muni_bot banned user {ban_user_id} from broadcaster {broadcaster_id}");
         Ok(())
     }
 }
