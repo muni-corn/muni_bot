@@ -23,26 +23,43 @@ impl TwitchMessageHandler for AutoBanHandler {
         agent: &TwitchAgent,
         _config: &Config,
     ) -> Result<bool, TwitchHandlerError> {
-        if let ServerMessage::Join(join_msg) = message {
-            if join_msg.user_login.starts_with("brandon") {
-                let Some(broadcaster_id) =
-                    agent.get_user_from_login(&join_msg.channel_login).await?
-                else {
-                    return Err(TwitchHandlerError::Other(format!(
-                        "could not get broadcaster id for channel {}",
-                        join_msg.channel_login
-                    )));
-                };
+        let (user_login, channel_login) = match message {
+            ServerMessage::Join(join_msg) => (
+                join_msg.user_login.as_str(),
+                join_msg.channel_login.as_str(),
+            ),
+            ServerMessage::Privmsg(privmsg) => (
+                privmsg.sender.login.as_str(),
+                privmsg.channel_login.as_str(),
+            ),
+            _ => return Ok(false),
+        };
 
-                agent
-                    .ban_user(
-                        &join_msg.user_login,
-                        "user is suspected to be an alt of brandontheponybrony",
-                        &broadcaster_id.id,
-                    )
-                    .await?;
-            }
+        if user_login.starts_with("brandon") || user_login.starts_with("phoenixredtailis") {
+            let Some(broadcaster_id) = agent.get_user_from_login(channel_login).await? else {
+                return Err(TwitchHandlerError::Other(format!(
+                    "could not get broadcaster id for channel {}",
+                    channel_login
+                )));
+            };
+
+            let Some(ban_user_id) = agent.get_user_from_login(user_login).await? else {
+                return Err(TwitchHandlerError::Other(format!(
+                    "could not get user id for user {} on channel {}",
+                    user_login, channel_login
+                )));
+            };
+
+            agent
+                .ban_user(
+                    &ban_user_id.id,
+                    "user is suspected to be an alt of brandontheponybrony",
+                    &broadcaster_id.id,
+                )
+                .await?;
+            Ok(true)
+        } else {
+            Ok(false)
         }
-        Ok(true)
     }
 }
