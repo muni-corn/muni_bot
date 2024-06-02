@@ -10,10 +10,11 @@ pub mod tokens;
 
 pub(crate) const REDIRECT_URI: &str = "http://localhost:6864/twitch";
 
-const SCOPE: [Scope; 7] = [
+const SCOPE: [Scope; 8] = [
     Scope::ChannelReadRedemptions,
     Scope::ChannelReadSubscriptions,
     Scope::ModeratorManageAnnouncements,
+    Scope::ModeratorManageBannedUsers,
     Scope::Other(Cow::Borrowed("moderator:read:chatters")),
     Scope::ModeratorManageChatMessages,
     Scope::ChatEdit,
