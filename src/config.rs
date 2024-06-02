@@ -74,10 +74,7 @@ impl Config {
             } else {
                 // notify we wrote the file
                 info!(
-                    "~~~
-  hi! i'm muni_bot! i've written my default configuration file to {} for you :3 <3
-~~~
-",
+                    "hi! i'm muni_bot! i've written my default configuration file to {} for you :3 <3",
                     p.display()
                 );
             }
@@ -102,13 +99,7 @@ impl Config {
             })?;
 
             // notify we read the config
-            info!(
-                "~~~
-  hiya! configuration has been read from {} ^u^
-~~~
-",
-                p.display()
-            );
+            info!("hiya! configuration has been read from {} ^u^", p.display());
 
             // return the config
             Ok(config)
