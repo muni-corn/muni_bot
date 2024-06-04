@@ -24,15 +24,19 @@
           inherit system;
           overlays = [fenix.overlays.default]; # for rust-analyzer-nightly
         };
-        fenix' = fenix.packages.${system};
+        rust = with fenix.packages.${system}; combine [
+          default.rustc
+          default.cargo
+          complete.rust-src
+          targets.wasm32-unknown-unknown.latest.rust-std
+        ];
 
-        rust = fenix'.default;
         naersk-lib = naersk.lib.${system}.override {
           inherit (rust) cargo rustc;
         };
 
         nativeBuildInputs =
-          [rust.toolchain]
+          [rust]
           ++ (with pkgs; [
             clang
             diesel-cli
@@ -67,7 +71,6 @@
             ++ buildInputs
             ++ (with pkgs; [cargo-watch cargo-outdated rust-analyzer-nightly]);
           LIBCLANG_PATH = "${pkgs.libclang.lib}/lib";
-          RUST_SRC_PATH = "${fenix'.complete.rust-src}/lib/rustlib/src/rust/library";
           RUST_LOG = "info";
         };
       });
