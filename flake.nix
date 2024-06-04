@@ -31,13 +31,16 @@
           inherit (rust) cargo rustc;
         };
 
-        nativeBuildInputs = with pkgs; [
-          rust.toolchain
-          pkg-config
-          clang
-          diesel-cli
-          glibc
-        ];
+        nativeBuildInputs =
+          [rust.toolchain]
+          ++ (with pkgs; [
+            clang
+            diesel-cli
+            glibc
+            leptosfmt
+            pkg-config
+            trunk
+          ]);
         buildInputs = with pkgs; [libressl];
       in {
         # `nix build`
