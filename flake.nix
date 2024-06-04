@@ -71,7 +71,7 @@
             ++ buildInputs
             ++ (with pkgs; [cargo-watch cargo-outdated rust-analyzer-nightly]);
           LIBCLANG_PATH = "${pkgs.libclang.lib}/lib";
-          RUST_LOG = "info";
+          RUST_LOG = "info,tracing::span=off";
         };
       });
   in

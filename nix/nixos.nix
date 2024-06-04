@@ -49,6 +49,7 @@ in {
         serviceConfig = {
           EnvironmentFile = cfg.environmentFile;
           ExecStart = "${pkgs.muni_bot}/bin/muni_bot --config-file ${configFile}";
+          Environment = "RUST_LOG=info,tracing::span=off";
           PassEnvironment = [
             "DATABASE_PASS"
             "DISCORD_APPLICATION_ID"
