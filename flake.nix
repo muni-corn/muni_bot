@@ -32,7 +32,8 @@
         ];
 
         naersk-lib = naersk.lib.${system}.override {
-          inherit (rust) cargo rustc;
+          cargo = rust;
+          rustc = rust;
         };
 
         nativeBuildInputs =
