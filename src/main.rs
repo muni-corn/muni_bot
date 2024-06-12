@@ -77,7 +77,6 @@ fn start_discord(config: Config) -> tokio::task::JoinHandle<()> {
         Box::new(DiceHandler),
         Box::new(BotAffectionProvider),
         Box::new(MagicalHandler),
-        Box::new(EightBallProvider),
         Box::new(VentriloquizeProvider),
         Box::new(EconomyProvider),
         Box::new(TopicChangeProvider),
