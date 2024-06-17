@@ -25,29 +25,38 @@ impl TwitchMessageHandler for AutoBanHandler {
     ) -> Result<bool, TwitchHandlerError> {
         let (user_login, channel_login, msg_content) = match message {
             ServerMessage::Join(join_msg) => (
-                join_msg.user_login.as_str(),
+                join_msg.user_login.to_lowercase(),
                 join_msg.channel_login.as_str(),
                 "",
             ),
             ServerMessage::Privmsg(privmsg) => (
-                privmsg.sender.login.as_str(),
+                privmsg.sender.login.to_lowercase(),
                 privmsg.channel_login.as_str(),
                 privmsg.message_text.as_str(),
             ),
             _ => return Ok(false),
         };
 
-        if user_login.starts_with("brandon") || user_login.starts_with("phoenixredtailis") {
+        if user_login.contains("ichi") && user_login.contains("rose") && user_login != "ichi_rose_" {
             yeet_user(
                 agent,
-                user_login,
+                &user_login,
                 channel_login,
-                "user suspected to be an alt of brandontheponybrony",
+                "user is suspected of impersonation and harrassment of ichi_rose_",
+            )
+            .await?;
+            Ok(true)
+        } else if user_login.contains("isapred") || user_login.contains("isabadstreamer") {
+            yeet_user(
+                agent,
+                &user_login,
+                channel_login,
+                "user is suspected of harassment",
             )
             .await?;
             Ok(true)
         } else if msg_content.starts_with("Cheap viewers on") {
-            yeet_user(agent, user_login, channel_login, "likely viewer scam bot").await?;
+            yeet_user(agent, &user_login, channel_login, "likely viewer scam bot").await?;
             Ok(true)
         } else {
             Ok(false)
