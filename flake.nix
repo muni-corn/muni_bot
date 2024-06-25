@@ -24,12 +24,15 @@
           inherit system;
           overlays = [fenix.overlays.default]; # for rust-analyzer-nightly
         };
-        rust = with fenix.packages.${system}; combine [
-          default.rustc
-          default.cargo
-          complete.rust-src
-          targets.wasm32-unknown-unknown.latest.rust-std
-        ];
+        rust = with fenix.packages.${system};
+          combine [
+            complete.rust-src
+            default.cargo
+            default.clippy
+            default.rustc
+            default.rustfmt
+            targets.wasm32-unknown-unknown.latest.rust-std
+          ];
 
         naersk-lib = naersk.lib.${system}.override {
           cargo = rust;
