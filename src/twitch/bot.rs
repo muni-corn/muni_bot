@@ -13,7 +13,12 @@ use super::{
 };
 use crate::{
     config::Config,
-    handlers::{autoban::AutoBanHandler, TwitchHandlerCollection},
+    handlers::{
+        affection::AffectionHandler, autoban::AutoBanHandler, bonk::BonkHandler,
+        greeting::GreetingHandler, lift::LiftHandler, lurk::LurkHandler, magical::MagicalHandler,
+        quotes::QuotesHandler, shoutout::ShoutoutHandler, socials::SocialsHandler,
+        TwitchHandlerCollection,
+    },
     twitch::tokens::TwitchAuth,
 };
 
@@ -21,13 +26,25 @@ pub type MuniBotTwitchIRCClient = TwitchIRCClient<SecureTCPTransport, StaticLogi
 pub type MuniBotTwitchIRCError = twitch_irc::Error<SecureTCPTransport, StaticLoginCredentials>;
 
 pub struct TwitchBot {
+    auto_ban_handler: AutoBanHandler,
     message_handlers: TwitchHandlerCollection,
 }
 
 impl TwitchBot {
-    pub async fn new() -> Self {
+    pub async fn new(config: Config) -> Self {
         Self {
-            message_handlers: vec![Box::new(AutoBanHandler)],
+            auto_ban_handler: AutoBanHandler,
+            message_handlers: vec![
+                Box::new(QuotesHandler::new(&config.db).await.unwrap()),
+                Box::new(BonkHandler),
+                Box::new(SocialsHandler),
+                Box::new(LurkHandler),
+                Box::new(GreetingHandler),
+                Box::new(LiftHandler::new()),
+                Box::new(ShoutoutHandler),
+                Box::new(AffectionHandler),
+                Box::new(MagicalHandler),
+            ],
         }
     }
 
@@ -97,14 +114,22 @@ impl TwitchMessageHandler for TwitchBot {
         agent: &TwitchAgent,
         config: &Config,
     ) -> Result<bool, TwitchHandlerError> {
-        for message_handler in self.message_handlers.iter_mut() {
-            // try to handle the message. if the handler determines the message was handled,
-            // we'll stop
-            if message_handler
-                .handle_twitch_message(message, client, agent, config)
-                .await?
-            {
-                return Ok(true);
+        self.auto_ban_handler
+            .handle_twitch_message(message, client, agent, config)
+            .await?;
+
+        if let ServerMessage::Privmsg(privmsg) = message
+            && privmsg.channel_id == "590712444"
+        {
+            for message_handler in self.message_handlers.iter_mut() {
+                // try to handle the message. if the handler determines the message was handled,
+                // we'll stop
+                if message_handler
+                    .handle_twitch_message(message, client, agent, config)
+                    .await?
+                {
+                    return Ok(true);
+                }
             }
         }
 
