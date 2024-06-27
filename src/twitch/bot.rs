@@ -115,9 +115,13 @@ impl TwitchMessageHandler for TwitchBot {
         agent: &TwitchAgent,
         config: &Config,
     ) -> Result<bool, TwitchHandlerError> {
-        self.auto_ban_handler
+        if let Err(e) = self
+            .auto_ban_handler
             .handle_twitch_message(message, client, agent, config)
-            .await?;
+            .await
+        {
+            error!("error in autoban handler at root: {}", e);
+        }
 
         if let ServerMessage::Privmsg(privmsg) = message
             && privmsg.channel_login == "muni_corn"
@@ -125,11 +129,13 @@ impl TwitchMessageHandler for TwitchBot {
             for message_handler in self.message_handlers.iter_mut() {
                 // try to handle the message. if the handler determines the message was handled,
                 // we'll stop
-                if message_handler
+                match message_handler
                     .handle_twitch_message(message, client, agent, config)
-                    .await?
+                    .await
                 {
-                    return Ok(true);
+                    Ok(true) => return Ok(true),
+                    Err(e) => error!("error twitch in message handler: {}", e),
+                    _ => continue,
                 }
             }
         }
