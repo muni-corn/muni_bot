@@ -120,7 +120,7 @@ impl TwitchMessageHandler for TwitchBot {
             .await?;
 
         if let ServerMessage::Privmsg(privmsg) = message
-            && privmsg.channel_id == "590712444"
+            && privmsg.channel_login == "muni_corn"
         {
             for message_handler in self.message_handlers.iter_mut() {
                 // try to handle the message. if the handler determines the message was handled,
