@@ -49,9 +49,10 @@ impl TwitchBot {
     }
 
     pub async fn start(mut self, token: String, bot_config: &Config) -> Result<JoinHandle<()>> {
-        let credentials = StaticLoginCredentials::new("muni__bot".to_owned(), Some(token.clone()));
+        let credentials =
+            StaticLoginCredentials::new(bot_config.twitch.twitch_user.clone(), Some(token.clone()));
         let cred_config = ClientConfig::new_simple(credentials.clone());
-        let twitch_auth = TwitchAuth::new("muni__bot", &token).await?;
+        let twitch_auth = TwitchAuth::new(&bot_config.twitch.twitch_user, &token).await?;
         let agent = TwitchAgent::new(twitch_auth);
 
         let (mut incoming_messages, irc_client) = MuniBotTwitchIRCClient::new(cred_config);
