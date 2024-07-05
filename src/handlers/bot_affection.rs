@@ -53,7 +53,7 @@ const KISS_ACTIONS: [&str; 5] = [
     "blushyblush",
     "giggles",
     "hides face",
-    "/)///(\\",
+    "/)///(\\\\",
 ];
 
 const BITE_PREFIXES: [&str; 6] = [
