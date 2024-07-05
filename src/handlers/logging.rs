@@ -662,10 +662,25 @@ where
         && let Some(guild_id) = event.guild_id
         && old.content != new.content
     {
-        let msg = MessageBuilder::new()
+        let mut msg_builder = MessageBuilder::new();
+
+        // add author mention, if available
+        if let Some(author) = &event.author {
+            msg_builder.push(format!("from {} ", author.mention()));
+        }
+
+        msg_builder
             .push("in ")
-            .push(event.channel_id.mention().to_string())
-            .build();
+            .push_line(event.channel_id.mention().to_string());
+
+        if let Some(Some(msg_ref)) = &event.message_reference
+            && let Some(msg_id) = msg_ref.message_id
+        {
+            let link = msg_id.link(event.channel_id, event.guild_id);
+            msg_builder.push_named_link("(go to message)", link);
+        }
+
+        let msg = msg_builder.build().trim().to_owned();
 
         let fields = vec![
             ("old".into(), old.content.clone(), false),
