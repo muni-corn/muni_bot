@@ -171,16 +171,16 @@ async fn transfer(
     #[description = "ping who you want to send funds to"] to: UserId,
 ) -> Result<(), MuniBotError> {
     if let Some(guild_id) = ctx.guild_id() {
-        // check if the author is trying to transfer to themselves
-        if ctx.author().id == to {
-            ctx.say("you can't transfer money to yourself! >:(").await?;
+        // ensure the author is sending anything at all
+        if amount == 0 {
+            ctx.say("you've transferred thin air.").await?;
 
             return Ok(());
         }
 
-        // ensure they're sending anything at all
-        if amount == 0 {
-            ctx.say("you've transferred thin air.").await?;
+        // check if they're trying to transfer to themselves
+        if ctx.author().id == to {
+            ctx.say("you can't transfer money to yourself! >:(").await?;
 
             return Ok(());
         }
