@@ -47,7 +47,7 @@ impl DiscordEventHandler for LoggingHandler {
             FullEvent::AutoModActionExecution { execution } => {
                 send(
                     execution.guild_id,
-                    simple_embed("automod executed an action", &format!("{:?}", execution)),
+                    useless_embed("automod executed an action"),
                 )
                 .await
             }
@@ -168,19 +168,12 @@ impl DiscordEventHandler for LoggingHandler {
             }
 
             FullEvent::GuildMemberUpdate { event, .. } => {
-                let mut fields = vec![];
-                fields.push(("event".to_string(), format!("{:?}", event), false));
-
                 let msg = MessageBuilder::new()
                     .push(event.user.id.mention().to_string())
-                    .push(" was updated")
+                    .push(" was updated. muni has been too lazy to implement any more useful information than this. go bug him about it.")
                     .build();
 
-                send(
-                    event.guild_id,
-                    embed_with_fields("member updated", &msg, fields),
-                )
-                .await
+                send(event.guild_id, simple_embed("member updated", &msg)).await
             }
 
             FullEvent::GuildRoleCreate { new } => {
@@ -233,26 +226,9 @@ impl DiscordEventHandler for LoggingHandler {
             }
 
             FullEvent::GuildUpdate {
-                old_data_if_available,
+                old_data_if_available: _,
                 new_data,
-            } => {
-                let old_rep = old_data_if_available
-                    .as_ref()
-                    .map_or_else(|| "none".to_string(), |old| format!("{:?}", old));
-
-                send(
-                    new_data.id,
-                    embed_with_fields(
-                        "guild updated",
-                        "",
-                        vec![
-                            ("old".into(), old_rep, false),
-                            ("new".into(), format!("{:?}", new_data), false),
-                        ],
-                    ),
-                )
-                .await
-            }
+            } => send(new_data.id, useless_embed("guild updated")).await,
 
             FullEvent::InviteCreate { data } => {
                 let title = if data.temporary {
@@ -621,6 +597,10 @@ async fn send_message(
 
 fn simple_embed(title: &str, message: &str) -> CreateEmbed {
     CreateEmbed::new().title(title).description(message)
+}
+
+fn useless_embed(title: &str) -> CreateEmbed {
+    simple_embed(title, "muni hasn't bothered to implement useful information for this yet. screenshot this and go bother him.")
 }
 
 fn embed_with_fields(
