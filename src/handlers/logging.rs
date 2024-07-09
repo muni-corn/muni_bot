@@ -673,12 +673,8 @@ where
             .push("in ")
             .push_line(event.channel_id.mention().to_string());
 
-        if let Some(Some(msg_ref)) = &event.message_reference
-            && let Some(msg_id) = msg_ref.message_id
-        {
-            let link = msg_id.link(event.channel_id, event.guild_id);
-            msg_builder.push_named_link("(go to message)", link);
-        }
+        let link = &event.id.link(event.channel_id, event.guild_id);
+        msg_builder.push_named_link("(go to message)", link);
 
         let msg = msg_builder.build().trim().to_owned();
 
