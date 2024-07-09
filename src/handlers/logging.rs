@@ -282,28 +282,37 @@ impl DiscordEventHandler for LoggingHandler {
                 deleted_message_id,
                 guild_id,
             } => {
-                let mut msg = MessageBuilder::new();
-                let mut fields = vec![];
-
-                msg.push("a message in ")
-                    .push(channel_id.mention().to_string())
-                    .push(" was deleted");
-
-                if let Some(cache) = context.cache() {
-                    if let Some(deleted_message) = cache.message(channel_id, deleted_message_id) {
-                        fields.push((
-                            "message content".into(),
-                            deleted_message.content_safe(cache),
-                            false,
-                        ));
-                    } else {
-                        msg.push(". its content could not be found in the cache.");
-                    }
-                } else {
-                    msg.push(". there is no cache to retrieve message content from.");
-                }
-
                 if let Some(guild_id) = guild_id {
+                    let mut msg = MessageBuilder::new();
+                    let mut fields = vec![];
+
+                    if let Some(cache) = context.cache() {
+                        if let Some(deleted_message) = cache.message(channel_id, deleted_message_id)
+                        {
+                            msg.push("a message from ")
+                                .push(deleted_message.author.mention().to_string())
+                                .push(" in ")
+                                .push(channel_id.mention().to_string())
+                                .push(" was deleted");
+
+                            fields.push((
+                                "message content".into(),
+                                deleted_message.content_safe(cache),
+                                false,
+                            ));
+                        } else {
+                            msg.push("a message in ")
+                                .push(channel_id.mention().to_string())
+                                .push(" was deleted. its content could not be found in the cache.");
+                        }
+                    } else {
+                        msg.push("a message in ")
+                            .push(channel_id.mention().to_string())
+                            .push(
+                                " was deleted. there is no cache to retrieve message content from.",
+                            );
+                    }
+
                     send(
                         *guild_id,
                         embed_with_fields("message deleted", &msg.build(), fields),
