@@ -243,17 +243,17 @@ impl DiscordEventHandler for LoggingHandler {
                         msg.push(&format!("by <@{}> ", user.id));
                     }
 
-                    let max_uses = if data.max_uses == 0 {
-                        "infinite".to_string()
-                    } else {
-                        format!("{} maximum", data.max_uses)
+                    let max_uses = match data.max_uses {
+                        0 => "infinite uses".to_string(),
+                        1 => "a single use".to_string(),
+                        x => format!("{x} maximum uses"),
                     };
 
                     msg.push("with code ")
                         .push_mono(&data.code)
                         .push(format!(", for channel <#{}>", data.channel_id))
                         .push(", with ")
-                        .push_bold(format!("{} uses", max_uses))
+                        .push_bold(max_uses)
                         .push(", and a lifetime of ")
                         .push_bold(format!("{} seconds", data.max_age));
 
