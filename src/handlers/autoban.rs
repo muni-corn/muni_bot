@@ -92,3 +92,15 @@ fn matches_scam_message(msg_content: &str) -> Result<bool, decancer::Error> {
         .find_multiple(["cheap viewers on", "best viewers on"])
         .is_empty())
 }
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_matches_scam_message() {
+        let msg = "𝕔𝕙𝕖𝕒𝕡 𝕧𝕚𝕖𝕨𝕖𝕣𝕤 𝕠𝕟 scam.url";
+        assert!(super::matches_scam_message(msg).unwrap());
+
+        let msg = "b︢e︢st v︢ie︢we︣rs o︣n scam.url";
+        assert!(super::matches_scam_message(msg).unwrap());
+    }
+}
