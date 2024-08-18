@@ -37,16 +37,7 @@ impl TwitchMessageHandler for AutoBanHandler {
             _ => return Ok(false),
         };
 
-        if user_login.contains("ichi") && user_login.contains("rose") && user_login != "ichi_rose_" {
-            yeet_user(
-                agent,
-                &user_login,
-                channel_login,
-                "user is suspected of impersonation and harrassment of ichi_rose_",
-            )
-            .await?;
-            Ok(true)
-        } else if user_login.contains("isapred") || user_login.contains("isabadstreamer") {
+        if user_login.contains("isapred") || user_login.contains("isabadstreamer") {
             yeet_user(
                 agent,
                 &user_login,
@@ -55,7 +46,9 @@ impl TwitchMessageHandler for AutoBanHandler {
             )
             .await?;
             Ok(true)
-        } else if msg_content.starts_with("Cheap viewers on") {
+        } else if matches_scam_message(msg_content).map_err(|e| {
+            TwitchHandlerError::Other(format!("couldn't sanitize homoglyphed message: {e}"))
+        })? {
             yeet_user(agent, &user_login, channel_login, "likely viewer scam bot").await?;
             Ok(true)
         } else {
@@ -89,4 +82,13 @@ async fn yeet_user(
         .await?;
 
     Ok(())
+}
+
+fn matches_scam_message(msg_content: &str) -> Result<bool, decancer::Error> {
+    // match by "cured" message (free of homoglyphs)
+    let cured_string = decancer::cure!(msg_content)?;
+
+    Ok(!cured_string
+        .find_multiple(["cheap viewers on", "best viewers on"])
+        .is_empty())
 }
