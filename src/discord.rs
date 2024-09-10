@@ -83,8 +83,9 @@ pub async fn start_discord_integration(
 
     let token = env::var("DISCORD_TOKEN")
         .expect("no token provided for discord! i can't run without it :(");
-    let intents =
-        serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT;
+    let intents = serenity::GatewayIntents::non_privileged()
+        | serenity::GatewayIntents::MESSAGE_CONTENT
+        | serenity::GatewayIntents::GUILD_MEMBERS;
     let framework = poise::Framework::<DiscordState, MuniBotError>::builder()
         .setup(move |ctx, ready, framework| {
             Box::pin(on_ready(ctx, ready, framework, handlers, config))
