@@ -111,7 +111,7 @@ impl DiscordEventHandler for LoggingHandler {
             } => {
                 let msg = MessageBuilder::new()
                     .push(banned_user.id.mention().to_string())
-                    .push(format!(
+                    .push_safe(format!(
                         " ({}) was banned",
                         banned_user
                             .global_name
@@ -130,7 +130,7 @@ impl DiscordEventHandler for LoggingHandler {
                 let msg = MessageBuilder::new()
                     .push("on ")
                     .push(unbanned_user.id.mention().to_string())
-                    .push(format!(
+                    .push_safe(format!(
                         " ({})",
                         unbanned_user
                             .global_name
@@ -158,7 +158,7 @@ impl DiscordEventHandler for LoggingHandler {
             FullEvent::GuildMemberRemoval { guild_id, user, .. } => {
                 let msg = MessageBuilder::new()
                     .push(user.id.mention().to_string())
-                    .push(format!(
+                    .push_safe(format!(
                         " ({}) has left",
                         user.global_name.as_ref().unwrap_or(&user.name),
                     ))
