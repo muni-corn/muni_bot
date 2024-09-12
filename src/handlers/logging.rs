@@ -147,7 +147,20 @@ impl DiscordEventHandler for LoggingHandler {
                 msg.push(new_member.user.id.mention().to_string())
                     .push(" joined!");
 
-                let mut embed = simple_embed("new member joined", &msg.build());
+                let account_created_timestamp = new_member.user.created_at().timestamp();
+
+                let mut embed = embed_with_fields(
+                    "new member joined",
+                    &msg.build(),
+                    vec![(
+                        "account created".into(),
+                        format!(
+                            "<t:{}:F>, <t:{}:R>",
+                            account_created_timestamp, account_created_timestamp
+                        ),
+                        false,
+                    )],
+                );
                 if let Some(timestamp) = new_member.joined_at {
                     embed = embed.timestamp(timestamp);
                 }
