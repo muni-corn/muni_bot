@@ -396,6 +396,13 @@ impl DiscordEventHandler for LoggingHandler {
                         msg.push(" from ").push(user_id.mention().to_string());
                     }
 
+                    msg.push("\n");
+
+                    let link = &removed_reaction
+                        .message_id
+                        .link(removed_reaction.channel_id, Some(guild_id));
+                    msg.push_named_link("(go to message)", link);
+
                     send(guild_id, simple_embed("reaction removed", &msg.build())).await
                 } else {
                     Ok(())
