@@ -415,11 +415,14 @@ impl DiscordEventHandler for LoggingHandler {
                     .map_err(|e| DiscordHandlerError::from_display(self.name(), e))?;
 
                 if let Some(guild_channel) = channel.guild() {
+                    let link =
+                        removed_from_message_id.link(*channel_id, Some(guild_channel.guild_id));
                     let msg = MessageBuilder::new()
                         .push("on message id ")
                         .push_mono(removed_from_message_id.to_string())
                         .push(" in ")
-                        .push(channel_id.mention().to_string())
+                        .push_line(channel_id.mention().to_string())
+                        .push_named_link("(go to message)", link)
                         .build();
 
                     send(
@@ -460,6 +463,13 @@ impl DiscordEventHandler for LoggingHandler {
                     if let Some(user_id) = removed_reactions.user_id {
                         msg.push(" from ").push(user_id.mention().to_string());
                     }
+
+                    msg.push("\n");
+
+                    let link = &removed_reactions
+                        .message_id
+                        .link(removed_reactions.channel_id, Some(guild_id));
+                    msg.push_named_link("(go to message)", link);
 
                     send(guild_id, simple_embed("reaction removed", &msg.build())).await
                 } else {
