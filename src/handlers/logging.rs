@@ -246,7 +246,7 @@ impl DiscordEventHandler for LoggingHandler {
                 if let Some(guild_id) = data.guild_id {
                     let mut msg = MessageBuilder::new();
                     if let Some(user) = &data.inviter {
-                        msg.push(&format!("by <@{}> ", user.id));
+                        msg.push(format!("by <@{}> ", user.id));
                     }
 
                     let max_uses = match data.max_uses {
