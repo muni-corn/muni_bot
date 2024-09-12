@@ -449,16 +449,16 @@ impl DiscordEventHandler for LoggingHandler {
 
                     match &removed_reactions.emoji {
                         ReactionType::Unicode(emoji) => {
-                            msg.push(" with unicode emoji ").push(emoji);
+                            msg.push(" of unicode emoji ").push(emoji);
                         }
                         ReactionType::Custom { id, name, .. } => {
                             if let Some(name) = name {
-                                msg.push(" with custom emoji ")
+                                msg.push(" of custom emoji ")
                                     .push_bold(name)
                                     .push(" id ")
                                     .push_mono(id.to_string());
                             } else {
-                                msg.push(" with custom emoji id ").push_mono(id.to_string());
+                                msg.push(" of custom emoji id ").push_mono(id.to_string());
                             }
                         }
                         _ => {}
@@ -475,7 +475,7 @@ impl DiscordEventHandler for LoggingHandler {
                         .link(removed_reactions.channel_id, Some(guild_id));
                     msg.push_named_link("(go to message)", link);
 
-                    send(guild_id, simple_embed("reaction removed", &msg.build())).await
+                    send(guild_id, simple_embed("reactions removed", &msg.build())).await
                 } else {
                     Ok(())
                 }
