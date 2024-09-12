@@ -180,14 +180,7 @@ impl DiscordEventHandler for LoggingHandler {
                 send(*guild_id, simple_embed("member left", &msg)).await
             }
 
-            FullEvent::GuildMemberUpdate { event, .. } => {
-                let msg = MessageBuilder::new()
-                    .push(event.user.id.mention().to_string())
-                    .push(" was updated. muni has been too lazy to implement any more useful information than this. go bug him about it.")
-                    .build();
-
-                send(event.guild_id, simple_embed("member updated", &msg)).await
-            }
+            FullEvent::GuildMemberUpdate { event, .. } => handle_member_update(send, event).await,
 
             FullEvent::GuildRoleCreate { new } => {
                 let msg = MessageBuilder::new()
@@ -699,4 +692,19 @@ where
     } else {
         Ok(())
     }
+}
+
+async fn handle_member_update<F, X>(
+    send: F,
+    event: &GuildMemberUpdateEvent,
+) -> Result<(), DiscordHandlerError>
+where
+    F: Fn(GuildId, CreateEmbed) -> X,
+    X: Future<Output = Result<(), DiscordHandlerError>>,
+{
+    let mut msg = MessageBuilder::new();
+    msg.push(event.user.id.mention().to_string())
+        .push(" was updated. muni has been too lazy to implement any more useful information than this. go bug him about it.");
+
+    send(event.guild_id, simple_embed("member updated", &msg.build())).await
 }
