@@ -180,7 +180,11 @@ impl DiscordEventHandler for LoggingHandler {
                 send(*guild_id, simple_embed("member left", &msg)).await
             }
 
-            FullEvent::GuildMemberUpdate { event, .. } => handle_member_update(send, event).await,
+            FullEvent::GuildMemberUpdate {
+                old_if_available,
+                new,
+                event,
+            } => handle_member_update(send, old_if_available, new, event).await,
 
             FullEvent::GuildRoleCreate { new } => {
                 let msg = MessageBuilder::new()
@@ -696,15 +700,88 @@ where
 
 async fn handle_member_update<F, X>(
     send: F,
+    old_if_available: &Option<Member>,
+    new: &Option<Member>,
     event: &GuildMemberUpdateEvent,
 ) -> Result<(), DiscordHandlerError>
 where
     F: Fn(GuildId, CreateEmbed) -> X,
     X: Future<Output = Result<(), DiscordHandlerError>>,
 {
-    let mut msg = MessageBuilder::new();
-    msg.push(event.user.id.mention().to_string())
-        .push(" was updated. muni has been too lazy to implement any more useful information than this. go bug him about it.");
+    if let (Some(old), Some(new)) = (old_if_available, new) {
+        let mut msg = MessageBuilder::new();
+        msg.push(event.user.id.mention().to_string())
+            .push(" was updated");
 
-    send(event.guild_id, simple_embed("member updated", &msg.build())).await
+        let mut fields: Vec<(&str, String)> = vec![];
+
+        // collect changed fields
+
+        // nickname
+        if old.nick != new.nick {
+            if let Some(new_nick) = &new.nick {
+                fields.push((
+                    "nickname",
+                    MessageBuilder::new().push_safe(new_nick).build(),
+                ))
+            } else {
+                fields.push((
+                    "nickname",
+                    MessageBuilder::new().push_italic("removed").build(),
+                ))
+            }
+        }
+
+        // roles
+        if old.roles != new.roles {
+            let added_roles = new
+                .roles
+                .iter()
+                .filter(|role| !old.roles.contains(role))
+                .map(|role| role.mention().to_string())
+                .collect::<Vec<String>>();
+            let removed_roles = old
+                .roles
+                .iter()
+                .filter(|role| !new.roles.contains(role))
+                .map(|role| role.mention().to_string())
+                .collect::<Vec<String>>();
+
+            if !added_roles.is_empty() {
+                fields.push(("roles added", added_roles.join(" ")))
+            }
+            if !removed_roles.is_empty() {
+                fields.push(("roles removed", removed_roles.join(" ")))
+            }
+        }
+
+        // timeouts
+        if old.communication_disabled_until != new.communication_disabled_until {
+            match (
+                old.communication_disabled_until,
+                new.communication_disabled_until,
+            ) {
+                (Some(_), None) => fields.push(("timeout removed", String::new())),
+                (_, Some(new)) => {
+                    fields.push(("timed out", format!("until <t:{}:F>", new.timestamp())))
+                }
+                _ => {}
+            }
+        }
+
+        if !fields.is_empty() {
+            let fields = fields
+                .into_iter()
+                .map(|(name, value)| (name.to_string(), value, true))
+                .collect();
+
+            send(
+                event.guild_id,
+                embed_with_fields("member updated", &msg.build(), fields),
+            )
+            .await?
+        }
+    }
+
+    Ok(())
 }
