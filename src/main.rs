@@ -8,9 +8,8 @@ use muni_bot::{
     discord::start_discord_integration,
     handlers::{
         bot_affection::BotAffectionProvider, dice::DiceHandler, economy::EconomyProvider,
-        eight_ball::EightBallProvider, greeting::GreetingHandler, logging::LoggingHandler,
-        magical::MagicalHandler, temperature::TemperatureConversionProvider,
-        topic_change::TopicChangeProvider, ventriloquize::VentriloquizeProvider,
+        greeting::GreetingHandler, logging::LoggingHandler, magical::MagicalHandler,
+        temperature::TemperatureConversionProvider, ventriloquize::VentriloquizeProvider,
         DiscordCommandProviderCollection, DiscordMessageHandlerCollection,
     },
     twitch::{bot::TwitchBot, get_basic_auth_url},
@@ -83,7 +82,6 @@ fn start_discord(config: Config) -> tokio::task::JoinHandle<()> {
         Box::new(MagicalHandler),
         Box::new(VentriloquizeProvider),
         Box::new(EconomyProvider),
-        Box::new(TopicChangeProvider),
         Box::new(TemperatureConversionProvider),
     ];
 

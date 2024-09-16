@@ -24,7 +24,6 @@ pub mod quotes;
 pub mod shoutout;
 pub mod socials;
 pub mod temperature;
-pub mod topic_change;
 pub mod ventriloquize;
 
 pub type TwitchHandlerCollection = Vec<Box<dyn TwitchMessageHandler>>;
