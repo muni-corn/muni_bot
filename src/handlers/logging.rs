@@ -217,22 +217,21 @@ impl DiscordEventHandler for LoggingHandler {
                 old_data_if_available,
                 new,
             } => {
-                let old_rep = old_data_if_available
-                    .as_ref()
-                    .map_or_else(|| "none".to_string(), |old| format!("{}", old));
-
-                send(
-                    new.guild_id,
-                    embed_with_fields(
-                        "role updated",
-                        "",
-                        vec![
-                            ("old".into(), old_rep, false),
-                            ("new".into(), format!("{}", new), false),
-                        ],
-                    ),
-                )
-                .await
+                if let Some(old) = old_data_if_available {
+                    handle_role_update(send, old, new).await
+                } else {
+                    send(
+                        new.guild_id,
+                        simple_embed(
+                            "role updated",
+                            &format!(
+                                "{} was updated, but its old data is not available in the cache",
+                                new.mention()
+                            ),
+                        ),
+                    )
+                    .await
+                }
             }
 
             FullEvent::GuildUpdate {
@@ -250,7 +249,7 @@ impl DiscordEventHandler for LoggingHandler {
                 if let Some(guild_id) = data.guild_id {
                     let mut msg = MessageBuilder::new();
                     if let Some(user) = &data.inviter {
-                        msg.push(format!("by <@{}> ", user.id));
+                        msg.push(format!("by {} ", user.mention()));
                     }
 
                     let max_uses = match data.max_uses {
@@ -791,4 +790,68 @@ where
     }
 
     Ok(())
+}
+
+async fn handle_role_update<F, X>(
+    send: F,
+    old: &Role,
+    new: &Role,
+) -> Result<(), DiscordHandlerError>
+where
+    F: Fn(GuildId, CreateEmbed) -> X,
+    X: Future<Output = Result<(), DiscordHandlerError>>,
+{
+    let mut msg = MessageBuilder::new();
+    msg.push("role ")
+        .push_bold(new.mention().to_string())
+        .push(" was updated");
+
+    let mut fields = vec![];
+
+    if old.name != new.name {
+        fields.push(("old name".into(), old.name.to_string(), false));
+        fields.push(("new name".into(), new.name.to_string(), false));
+    }
+
+    if old.colour != new.colour {
+        fields.push(("color".into(), format!("{:#x}", new.colour.0), true));
+    }
+
+    if old.hoist != new.hoist {
+        fields.push(("hoist".into(), bool_to_string(new.hoist), true));
+    }
+
+    if old.mentionable != new.mentionable {
+        fields.push(("mentionable".into(), bool_to_string(new.mentionable), true));
+    }
+
+    if old.position != new.position {
+        fields.push(("position".into(), new.position.to_string(), true));
+    }
+
+    if old.permissions != new.permissions {
+        let added_perms = (new.permissions - old.permissions)
+            .iter_names()
+            .map(|(name, _)| name)
+            .collect::<Vec<_>>()
+            .join(", ");
+        let removed_perms = (old.permissions - new.permissions)
+            .iter_names()
+            .map(|(name, _)| name)
+            .collect::<Vec<_>>()
+            .join(", ");
+
+        fields.push(("added permissions".into(), added_perms, false));
+        fields.push(("removed permissions".into(), removed_perms, false));
+    }
+
+    send(
+        new.guild_id,
+        embed_with_fields("role updated", &msg.build(), fields),
+    )
+    .await
+}
+
+fn bool_to_string(b: bool) -> String {
+    if b { "yes" } else { "no" }.to_string()
 }
