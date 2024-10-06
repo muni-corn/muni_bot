@@ -1,22 +1,18 @@
 use async_trait::async_trait;
 use serde::{de::DeserializeOwned, Serialize};
-use surrealdb::{
-    sql::{Id, Thing},
-    Connection, Surreal,
-};
+use surrealdb::{opt::IntoResource, Connection, RecordIdKey, Surreal};
 
 #[async_trait]
 pub trait DbItem<C: Connection>: Serialize + DeserializeOwned {
     const NAME: &'static str;
+    type Id: Into<RecordIdKey>;
     type GetQuery;
+    type UpsertContent: Serialize + Send + 'static;
 
-    fn get_id(&self) -> Id;
+    fn get_id(&self) -> Self::Id;
 
-    fn as_thing(&self) -> Thing {
-        Thing {
-            id: self.get_id().clone(),
-            tb: Self::NAME.to_string(),
-        }
+    fn as_into_resource(&self) -> impl IntoResource<Option<Self>> {
+        (Self::NAME, self.get_id())
     }
 
     async fn get_from_db(
@@ -24,15 +20,15 @@ pub trait DbItem<C: Connection>: Serialize + DeserializeOwned {
         query: Self::GetQuery,
     ) -> Result<Option<Self>, surrealdb::Error>;
 
-    async fn update_in_db(&self, db: &Surreal<C>) -> Result<Option<Self>, surrealdb::Error> {
-        db.update(self.as_thing()).content(self).await
+    async fn upsert_in_db<'a>(
+        &self,
+        db: &'a Surreal<C>,
+        content: Self::UpsertContent,
+    ) -> Result<Option<Self>, surrealdb::Error> {
+        db.upsert(self.as_into_resource()).content(content).await
     }
 
     async fn delete_from_db(&self, db: &Surreal<C>) -> Result<Option<Self>, surrealdb::Error> {
-        db.delete(Thing {
-            id: self.get_id().clone(),
-            tb: Self::NAME.to_string(),
-        })
-        .await
+        db.delete(self.as_into_resource()).await
     }
 }

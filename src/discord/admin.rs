@@ -44,9 +44,8 @@ async fn set_log_channel(ctx: DiscordContext<'_>, channel: ChannelId) -> Result<
     let db = &ctx.data().db;
 
     if let Some(guild_id) = ctx.guild_id() {
-        LoggingChannel::new(guild_id, channel)
-            .update_in_db(db)
-            .await?;
+        let lc = LoggingChannel::new(guild_id, channel);
+        lc.upsert_in_db(db, lc.clone()).await?;
         ctx.say(format!("done! log messages will be sent to <#{}>", channel))
             .await?;
     } else {

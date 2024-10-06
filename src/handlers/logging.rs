@@ -3,10 +3,7 @@ use std::future::Future;
 use async_trait::async_trait;
 use poise::serenity_prelude::{self as serenity, *};
 use serde::{Deserialize, Serialize};
-use surrealdb::{
-    sql::{Id, Thing},
-    Connection, Surreal,
-};
+use surrealdb::{Connection, Surreal};
 
 use crate::{
     db::DbItem,
@@ -544,7 +541,7 @@ impl LoggingHandler {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct LoggingChannel {
     /// The guild id that owns this logging channel.
     #[serde(skip)]
@@ -559,11 +556,13 @@ const LOGGING_CHANNEL_TABLE: &str = "logging_channel";
 #[async_trait]
 impl<C: Connection> DbItem<C> for LoggingChannel {
     type GetQuery = GuildId;
+    type Id = i64;
+    type UpsertContent = Self;
 
     const NAME: &'static str = LOGGING_CHANNEL_TABLE;
 
-    fn get_id(&self) -> Id {
-        Id::from(self.guild_id.get())
+    fn get_id(&self) -> Self::Id {
+        self.guild_id.get() as i64
     }
 
     async fn get_from_db(
@@ -572,13 +571,7 @@ impl<C: Connection> DbItem<C> for LoggingChannel {
     ) -> Result<Option<Self>, surrealdb::Error> {
         let mut result = db
             .query("SELECT * FROM $guild_id;")
-            .bind((
-                "guild_id",
-                Thing {
-                    id: Id::from(guild_id.get()),
-                    tb: LOGGING_CHANNEL_TABLE.to_string(),
-                },
-            ))
+            .bind(("guild_id", guild_id.get()))
             .await?;
 
         Ok(result.take::<Option<Self>>(0)?.map(|mut r| {

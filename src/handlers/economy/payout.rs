@@ -1,7 +1,7 @@
 use chrono::Local;
 use poise::serenity_prelude::{GuildId, UserId};
 use serde::{Deserialize, Serialize};
-use surrealdb::{sql::Thing, Connection, Surreal};
+use surrealdb::{Connection, Surreal};
 use thiserror::Error;
 
 use super::wallet::{Wallet, WalletError};
@@ -11,7 +11,7 @@ const GUILD_PAYOUT_TABLE: &str = "guild_payout";
 
 const PAYOUT_INTERVAL: chrono::Duration = chrono::Duration::milliseconds(1000 * 60 * 5);
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct PayoutData {
     guild_id: GuildId,
     user_id: UserId,
@@ -21,7 +21,7 @@ pub struct PayoutData {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Payout {
-    id: Thing,
+    id: String,
 
     #[serde(flatten)]
     data: PayoutData,
@@ -62,7 +62,7 @@ impl Payout {
         user_id: UserId,
     ) -> Result<Self, PayoutError> {
         // insert the payout into the payout table
-        db.create::<Vec<Self>>(GUILD_PAYOUT_TABLE)
+        db.create::<Option<Self>>(GUILD_PAYOUT_TABLE)
             .content(PayoutData {
                 guild_id,
                 user_id,
@@ -71,16 +71,14 @@ impl Payout {
             })
             .await
             .map_err(PayoutError::Database)
-            .and_then(|mut vec| {
-                vec.pop()
-                    .ok_or_else(|| PayoutError::NotCreated(user_id, guild_id))
-            })
+            .and_then(|opt| opt.ok_or_else(|| PayoutError::NotCreated(user_id, guild_id)))
     }
 
     /// Updates this payout in the database.
     async fn update_in_db<C: Connection>(&self, db: &Surreal<C>) -> Result<(), PayoutError> {
-        db.update::<Option<Self>>(&self.id)
-            .content(&self.data)
+        let data = self.data.clone();
+        db.update::<Option<Self>>((GUILD_PAYOUT_TABLE, self.id.clone()))
+            .content(data)
             .await?;
         Ok(())
     }

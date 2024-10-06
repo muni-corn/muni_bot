@@ -56,12 +56,9 @@ impl QuotesHandler {
     }
 
     /// Add a new quote to the database, returning the new count of quotes
-    pub async fn add_new_quote<'a>(
-        &mut self,
-        new_quote: &Quote,
-    ) -> Result<u32, TwitchHandlerError> {
+    pub async fn add_new_quote<'a>(&mut self, new_quote: Quote) -> Result<u32, TwitchHandlerError> {
         self.db
-            .create::<Vec<Quote>>(QUOTE_TABLE)
+            .create::<Option<Quote>>(QUOTE_TABLE)
             .content(new_quote)
             .await?;
 
@@ -163,7 +160,7 @@ impl TwitchMessageHandler for QuotesHandler {
                         stream_title: channel_info.title,
                     };
 
-                    let quote_count = self.add_new_quote(&new_quote).await?;
+                    let quote_count = self.add_new_quote(new_quote).await?;
                     self.send_twitch_message(
                         client,
                         &m.channel_login,

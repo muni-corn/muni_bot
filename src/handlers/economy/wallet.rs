@@ -1,13 +1,13 @@
 use poise::serenity_prelude::{GuildId, UserId};
 use serde::{Deserialize, Serialize};
-use surrealdb::{sql::Thing, Connection, Surreal};
+use surrealdb::{Connection, Surreal};
 use thiserror::Error;
 
 use crate::MuniBotError;
 
 pub const GUILD_WALLET_TABLE: &str = "guild_wallet";
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct WalletData {
     guild_id: GuildId,
     user_id: UserId,
@@ -16,7 +16,7 @@ pub struct WalletData {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Wallet {
-    id: Thing,
+    id: String,
 
     #[serde(flatten)]
     data: WalletData,
@@ -53,7 +53,7 @@ impl Wallet {
         balance: u64,
     ) -> Result<Self, WalletError> {
         // insert the wallet into the wallet table
-        db.create::<Vec<Self>>(GUILD_WALLET_TABLE)
+        db.create::<Option<Self>>(GUILD_WALLET_TABLE)
             .content(WalletData {
                 guild_id,
                 user_id,
@@ -61,16 +61,14 @@ impl Wallet {
             })
             .await
             .map_err(WalletError::Database)
-            .and_then(|mut vec| {
-                vec.pop()
-                    .ok_or_else(|| WalletError::NotCreated(user_id, guild_id))
-            })
+            .and_then(|opt| opt.ok_or_else(|| WalletError::NotCreated(user_id, guild_id)))
     }
 
     /// Updates this wallet in the database.
     async fn update_in_db<C: Connection>(&self, db: &Surreal<C>) -> Result<(), WalletError> {
-        db.update::<Option<Self>>(&self.id)
-            .content(&self.data)
+        let data = self.data.clone();
+        db.update::<Option<Self>>((GUILD_WALLET_TABLE, self.id.clone()))
+            .content(data)
             .await?;
         Ok(())
     }
