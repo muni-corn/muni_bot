@@ -142,7 +142,14 @@ impl DiscordEventHandler for LoggingHandler {
             FullEvent::GuildMemberAddition { new_member } => {
                 let mut msg = MessageBuilder::new();
                 msg.push(new_member.user.id.mention().to_string())
-                    .push(" joined!");
+                    .push_safe(format!(
+                        " ({}) joined!",
+                        new_member
+                            .user
+                            .global_name
+                            .as_ref()
+                            .unwrap_or(&new_member.user.name)
+                    ));
 
                 let account_created_timestamp = new_member.user.created_at().timestamp();
 
