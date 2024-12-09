@@ -1,7 +1,7 @@
 use chrono::Local;
 use poise::serenity_prelude::{GuildId, UserId};
 use serde::{Deserialize, Serialize};
-use surrealdb::{Connection, Surreal};
+use surrealdb::{Connection, RecordId, Surreal};
 use thiserror::Error;
 
 use super::wallet::{Wallet, WalletError};
@@ -21,7 +21,7 @@ pub struct PayoutData {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Payout {
-    id: String,
+    id: RecordId,
 
     #[serde(flatten)]
     data: PayoutData,
@@ -77,7 +77,7 @@ impl Payout {
     /// Updates this payout in the database.
     async fn update_in_db<C: Connection>(&self, db: &Surreal<C>) -> Result<(), PayoutError> {
         let data = self.data.clone();
-        db.update::<Option<Self>>((GUILD_PAYOUT_TABLE, self.id.clone()))
+        db.update::<Option<Self>>((GUILD_PAYOUT_TABLE, self.id.key().clone()))
             .content(data)
             .await?;
         Ok(())

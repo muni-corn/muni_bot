@@ -1,6 +1,6 @@
 use poise::serenity_prelude::{GuildId, UserId};
 use serde::{Deserialize, Serialize};
-use surrealdb::{Connection, Surreal};
+use surrealdb::{Connection, RecordId, Surreal};
 use thiserror::Error;
 
 use crate::MuniBotError;
@@ -16,7 +16,7 @@ pub struct WalletData {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Wallet {
-    id: String,
+    id: RecordId,
 
     #[serde(flatten)]
     data: WalletData,
@@ -67,7 +67,7 @@ impl Wallet {
     /// Updates this wallet in the database.
     async fn update_in_db<C: Connection>(&self, db: &Surreal<C>) -> Result<(), WalletError> {
         let data = self.data.clone();
-        db.update::<Option<Self>>((GUILD_WALLET_TABLE, self.id.clone()))
+        db.update::<Option<Self>>((GUILD_WALLET_TABLE, self.id.key().clone()))
             .content(data)
             .await?;
         Ok(())
