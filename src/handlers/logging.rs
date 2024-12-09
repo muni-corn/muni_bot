@@ -3,7 +3,7 @@ use std::future::Future;
 use async_trait::async_trait;
 use poise::serenity_prelude::{self as serenity, *};
 use serde::{Deserialize, Serialize};
-use surrealdb::{Connection, Surreal};
+use surrealdb::{Connection, RecordId, Surreal};
 
 use crate::{
     db::DbItem,
@@ -577,8 +577,11 @@ impl<C: Connection> DbItem<C> for LoggingChannel {
         guild_id: Self::GetQuery,
     ) -> Result<Option<Self>, surrealdb::Error> {
         let mut result = db
-            .query("SELECT * FROM $guild_id;")
-            .bind(("guild_id", guild_id.get()))
+            .query("SELECT * FROM $thing;")
+            .bind((
+                "thing",
+                RecordId::from_table_key(LOGGING_CHANNEL_TABLE, guild_id.get() as i64),
+            ))
             .await?;
 
         Ok(result.take::<Option<Self>>(0)?.map(|mut r| {
