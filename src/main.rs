@@ -32,41 +32,52 @@ async fn main() -> Result<(), MuniBotError> {
     let args = Args::parse();
     let config = Config::read_or_write_default_from(&args.config_file)?;
 
-    // ensure credentials exist
-    match std::env::var("TWITCH_TOKEN") {
-        Ok(twitch_token) => {
-            let discord_handle = start_discord(config.clone());
+    let discord_handle = start_discord(config.clone());
 
+    // ensure credentials exist
+    let twitch_handle = match std::env::var("TWITCH_TOKEN") {
+        Ok(twitch_token) => {
             // start twitch
             match TwitchBot::new(config.clone())
                 .await
-                .start(twitch_token, &config)
+                .launch(twitch_token, &config)
                 .await
             {
                 // wait for the twitch bot to stop, if ever
-                Ok(twitch_handle) => match twitch_handle.await {
-                    Ok(_) => warn!("twitch bot stopped o.o"),
-                    Err(e) => error!("twitch bot died with error: {e}"),
-                },
-                Err(e) => error!("twitch bot failed to start :< {e}"),
+                Ok(twitch_handle) => Some(twitch_handle),
+                Err(e) => {
+                    error!("twitch bot failed to start :< {e}");
+                    None
+                }
             }
-
-            // wait for the discord bot to stop, if ever
-            match discord_handle.await {
-                Ok(_) => warn!("discord bot stopped o.o"),
-                Err(e) => error!("discord bot died with error: {e}"),
-            }
-
-            info!("all bot integrations have stopped. goodbye ^-^");
-            Ok(())
         }
         Err(e) => {
-            let auth_page_url = get_basic_auth_url();
-            error!("no TWITCH_TOKEN found ({e})");
-            info!("visit {auth_page_url} to get a token");
-            Err(MuniBotError::MissingToken)
+            if let Ok(auth_page_url) = get_basic_auth_url() {
+                error!("no TWITCH_TOKEN found ({e})");
+                info!("visit {auth_page_url} to get a token");
+            } else {
+                error!("no TWITCH_TOKEN found and no TWITCH_CLIENT_ID set. the TWITCH_CLIENT_ID environment variable is required to generate an auth url link.");
+            }
+            warn!("since twitch integration is misconfigured, i won't be running my twitch integration at this time. >.>");
+            None
+        }
+    };
+
+    // wait for the discord bot to stop, if ever
+    match discord_handle.await {
+        Ok(_) => warn!("discord bot stopped o.o  this is probably not supposed to happen..."),
+        Err(e) => error!("discord bot died with error: {e}"),
+    }
+
+    if let Some(twitch_handle) = twitch_handle {
+        match twitch_handle.await {
+            Ok(_) => warn!("twitch bot stopped o.o  this is probably not supposed to happen..."),
+            Err(e) => error!("twitch bot died with error: {e}"),
         }
     }
+
+    warn!("all bot integrations have unexpectedly stopped. i can't do anything else right now. goodbye! ^-^");
+    Ok(())
 }
 
 fn start_discord(config: Config) -> tokio::task::JoinHandle<()> {

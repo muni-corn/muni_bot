@@ -48,7 +48,7 @@ impl TwitchBot {
         }
     }
 
-    pub async fn start(mut self, token: String, bot_config: &Config) -> Result<JoinHandle<()>> {
+    pub async fn launch(mut self, token: String, bot_config: &Config) -> Result<JoinHandle<()>> {
         let credentials =
             StaticLoginCredentials::new(bot_config.twitch.twitch_user.clone(), Some(token.clone()));
         let cred_config = ClientConfig::new_simple(credentials.clone());

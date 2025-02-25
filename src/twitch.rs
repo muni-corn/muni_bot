@@ -1,4 +1,4 @@
-use std::{borrow::Cow, str::FromStr};
+use std::{borrow::Cow, env::VarError, str::FromStr};
 
 use twitch_oauth2::Scope;
 use url::Url;
@@ -21,9 +21,11 @@ const SCOPE: [Scope; 8] = [
     Scope::ChatRead,
 ];
 
-pub fn get_basic_auth_url() -> Url {
+/// Returns the authorization URL to authorize muni_bot's Twitch account. Will
+/// only return an error if the `TWITCH_CLIENT_ID` variable is not set.
+pub fn get_basic_auth_url() -> Result<Url, VarError> {
     let mut url = Url::from_str("https://id.twitch.tv/oauth2/authorize").unwrap();
-    let client_id = std::env::var("TWITCH_CLIENT_ID").expect("env var TWITCH_CLIENT_ID is not set");
+    let client_id = std::env::var("TWITCH_CLIENT_ID")?;
 
     let auth = vec![
         ("response_type", "token"),
@@ -36,5 +38,5 @@ pub fn get_basic_auth_url() -> Url {
     url.query_pairs_mut()
         .append_pair("scope", &SCOPE.as_slice().join(" "));
 
-    url
+    Ok(url)
 }
