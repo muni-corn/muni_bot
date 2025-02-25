@@ -2,6 +2,7 @@ pub mod admin;
 pub mod commands;
 pub mod handler;
 pub mod utils;
+pub mod vc_greeter;
 
 use std::env;
 

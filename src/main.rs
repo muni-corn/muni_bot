@@ -5,7 +5,7 @@ use env_logger::Env;
 use log::{error, info, warn};
 use muni_bot::{
     config::Config,
-    discord::start_discord_integration,
+    discord::{start_discord_integration, vc_greeter::VoiceChannelGreeter},
     handlers::{
         bot_affection::BotAffectionProvider, dice::DiceHandler, economy::EconomyProvider,
         greeting::GreetingHandler, logging::LoggingHandler, magical::MagicalHandler,
@@ -86,6 +86,7 @@ fn start_discord(config: Config) -> tokio::task::JoinHandle<()> {
         Arc::new(Mutex::new(GreetingHandler)),
         Arc::new(Mutex::new(EconomyProvider)),
         Arc::new(Mutex::new(LoggingHandler)),
+        Arc::new(Mutex::new(VoiceChannelGreeter)),
     ];
     let discord_command_providers: DiscordCommandProviderCollection = vec![
         Box::new(DiceHandler),

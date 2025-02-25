@@ -1,4 +1,4 @@
-use poise::serenity_prelude::{CacheHttp, Message};
+use poise::serenity_prelude::*;
 
 use super::DiscordContext;
 
@@ -20,5 +20,22 @@ pub async fn display_name_from_command_context(ctx: DiscordContext<'_>) -> Strin
             .unwrap_or_else(|| author.name.clone())
     } else {
         author.name.clone()
+    }
+}
+
+pub async fn display_name_from_ids(
+    http: &Http,
+    user_id: UserId,
+    guild_id: Option<GuildId>,
+) -> Result<String, poise::serenity_prelude::Error> {
+    let user = http.get_user(user_id).await?;
+    if let Some(guild_id) = guild_id {
+        Ok(user
+            .nick_in(http, guild_id)
+            .await
+            .or(user.global_name)
+            .unwrap_or(user.name))
+    } else {
+        Ok(user.global_name.unwrap_or(user.name))
     }
 }
