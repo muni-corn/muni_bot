@@ -1,6 +1,7 @@
 use std::future::Future;
 
 use async_trait::async_trait;
+use log::debug;
 use poise::serenity_prelude::{self as serenity, *};
 use serde::{Deserialize, Serialize};
 use surrealdb::{Connection, RecordId, Surreal};
@@ -603,7 +604,7 @@ impl LoggingChannel {
 async fn get_logging_channel_for_guild(
     framework: &DiscordFrameworkContext<'_>,
     guild_id: GuildId,
-) -> Result<ChannelId, DiscordHandlerError> {
+) -> Result<Option<ChannelId>, DiscordHandlerError> {
     let db = &framework.user_data().await.db;
     let logging_channel = LoggingChannel::get_from_db(db, guild_id)
         .await
@@ -612,14 +613,7 @@ async fn get_logging_channel_for_guild(
             handler_name: "logging",
         })?;
 
-    if let Some(logging_channel) = logging_channel {
-        Ok(logging_channel.channel_id)
-    } else {
-        Err(DiscordHandlerError {
-            message: "no logging channel found for guild".to_string(),
-            handler_name: "logging",
-        })
-    }
+    Ok(logging_channel.map(|l| l.channel_id))
 }
 
 async fn send_message(
@@ -628,8 +622,11 @@ async fn send_message(
     guild_id: GuildId,
     message: CreateMessage,
 ) -> anyhow::Result<()> {
-    let logging_channel = get_logging_channel_for_guild(framework, guild_id).await?;
-    logging_channel.send_message(&context.http, message).await?;
+    if let Some(logging_channel) = get_logging_channel_for_guild(framework, guild_id).await? {
+        logging_channel.send_message(&context.http, message).await?;
+    } else {
+        debug!("no logging channel for guild with id {guild_id}")
+    }
     Ok(())
 }
 
