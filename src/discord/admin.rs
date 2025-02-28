@@ -1,4 +1,4 @@
-use poise::serenity_prelude::ChannelId;
+use poise::serenity_prelude::{ChannelId, Mentionable};
 
 use super::{DiscordCommand, DiscordCommandProvider, DiscordContext};
 use crate::{db::DbItem, handlers::logging::LoggingChannel, MuniBotError};
@@ -40,14 +40,25 @@ async fn admin(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
     guild_only,
     required_permissions = "MANAGE_GUILD"
 )]
-async fn set_log_channel(ctx: DiscordContext<'_>, channel: ChannelId) -> Result<(), MuniBotError> {
+async fn set_log_channel(
+    ctx: DiscordContext<'_>,
+
+    #[description = "the channel to log messages to. if omitted, use the current channel instead."]
+    channel: Option<ChannelId>,
+) -> Result<(), MuniBotError> {
     let db = &ctx.data().db;
 
     if let Some(guild_id) = ctx.guild_id() {
-        let lc = LoggingChannel::new(guild_id, channel);
+        let channel_id = channel.unwrap_or_else(|| ctx.channel_id());
+        let lc = LoggingChannel::new(guild_id, channel_id);
         lc.upsert_in_db(db, lc.clone()).await?;
-        ctx.say(format!("done! log messages will be sent to <#{}>", channel))
-            .await?;
+        ctx.say(format!(
+            "done! log messages will be sent to {}.",
+            channel
+                .map(|id| id.mention().to_string())
+                .unwrap_or("this channel".to_string())
+        ))
+        .await?;
     } else {
         ctx.say("this command can only be used in a server, silly.")
             .await?;
