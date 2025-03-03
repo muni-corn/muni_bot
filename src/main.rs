@@ -8,7 +8,7 @@ use muni_bot::{
     discord::{start_discord_integration, vc_greeter::VoiceChannelGreeter},
     handlers::{
         bot_affection::BotAffectionProvider, dice::DiceHandler, economy::EconomyProvider,
-        greeting::GreetingHandler, logging::LoggingHandler, magical::MagicalHandler,
+        greeting::GreetingHandler, magical::MagicalHandler,
         temperature::TemperatureConversionProvider, ventriloquize::VentriloquizeProvider,
         DiscordCommandProviderCollection, DiscordMessageHandlerCollection,
     },
@@ -85,7 +85,6 @@ fn start_discord(config: Config) -> tokio::task::JoinHandle<()> {
     let discord_handlers: DiscordMessageHandlerCollection = vec![
         Arc::new(Mutex::new(GreetingHandler)),
         Arc::new(Mutex::new(EconomyProvider)),
-        Arc::new(Mutex::new(LoggingHandler)),
         Arc::new(Mutex::new(VoiceChannelGreeter)),
     ];
     let discord_command_providers: DiscordCommandProviderCollection = vec![
