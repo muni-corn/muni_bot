@@ -85,7 +85,7 @@ async fn on_ready(
 ) -> Result<DiscordState, MuniBotError> {
     register_globally(ctx, &framework.options().commands)
         .await
-        .expect("failed to register commands in guild");
+        .expect("failed to register commands globally");
 
     ctx.set_activity(Some(serenity::ActivityData::watching("you sleep uwu")));
 
@@ -104,10 +104,7 @@ async fn event_handler(
         let mut locked_handler = handler.lock().await;
         let handled_future = locked_handler.handle_discord_event(context, framework_context, event);
         if let Err(e) = handled_future.await {
-            error!(
-                "discord integration ran into an error executing handlers: {}",
-                e
-            );
+            error!("discord: error in {} handler: {}", locked_handler.name(), e);
         }
     }
     Ok(())
