@@ -12,7 +12,7 @@ pub struct VoiceChannelGreeter;
 #[async_trait]
 impl DiscordEventHandler for VoiceChannelGreeter {
     fn name(&self) -> &'static str {
-        todo!()
+        "vc greeter"
     }
 
     async fn handle_discord_event(
