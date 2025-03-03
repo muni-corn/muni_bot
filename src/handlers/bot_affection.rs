@@ -4,7 +4,8 @@ use rand::{seq::SliceRandom, Rng};
 use crate::{
     discord::{
         commands::{DiscordCommandError, DiscordCommandProvider},
-        DiscordCommand, DiscordContext, DiscordState,
+        state::DiscordState,
+        DiscordCommand, DiscordContext,
     },
     MuniBotError,
 };

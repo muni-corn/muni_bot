@@ -4,7 +4,7 @@ use log::error;
 use poise::{serenity_prelude::CreateMessage, Command, CreateReply};
 
 use crate::{
-    discord::{commands::DiscordCommandProvider, DiscordContext, DiscordState},
+    discord::{commands::DiscordCommandProvider, state::DiscordState, DiscordContext},
     MuniBotError,
 };
 

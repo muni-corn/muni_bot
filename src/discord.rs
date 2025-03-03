@@ -1,6 +1,7 @@
 pub mod admin;
 pub mod commands;
 pub mod handler;
+pub mod state;
 pub mod utils;
 pub mod vc_greeter;
 
@@ -13,42 +14,10 @@ use poise::{
     serenity_prelude::{self as serenity, Settings},
     Prefix, PrefixFrameworkOptions,
 };
-use surrealdb::{engine::remote::ws, opt::auth::Database, Surreal};
+use state::DiscordState;
 
 use self::{admin::AdminCommandProvider, commands::DiscordCommandProvider};
-use crate::{
-    config::{Config, DiscordConfig},
-    handlers::DiscordMessageHandlerCollection,
-    MuniBotError,
-};
-
-pub struct DiscordState {
-    pub config: DiscordConfig,
-    handlers: DiscordMessageHandlerCollection,
-    pub db: Surreal<ws::Client>,
-}
-impl DiscordState {
-    pub async fn new(
-        handlers: DiscordMessageHandlerCollection,
-        config: &Config,
-    ) -> Result<Self, MuniBotError> {
-        let database_url = config.db.url.clone();
-        let db = Surreal::new::<ws::Ws>(&database_url).await?;
-        db.signin(Database {
-            namespace: "muni_bot",
-            database: "muni_bot",
-            username: &config.db.user,
-            password: &env::var("DATABASE_PASS").expect("expected DATABASE_PASS to be set"),
-        })
-        .await?;
-
-        Ok(Self {
-            handlers,
-            db,
-            config: config.discord.clone(),
-        })
-    }
-}
+use crate::{config::Config, handlers::DiscordMessageHandlerCollection, MuniBotError};
 
 pub type DiscordCommand = poise::Command<DiscordState, MuniBotError>;
 pub type DiscordContext<'a> = poise::Context<'a, DiscordState, MuniBotError>;
@@ -131,7 +100,7 @@ async fn event_handler(
     framework_context: DiscordFrameworkContext<'_>,
     data: &DiscordState,
 ) -> Result<(), MuniBotError> {
-    for handler in data.handlers.iter() {
+    for handler in data.handlers().iter() {
         let mut locked_handler = handler.lock().await;
         let handled_future = locked_handler.handle_discord_event(context, framework_context, event);
         if let Err(e) = handled_future.await {
