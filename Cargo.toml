@@ -21,7 +21,7 @@ once_cell = "1.18"
 poise = { version = "0.6", features = ["cache"] }
 rand = { version = "0.8", features = ["std_rng"] }
 regex = "1"
-reqwest = "0.11"
+reqwest = "0.12"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1.0"
 strum = { version = "0.27", features = ["derive"] }
@@ -30,7 +30,7 @@ thiserror = "1.0"
 tokio = { version = "1.22", features = [ "full" ] }
 tokio-tungstenite = { version = "0.20.1", features = [ "native-tls" ] }
 toml = "0.8.12"
-twitch-irc = { version = "5.0", features = [ "refreshing-token-native-tls" ] }
-twitch_api = { version = "0.7.0-rc.7", features = ["client", "helix", "eventsub", "hmac", "reqwest"] }
-twitch_oauth2 = "0.12"
+twitch-irc = { version = "5.0", features = ["refreshing-token-native-tls"] }
+twitch_api = { version = "0.7", features = ["client", "helix", "eventsub", "hmac", "reqwest"] }
+twitch_oauth2 = "0.15"
 url = "2.4"
