@@ -1,8 +1,14 @@
-use std::future::Future;
+use std::{
+    collections::{HashMap, HashSet},
+    future::Future,
+};
 
-use async_trait::async_trait;
 use log::debug;
-use poise::serenity_prelude::{self as serenity, *};
+use poise::serenity_prelude::{
+    self as serenity, async_trait, CacheHttp, ChannelId, CreateEmbed, CreateMessage,
+    EmbedMessageBuilding, FullEvent, GuildId, GuildMemberUpdateEvent, Member, Mentionable, Message,
+    MessageBuilder, MessageUpdateEvent, ReactionType, Result, Role,
+};
 use serde::{Deserialize, Serialize};
 use surrealdb::{Connection, RecordId, Surreal};
 
@@ -10,11 +16,24 @@ use crate::{
     db::DbItem,
     discord::{
         handler::{DiscordEventHandler, DiscordHandlerError},
+        state::GlobalAccess,
         DiscordFrameworkContext,
     },
 };
 
-pub struct LoggingHandler;
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub enum PauseType {
+    MessageDeleteBulk,
+    MessageDelete,
+}
+
+#[derive(Debug)]
+pub struct LoggingHandler {
+    /// channels with pauses on them. a pause prevents logs from being created
+    /// about the corresponding `PauseType`.
+    pauses: HashMap<ChannelId, HashSet<PauseType>>,
+    access: GlobalAccess,
+}
 
 #[async_trait]
 impl DiscordEventHandler for LoggingHandler {
@@ -297,6 +316,11 @@ impl DiscordEventHandler for LoggingHandler {
                 guild_id,
             } => {
                 if let Some(guild_id) = guild_id {
+                    if let Some(pause_set) = self.pauses.get(channel_id)
+                        && pause_set.contains(&PauseType::MessageDelete)
+                    {
+                        return Ok(());
+                    }
                     let mut msg = MessageBuilder::new();
                     let mut fields = vec![];
 
@@ -542,6 +566,95 @@ impl DiscordEventHandler for LoggingHandler {
 
 impl LoggingHandler {
     const NAME: &'static str = "logging";
+
+    pub fn new(access: GlobalAccess) -> Self {
+        Self {
+            pauses: Default::default(),
+            access,
+        }
+    }
+
+    pub async fn send_simple_log(
+        &self,
+        guild_id: GuildId,
+        title: &str,
+        message: &str,
+    ) -> Result<(), anyhow::Error> {
+        let embed = simple_embed(title, message);
+        send_message(
+            self.access.as_cache_http(),
+            self.access.db(),
+            guild_id,
+            CreateMessage::new().embed(embed),
+        )
+        .await
+    }
+
+    pub async fn set_pauses(
+        &mut self,
+        channel_id: ChannelId,
+        pause_types: &[PauseType],
+        reason: &str,
+    ) {
+        self.pauses
+            .insert(channel_id, HashSet::from_iter(pause_types.iter().copied()));
+
+        // alert the guild of the pause, if possible
+        if let Ok(Some(guild_id)) = self
+            .access
+            .http()
+            .get_channel(channel_id)
+            .await
+            .map(|c| c.guild().map(|gc| gc.guild_id))
+        {
+            if let Err(e) = send_message(
+                self.access.as_cache_http(),
+                self.access.db(),
+                guild_id,
+                CreateMessage::new().embed(
+                    CreateEmbed::new()
+                        .title("logging pauses set")
+                        .description(format!("for channel {}", channel_id.mention()))
+                        .field("because", reason, false),
+                ),
+            )
+            .await
+            {
+                log::error!("error while alerting of set_pauses: {e}")
+            }
+        }
+    }
+
+    pub async fn clear_pauses(&mut self, channel_id: ChannelId) {
+        self.pauses.remove(&channel_id);
+
+        // alert the guild of the resume, if possible
+        if let Ok(Some(guild_id)) = self
+            .access
+            .http()
+            .get_channel(channel_id)
+            .await
+            .map(|c| c.guild().map(|gc| gc.guild_id))
+        {
+            if let Err(e) = send_message(
+                self.access.as_cache_http(),
+                self.access.db(),
+                guild_id,
+                CreateMessage::new().embed(
+                    CreateEmbed::new()
+                        .title("logging pauses cleared")
+                        .description(format!(
+                            "for channel {}. logging has resumed as normal!",
+                            channel_id.mention()
+                        )),
+                ),
+            )
+            .await
+            {
+                log::error!("error while alerting of set_pauses: {e}")
+            }
+        }
+    }
 
     fn map_result<T>(r: anyhow::Result<T>) -> Result<(), DiscordHandlerError> {
         r.map_err(|e| DiscordHandlerError::from_display(Self::NAME, e))?;

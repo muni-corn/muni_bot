@@ -60,7 +60,7 @@ impl DiscordState {
         let global_access = GlobalAccess { db, http, cache };
 
         // add the logging handler to the list of handlers
-        let logging = Arc::new(Mutex::new(LoggingHandler));
+        let logging = Arc::new(Mutex::new(LoggingHandler::new(global_access.clone())));
 
         handlers.push(logging.clone());
 
