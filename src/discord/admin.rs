@@ -1,7 +1,15 @@
-use poise::serenity_prelude::{ChannelId, Mentionable};
+use poise::{
+    serenity_prelude::{ChannelId, Mentionable, MessageBuilder},
+    CreateReply,
+};
 
-use super::{DiscordCommand, DiscordCommandProvider, DiscordContext};
-use crate::{db::DbItem, handlers::logging::LoggingChannel, MuniBotError};
+use super::{
+    autodelete::AutoDeleteHandler, DiscordCommand, DiscordCommandProvider, DiscordContext,
+};
+use crate::{
+    db::DbItem, discord::autodelete::AutoDeleteMode, handlers::logging::LoggingChannel,
+    MuniBotError,
+};
 
 pub struct AdminCommandProvider;
 
@@ -16,7 +24,7 @@ impl DiscordCommandProvider for AdminCommandProvider {
     hide_in_help,
     required_permissions = "MANAGE_GUILD",
     subcommand_required,
-    subcommands("set_log_channel", "stop_logging"),
+    subcommands("set_log_channel", "stop_logging", "set_autodelete", "stop_autodelete"),
     ephemeral
 )]
 async fn admin(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
@@ -95,5 +103,112 @@ async fn stop_logging(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
             .await?;
     };
 
+    Ok(())
+}
+
+/// setup auto-deleting messages for this channel.
+#[poise::command(
+    rename = "set-autodelete",
+    slash_command,
+    hide_in_help,
+    required_permissions = "MANAGE_GUILD",
+    guild_only,
+    ephemeral
+)]
+async fn set_autodelete(
+    ctx: DiscordContext<'_>,
+
+    #[description = "how long messages should survive before deletion, e.g. '1h', '8 hours', '1 week'"]
+    duration: String,
+    #[description = "whether to always clean any message that is old or only clean messages after the channel is silent"]
+    #[rename = "clean_mode"]
+    specified_clean_mode: Option<AutoDeleteMode>,
+) -> Result<(), MuniBotError> {
+    let clean_mode = specified_clean_mode.unwrap_or_default();
+    let reply_content = if let Some(guild_id) = ctx.guild_id() {
+        let mut msg = MessageBuilder::new();
+
+        let parsed_duration = humantime::parse_duration(&duration)?;
+        if parsed_duration >= AutoDeleteHandler::MINIMUM_TIMER_DURATION {
+            ctx.framework()
+                .user_data
+                .autodeletion()
+                .lock()
+                .await
+                .set_autodelete(guild_id, ctx.channel_id(), parsed_duration, clean_mode)
+                .await?;
+
+            let formatted_duration = humantime::format_duration(parsed_duration).to_string();
+
+            match clean_mode {
+                AutoDeleteMode::Always => {
+                    msg.push("okay! this channel will delete messages older than ")
+                        .push_bold(&formatted_duration)
+                        .push('.');
+                }
+                AutoDeleteMode::AfterSilence => {
+                    msg.push("okay! this channel will delete messages after ")
+                        .push_bold(&formatted_duration)
+                        .push(" of no activity.");
+                }
+            }
+
+            if specified_clean_mode.is_none() {
+                msg.push(" if you want ignore channel activity and delete ")
+                    .push_italic("any")
+                    .push(" message that is older than ")
+                    .push_bold(formatted_duration)
+                    .push(", you can run this command again and set `mode` to \"always\".");
+            }
+        } else {
+            msg.push("i can't delete messages that quickly. give me a duration that's at least ")
+                .push_bold(
+                    humantime::format_duration(AutoDeleteHandler::MINIMUM_TIMER_DURATION)
+                        .to_string(),
+                )
+                .push('.');
+        }
+        msg.build()
+    } else {
+        "you can only use this command in a server, silly.".to_string()
+    };
+
+    ctx.reply(reply_content).await?;
+    Ok(())
+}
+
+/// stops autodeletion for this channel.
+#[poise::command(
+    rename = "stop-autodelete",
+    slash_command,
+    hide_in_help,
+    required_permissions = "MANAGE_GUILD",
+    guild_only,
+    ephemeral
+)]
+async fn stop_autodelete(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
+    let reply_content = if let Some(guild_id) = ctx.guild_id() {
+        let did_exist = ctx
+            .framework()
+            .user_data
+            .autodeletion()
+            .lock()
+            .await
+            .clear_autodelete(guild_id, ctx.channel_id())
+            .await?;
+
+        if did_exist {
+            "done! less cleanup for me to do~"
+        } else {
+            "i don't have an autodelete timer for this channel :3"
+        }
+    } else {
+        "you can only use this command in a server, silly."
+    };
+
+    let reply = CreateReply::default()
+        .ephemeral(true)
+        .content(reply_content);
+    ctx.send(reply).await?;
     Ok(())
 }

@@ -1,6 +1,7 @@
 #![feature(decl_macro)]
 #![feature(let_chains)]
 #![feature(never_type)]
+#![feature(duration_constructors)]
 
 use poise::serenity_prelude as serenity;
 use thiserror::Error;
@@ -41,12 +42,21 @@ pub enum MuniBotError {
     #[error("error loading config :< {0}, {1}")]
     LoadConfig(String, anyhow::Error),
 
-    #[error("something different went wrong :< {0}")]
+    #[error("couldn't parse duration :< {0}")]
+    DurationParseError(#[from] humantime::DurationError),
+
+    #[error("something went wrong :< {0}")]
     Other(String),
 }
 
 impl From<DiscordCommandError> for MuniBotError {
     fn from(e: DiscordCommandError) -> Self {
         Self::DiscordCommand(e.command_identifier.to_string(), format!("{e}"))
+    }
+}
+
+impl From<anyhow::Error> for MuniBotError {
+    fn from(value: anyhow::Error) -> Self {
+        Self::Other(value.to_string())
     }
 }

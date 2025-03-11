@@ -4,7 +4,7 @@ use poise::serenity_prelude::{Cache, Http, Result};
 use surrealdb::{engine::remote::ws, Surreal};
 use tokio::sync::Mutex;
 
-use super::handler::DiscordEventHandler;
+use super::{autodelete::AutoDeleteHandler, handler::DiscordEventHandler};
 use crate::{
     config::{Config, DiscordConfig},
     handlers::{logging::LoggingHandler, DiscordMessageHandlerCollection},
@@ -46,10 +46,11 @@ pub struct DiscordState {
     access: GlobalAccess,
 
     logging: Arc<Mutex<LoggingHandler>>,
+    autodeletion: Arc<Mutex<AutoDeleteHandler>>,
 }
 impl DiscordState {
-    /// creates a new `DiscordState` struct. a `LoggingHandler` is added for
-    /// you.
+    /// creates a new `DiscordState` struct. the `LoggingHandler` and
+    /// `AutoDeleteHandler` are added for you.
     pub async fn new(
         mut handlers: DiscordMessageHandlerCollection,
         config: &Config,
@@ -64,11 +65,17 @@ impl DiscordState {
 
         handlers.push(logging.clone());
 
+        // autodeletion handler
+        let autodeletion = Arc::new(Mutex::new(
+            AutoDeleteHandler::new(global_access.clone(), logging.clone()).await?,
+        ));
+
         Ok(Self {
             handlers,
             config: config.discord.clone(),
             access: global_access,
             logging,
+            autodeletion,
         })
     }
 
@@ -82,5 +89,9 @@ impl DiscordState {
 
     pub fn logging(&self) -> &Arc<Mutex<LoggingHandler>> {
         &self.logging
+    }
+
+    pub fn autodeletion(&self) -> &Arc<Mutex<AutoDeleteHandler>> {
+        &self.autodeletion
     }
 }

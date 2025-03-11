@@ -1,4 +1,5 @@
 pub mod admin;
+pub mod autodelete;
 pub mod commands;
 pub mod handler;
 pub mod state;
@@ -7,6 +8,7 @@ pub mod vc_greeter;
 
 use std::{env, sync::Arc};
 
+use autodelete::AutoDeleteHandler;
 use dotenvy::dotenv;
 use log::{error, info};
 use poise::{
@@ -118,6 +120,9 @@ async fn on_ready(
 
     let new_state =
         DiscordState::new(handlers, &config, db, ctx.http.clone(), ctx.cache.clone()).await?;
+
+    // start the autodeletion handler
+    AutoDeleteHandler::start(new_state.autodeletion().clone());
 
     Ok(new_state)
 }
