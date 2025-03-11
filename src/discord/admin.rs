@@ -38,7 +38,8 @@ async fn admin(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
     slash_command,
     hide_in_help,
     guild_only,
-    required_permissions = "MANAGE_GUILD"
+    required_permissions = "MANAGE_GUILD",
+    ephemeral
 )]
 async fn set_log_channel(
     ctx: DiscordContext<'_>,
@@ -52,6 +53,7 @@ async fn set_log_channel(
         let channel_id = channel.unwrap_or_else(|| ctx.channel_id());
         let lc = LoggingChannel::new(guild_id, channel_id);
         lc.upsert_in_db(db, lc.clone()).await?;
+
         ctx.say(format!(
             "done! log messages will be sent to {}.",
             channel
@@ -72,7 +74,9 @@ async fn set_log_channel(
     rename = "stop-logging",
     slash_command,
     hide_in_help,
-    required_permissions = "MANAGE_GUILD"
+    required_permissions = "MANAGE_GUILD",
+    guild_only,
+    ephemeral
 )]
 async fn stop_logging(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
     let db = &ctx.data().access().db();
@@ -89,7 +93,7 @@ async fn stop_logging(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
     } else {
         ctx.say("this command can only be used in a server, silly.")
             .await?;
-    }
+    };
 
     Ok(())
 }
