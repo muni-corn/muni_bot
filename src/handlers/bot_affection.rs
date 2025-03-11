@@ -1,5 +1,6 @@
 use poise::serenity_prelude::MessageBuilder;
 use rand::{seq::SliceRandom, Rng};
+use tokio::time::sleep;
 
 use crate::{
     discord::{
@@ -162,7 +163,7 @@ async fn boop(ctx: poise::Context<'_, DiscordState, MuniBotError>) -> Result<(),
         })?;
 
         // sleep for a sec before assuring the user that everything is fine
-        std::thread::sleep(std::time::Duration::from_secs(1));
+        sleep(std::time::Duration::from_secs(1)).await;
 
         ctx.say("jk. i'm fine. hehe! :3")
             .await

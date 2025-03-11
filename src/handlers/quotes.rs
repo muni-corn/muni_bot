@@ -56,7 +56,7 @@ impl QuotesHandler {
     }
 
     /// Add a new quote to the database, returning the new count of quotes
-    pub async fn add_new_quote<'a>(&mut self, new_quote: Quote) -> Result<u32, TwitchHandlerError> {
+    pub async fn add_new_quote(&mut self, new_quote: Quote) -> Result<u32, TwitchHandlerError> {
         self.db
             .create::<Option<Quote>>(QUOTE_TABLE)
             .content(new_quote)

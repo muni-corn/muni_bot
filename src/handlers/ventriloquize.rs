@@ -1,7 +1,8 @@
-use std::{thread, time::Duration};
+use std::time::Duration;
 
 use log::error;
 use poise::{serenity_prelude::CreateMessage, Command, CreateReply};
+use tokio::time::sleep;
 
 use crate::{
     discord::{commands::DiscordCommandProvider, state::DiscordState, DiscordContext},
@@ -29,7 +30,7 @@ async fn ventriloquize<'a, 'b: 'a>(
         let typing = channel_id.start_typing(&http);
 
         // wait a minute to simulate typing
-        thread::sleep(Duration::from_millis(message.len() as u64 * 25));
+        sleep(Duration::from_millis(message.len() as u64 * 25)).await;
         typing.stop();
 
         // send the message
