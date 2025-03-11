@@ -3,14 +3,14 @@ use std::{collections::HashMap, sync::Arc, time::Duration};
 use chrono::{DateTime, Utc};
 use log::{debug, error, warn};
 use poise::serenity_prelude::{
-    futures::{executor::block_on, stream, StreamExt},
+    futures::{stream, StreamExt},
     Cache, CacheHttp, ChannelId, GuildChannel, GuildId, Mentionable, Message, MessageBuilder,
     MessageId, PartialGuild, Result,
 };
 use serde::{Deserialize, Serialize};
 use strum::EnumString;
 use surrealdb::{Connection, RecordId, Surreal};
-use tokio::{sync::Mutex, task::JoinHandle};
+use tokio::{runtime::Handle, sync::Mutex, task::JoinHandle};
 
 use super::state::GlobalAccess;
 use crate::{
@@ -548,7 +548,9 @@ impl AutoDeleteTimer {
             .and_then(|cache| guild_channel.guild(cache))
         {
             Some(cached_guild) => cached_guild.clone().into(),
-            None => block_on(cache_http.http().get_guild(guild_channel.guild_id))?,
+            None => {
+                Handle::current().block_on(cache_http.http().get_guild(guild_channel.guild_id))?
+            }
         };
 
         Ok((guild, guild_channel))
