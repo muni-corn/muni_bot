@@ -32,7 +32,7 @@ impl DiscordEventHandler for LoggingHandler {
             Self::map_result(
                 send_message(
                     context,
-                    &framework,
+                    framework.user_data.access().db(),
                     guild_id,
                     CreateMessage::new().embed(embed),
                 )
@@ -601,11 +601,10 @@ impl LoggingChannel {
     }
 }
 
-async fn get_logging_channel_for_guild(
-    framework: &DiscordFrameworkContext<'_>,
+async fn get_logging_channel_for_guild<C: Connection>(
+    db: &Surreal<C>,
     guild_id: GuildId,
 ) -> Result<Option<ChannelId>, DiscordHandlerError> {
-    let db = &framework.user_data().await.db;
     let logging_channel = LoggingChannel::get_from_db(db, guild_id)
         .await
         .map_err(|e| DiscordHandlerError {
@@ -616,14 +615,14 @@ async fn get_logging_channel_for_guild(
     Ok(logging_channel.map(|l| l.channel_id))
 }
 
-async fn send_message(
-    context: &serenity::Context,
-    framework: &DiscordFrameworkContext<'_>,
+async fn send_message<C: Connection>(
+    cache_http: impl CacheHttp,
+    db: &Surreal<C>,
     guild_id: GuildId,
     message: CreateMessage,
 ) -> anyhow::Result<()> {
-    if let Some(logging_channel) = get_logging_channel_for_guild(framework, guild_id).await? {
-        logging_channel.send_message(&context.http, message).await?;
+    if let Some(logging_channel) = get_logging_channel_for_guild(db, guild_id).await? {
+        logging_channel.send_message(cache_http, message).await?;
     } else {
         debug!("no logging channel for guild with id {guild_id}")
     }

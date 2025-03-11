@@ -46,7 +46,7 @@ async fn set_log_channel(
     #[description = "the channel to log messages to. if omitted, use the current channel instead."]
     channel: Option<ChannelId>,
 ) -> Result<(), MuniBotError> {
-    let db = &ctx.data().db;
+    let db = &ctx.data().access().db();
 
     if let Some(guild_id) = ctx.guild_id() {
         let channel_id = channel.unwrap_or_else(|| ctx.channel_id());
@@ -75,7 +75,7 @@ async fn set_log_channel(
     required_permissions = "MANAGE_GUILD"
 )]
 async fn stop_logging(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
-    let db = &ctx.data().db;
+    let db = &ctx.data().access().db();
 
     if let Some(guild_id) = ctx.guild_id() {
         if let Some(logging_entry) = LoggingChannel::get_from_db(db, guild_id).await? {
