@@ -1,4 +1,4 @@
-use poise::serenity_prelude::*;
+use poise::serenity_prelude::{CacheHttp, GuildId, Http, Message, Result, UserId};
 
 use super::DiscordContext;
 

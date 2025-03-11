@@ -1,5 +1,6 @@
-use async_trait::async_trait;
-use poise::serenity_prelude::*;
+use poise::serenity_prelude::{
+    async_trait, ChannelId, Context, FullEvent, GuildId, Result, UserId,
+};
 
 use super::{
     handler::{DiscordEventHandler, DiscordHandlerError},
