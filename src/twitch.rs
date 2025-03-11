@@ -34,7 +34,6 @@ pub fn get_basic_auth_url() -> Result<Url, VarError> {
     ];
 
     url.query_pairs_mut().extend_pairs(auth);
-
     url.query_pairs_mut()
         .append_pair("scope", &SCOPE.as_slice().join(" "));
 

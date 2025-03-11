@@ -1,7 +1,4 @@
-use poise::{
-    serenity_prelude::{ChannelId, Mentionable, MessageBuilder},
-    CreateReply,
-};
+use poise::serenity_prelude::{ChannelId, Mentionable, MessageBuilder};
 
 use super::{
     autodelete::AutoDeleteHandler, DiscordCommand, DiscordCommandProvider, DiscordContext,
@@ -57,23 +54,22 @@ async fn set_log_channel(
 ) -> Result<(), MuniBotError> {
     let db = &ctx.data().access().db();
 
-    if let Some(guild_id) = ctx.guild_id() {
+    let reply = if let Some(guild_id) = ctx.guild_id() {
         let channel_id = channel.unwrap_or_else(|| ctx.channel_id());
         let lc = LoggingChannel::new(guild_id, channel_id);
         lc.upsert_in_db(db, lc.clone()).await?;
 
-        ctx.say(format!(
+        format!(
             "done! log messages will be sent to {}.",
             channel
                 .map(|id| id.mention().to_string())
                 .unwrap_or("this channel".to_string())
-        ))
-        .await?;
+        )
     } else {
-        ctx.say("this command can only be used in a server, silly.")
-            .await?;
-    }
+        "this command can only be used in a server, silly.".to_string()
+    };
 
+    ctx.say(reply).await?;
     Ok(())
 }
 
@@ -89,19 +85,18 @@ async fn set_log_channel(
 async fn stop_logging(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
     let db = &ctx.data().access().db();
 
-    if let Some(guild_id) = ctx.guild_id() {
+    let reply = if let Some(guild_id) = ctx.guild_id() {
         if let Some(logging_entry) = LoggingChannel::get_from_db(db, guild_id).await? {
             logging_entry.delete_from_db(db).await?;
-            ctx.say("done! logging has been disabled for this server.")
-                .await?;
+            "done! logging has been disabled for this server."
         } else {
-            ctx.say("no logging channel is set for this server! nothing was done.")
-                .await?;
+            "no logging channel is set for this server! nothing was done."
         }
     } else {
-        ctx.say("this command can only be used in a server, silly.")
-            .await?;
+        "this command can only be used in a server, silly."
     };
+
+    ctx.say(reply).await?;
 
     Ok(())
 }
@@ -125,7 +120,7 @@ async fn set_autodelete(
     specified_clean_mode: Option<AutoDeleteMode>,
 ) -> Result<(), MuniBotError> {
     let clean_mode = specified_clean_mode.unwrap_or_default();
-    let reply_content = if let Some(guild_id) = ctx.guild_id() {
+    let reply = if let Some(guild_id) = ctx.guild_id() {
         let mut msg = MessageBuilder::new();
 
         let parsed_duration = humantime::parse_duration(&duration)?;
@@ -173,7 +168,7 @@ async fn set_autodelete(
         "you can only use this command in a server, silly.".to_string()
     };
 
-    ctx.reply(reply_content).await?;
+    ctx.say(reply).await?;
     Ok(())
 }
 
@@ -187,7 +182,7 @@ async fn set_autodelete(
     ephemeral
 )]
 async fn stop_autodelete(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
-    let reply_content = if let Some(guild_id) = ctx.guild_id() {
+    let reply = if let Some(guild_id) = ctx.guild_id() {
         let did_exist = ctx
             .framework()
             .user_data
@@ -206,9 +201,6 @@ async fn stop_autodelete(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
         "you can only use this command in a server, silly."
     };
 
-    let reply = CreateReply::default()
-        .ephemeral(true)
-        .content(reply_content);
-    ctx.send(reply).await?;
+    ctx.say(reply).await?;
     Ok(())
 }
