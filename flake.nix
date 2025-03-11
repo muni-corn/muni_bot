@@ -107,7 +107,7 @@
           packages = with pkgs; [leptosfmt cargo-watch cargo-outdated flyctl cargo-machete];
 
           LIBCLANG_PATH = "${pkgs.libclang.lib}/lib";
-          RUST_LOG = "error,muni_bot=info";
+          RUST_LOG = "error,muni_bot=debug";
           LEPTOS_TAILWIND_VERSION = "v3.4.14";
           LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath buildInputs;
         };
