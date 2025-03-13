@@ -404,7 +404,7 @@ impl AutoDeleteTimer {
             .filter_map(|result| async {
                 match result {
                     Ok(m) => {
-                        if m.timestamp.to_utc() <= Utc::now() - self.data.duration {
+                        if !m.pinned && m.timestamp.to_utc() <= Utc::now() - self.data.duration {
                             Some(m)
                         } else {
                             None
