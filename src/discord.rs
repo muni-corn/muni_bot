@@ -2,6 +2,7 @@ pub mod admin;
 pub mod autodelete;
 pub mod commands;
 pub mod handler;
+pub mod simple;
 pub mod state;
 pub mod utils;
 pub mod vc_greeter;

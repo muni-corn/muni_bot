@@ -5,7 +5,9 @@ use env_logger::Env;
 use log::{error, info, warn};
 use muni_bot::{
     config::Config,
-    discord::{start_discord_integration, vc_greeter::VoiceChannelGreeter},
+    discord::{
+        simple::SimpleCommandProvider, start_discord_integration, vc_greeter::VoiceChannelGreeter,
+    },
     handlers::{
         bot_affection::BotAffectionProvider, dice::DiceHandler, economy::EconomyProvider,
         greeting::GreetingHandler, magical::MagicalHandler,
@@ -94,6 +96,7 @@ fn start_discord(config: Config) -> tokio::task::JoinHandle<()> {
         Box::new(VentriloquizeProvider),
         Box::new(EconomyProvider),
         Box::new(TemperatureConversionProvider),
+        Box::new(SimpleCommandProvider),
     ];
 
     tokio::spawn(start_discord_integration(
