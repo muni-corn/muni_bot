@@ -40,7 +40,7 @@ const UNCOMMON_TONE_INDICATORS: &[(&str, &str)] = &[
 ];
 
 /// display a guide on tone indicators.
-#[poise::command(prefix_command, slash_command, rename = "tone-indicators")]
+#[poise::command(slash_command, rename = "tone-indicators", ephemeral)]
 async fn tone_indicators(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
     let mut msg = MessageBuilder::new();
     msg
