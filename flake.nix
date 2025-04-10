@@ -20,10 +20,7 @@
       system:
       let
         name = "muni_bot";
-        pkgs = import nixpkgs {
-          inherit system;
-          overlays = [ fenix.overlays.default ]; # for rust-analyzer-nightly
-        };
+        pkgs = nixpkgs.legacyPackages.${system};
         lib = pkgs.lib;
 
         # make rust toolchain
