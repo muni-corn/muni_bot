@@ -90,7 +90,7 @@ impl AutoDeleteHandler {
 
             match mode {
                 AutoDeleteMode::Always => msg
-                    .push("when they are older than")
+                    .push("when they are older than ")
                     .push_bold(humantime::format_duration(duration).to_string())
                     .push('.'),
 
