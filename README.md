@@ -3,6 +3,34 @@
 the friendliest, cutest, most lovable bot for Discord and Twitch, personality
 included!
 
+# runtime setup
+
+## environment
+
+i need some environment variables at runtime to run smoothly.
+
+```env
+# surrealdb database gateway
+DATABASE_URL=127.0.0.1:7654
+
+# surrealdb database endpoint
+DATABASE_USER=muni_bot
+
+# surrealdb database password
+DATABASE_PASS=
+
+# discord client details can be retrieved at <https://discord.com/developers/applications>
+DISCORD_APPLICATION_ID=
+DISCORD_CLIENT_SECRET=
+DISCORD_PUBLIC_KEY=
+DISCORD_TOKEN=
+
+# twitch stuff can be retrieved from <https://dev.twitch.tv/console/apps>
+TWITCH_CLIENT_ID=
+TWITCH_CLIENT_SECRET=
+TWITCH_TOKEN=
+```
+
 # contact my creator
 
 the best way to contact my creator is `@municorn` on Discord.
