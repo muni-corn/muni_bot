@@ -1,4 +1,7 @@
-use poise::serenity_prelude::{ChannelId, Mentionable, MessageBuilder};
+use poise::{
+    serenity_prelude::{ChannelId, Mentionable, MessageBuilder},
+    CreateReply,
+};
 
 use super::{
     autodelete::AutoDeleteHandler, DiscordCommand, DiscordCommandProvider, DiscordContext,
@@ -54,7 +57,7 @@ async fn set_log_channel(
 ) -> Result<(), MuniBotError> {
     let db = &ctx.data().access().db();
 
-    let reply = if let Some(guild_id) = ctx.guild_id() {
+    let reply_content = if let Some(guild_id) = ctx.guild_id() {
         let channel_id = channel.unwrap_or_else(|| ctx.channel_id());
         let lc = LoggingChannel::new(guild_id, channel_id);
         lc.upsert_in_db(db, lc.clone()).await?;
@@ -69,7 +72,10 @@ async fn set_log_channel(
         "this command can only be used in a server, silly.".to_string()
     };
 
-    ctx.say(reply).await?;
+    let reply = CreateReply::default()
+        .ephemeral(true)
+        .content(reply_content);
+    ctx.send(reply).await?;
     Ok(())
 }
 
@@ -85,7 +91,7 @@ async fn set_log_channel(
 async fn stop_logging(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
     let db = &ctx.data().access().db();
 
-    let reply = if let Some(guild_id) = ctx.guild_id() {
+    let reply_content = if let Some(guild_id) = ctx.guild_id() {
         if let Some(logging_entry) = LoggingChannel::get_from_db(db, guild_id).await? {
             logging_entry.delete_from_db(db).await?;
             "done! logging has been disabled for this server."
@@ -96,8 +102,10 @@ async fn stop_logging(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
         "this command can only be used in a server, silly."
     };
 
-    ctx.say(reply).await?;
-
+    let reply = CreateReply::default()
+        .ephemeral(true)
+        .content(reply_content);
+    ctx.send(reply).await?;
     Ok(())
 }
 
@@ -120,7 +128,7 @@ async fn set_autodelete(
     specified_clean_mode: Option<AutoDeleteMode>,
 ) -> Result<(), MuniBotError> {
     let clean_mode = specified_clean_mode.unwrap_or_default();
-    let reply = if let Some(guild_id) = ctx.guild_id() {
+    let reply_content = if let Some(guild_id) = ctx.guild_id() {
         let mut msg = MessageBuilder::new();
 
         let parsed_duration = humantime::parse_duration(&duration)?;
@@ -168,7 +176,10 @@ async fn set_autodelete(
         "you can only use this command in a server, silly.".to_string()
     };
 
-    ctx.say(reply).await?;
+    let reply = CreateReply::default()
+        .ephemeral(true)
+        .content(reply_content);
+    ctx.send(reply).await?;
     Ok(())
 }
 
@@ -182,7 +193,7 @@ async fn set_autodelete(
     ephemeral
 )]
 async fn stop_autodelete(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
-    let reply = if let Some(guild_id) = ctx.guild_id() {
+    let reply_content = if let Some(guild_id) = ctx.guild_id() {
         let did_exist = ctx
             .framework()
             .user_data
@@ -201,6 +212,9 @@ async fn stop_autodelete(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
         "you can only use this command in a server, silly."
     };
 
-    ctx.say(reply).await?;
+    let reply = CreateReply::default()
+        .ephemeral(true)
+        .content(reply_content);
+    ctx.send(reply).await?;
     Ok(())
 }
