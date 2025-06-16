@@ -937,10 +937,6 @@ where
         fields.push(("mentionable".into(), bool_to_string(new.mentionable), true));
     }
 
-    if old.position != new.position {
-        fields.push(("position".into(), new.position.to_string(), true));
-    }
-
     if old.permissions != new.permissions {
         let added_perms = (new.permissions - old.permissions)
             .iter_names()
