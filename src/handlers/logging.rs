@@ -111,7 +111,7 @@ impl DiscordEventHandler for LoggingHandler {
                     .push(" was deleted");
 
                 if let Some(messages) = messages {
-                    msg.push(" along with its ")
+                    msg.push("along with its ")
                         .push_bold(format!("{} messages", messages.len()));
                 }
 
