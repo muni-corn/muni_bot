@@ -11,15 +11,6 @@ use crate::{
     MuniBotError,
 };
 
-const NUZZLE_PREFIXES: [&str; 5] = ["*giggle!*", "eee hehe!", "hehehe!", "aaa!", "eep!"];
-const NUZZLE_ACTIONS: [&str; 5] = [
-    "nuzzle",
-    "nuzzleeeee",
-    "nuzzlenuzzle",
-    "nuzzles back",
-    "nuzznuzz",
-];
-
 const BOOP_PREFIXES: [&str; 4] = ["ACK!", "ack!", "eep!", "meep!"];
 const BOOP_ACTIONS: [&str; 2] = ["boops back", "@~@ bzzzt"];
 const BOOP_ERROR_CHANCE: f64 = 0.01;
@@ -40,24 +31,6 @@ const HUG_ACTIONS: [&str; 6] = [
     "gibs hugs",
 ];
 
-const KISS_PREFIXES: [&str; 8] = [
-    "oh!",
-    "meep~!",
-    "uwu~",
-    "ehehe~",
-    "owo~",
-    "owo th-thank you~",
-    "h-huh??",
-    "oh my!",
-];
-const KISS_ACTIONS: [&str; 5] = [
-    "blushes",
-    "blushyblush",
-    "giggles",
-    "hides face",
-    "/)///(\\\\",
-];
-
 const BITE_PREFIXES: [&str; 6] = [
     "OW",
     "OWIE",
@@ -71,17 +44,6 @@ const BITE_ACTIONS: [&str; 4] = [
     "nibbles",
     "aggressive nuzzle",
     "bites back",
-];
-
-const LICK_PREFIXES: [&str; 8] = [
-    "oh--",
-    "uh...",
-    "h-hi.",
-    "c-can i help you?",
-    "is there something you want?",
-    "oh my...",
-    "...do i taste good to you?",
-    "...well i hope i at least taste good",
 ];
 
 const CHANCE_OF_EXCLAMATION: f64 = 0.5;
@@ -183,39 +145,6 @@ async fn boop(ctx: poise::Context<'_, DiscordState, MuniBotError>) -> Result<(),
     }
 }
 
-/// Nuzzle the good bot!
-#[poise::command(slash_command, prefix_command)]
-async fn nuzzle(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
-    BotAffectionProvider::handle_generic_affection(
-        ctx,
-        ResponseSelection::Rare(&NUZZLE_PREFIXES, 0.5),
-        ResponseSelection::Always(&NUZZLE_ACTIONS),
-    )
-    .await
-}
-
-/// Smooch the bot ;3
-#[poise::command(slash_command, prefix_command)]
-async fn kiss(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
-    // VERY rarely will the bot smooch back.
-    if rand::thread_rng().gen_bool(0.00001) {
-        ctx.say("*smooches back~*")
-            .await
-            .map_err(|e| DiscordCommandError {
-                message: format!("couldn't send message :( {e}"),
-                command_identifier: "kiss".to_string(),
-            })
-            .map(|_| Ok(()))?
-    } else {
-        BotAffectionProvider::handle_generic_affection(
-            ctx,
-            ResponseSelection::Rare(&KISS_PREFIXES, 0.9),
-            ResponseSelection::Rare(&KISS_ACTIONS, 0.3),
-        )
-        .await
-    }
-}
-
 /// Pat the bot! >w<
 #[poise::command(slash_command, prefix_command)]
 async fn pat(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
@@ -249,17 +178,6 @@ async fn bite(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
     .await
 }
 
-/// Lick the bot... for whatever reason.
-#[poise::command(slash_command, prefix_command)]
-async fn lick(ctx: DiscordContext<'_>) -> Result<(), MuniBotError> {
-    BotAffectionProvider::handle_generic_affection(
-        ctx,
-        ResponseSelection::Always(&LICK_PREFIXES),
-        ResponseSelection::Never,
-    )
-    .await
-}
-
 impl DiscordCommandProvider for BotAffectionProvider {
     fn commands(&self) -> Vec<DiscordCommand> {
         vec![boop(), pat(), hug(), bite()]
@@ -273,9 +191,6 @@ enum ResponseSelection<'a> {
     /// A collection of responses that may only happen with the probability
     /// specified.
     Rare(&'a [&'a str], f64),
-
-    /// There are no responses to choose from.
-    Never,
 }
 
 impl ResponseSelection<'_> {
