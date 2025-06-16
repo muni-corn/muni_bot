@@ -1,5 +1,5 @@
 {
-  description = "muni_bot";
+  description = "munibot, the cutest bot for Discord and Twitch, personality included";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
@@ -19,7 +19,7 @@
     utils.lib.eachDefaultSystem (
       system:
       let
-        name = "muni_bot";
+        name = "munibot";
         pkgs = nixpkgs.legacyPackages.${system};
         lib = pkgs.lib;
 
@@ -68,7 +68,7 @@
         ];
         buildInputs = with pkgs; [ libressl ];
 
-        muni_bot = craneLib.buildPackage (
+        munibot = craneLib.buildPackage (
           commonArgs
           // {
             LIBCLANG_PATH = "${pkgs.libclang.lib}/lib";
@@ -78,7 +78,7 @@
       in
       {
         # `nix build`
-        packages.default = muni_bot;
+        packages.default = munibot;
 
         # `nix run`
         apps.default = utils.lib.mkApp {
@@ -89,7 +89,7 @@
 
         # `nix flake check`
         checks = {
-          inherit muni_bot;
+          inherit munibot;
           clippy = craneLib.cargoClippy (
             commonArgs // { cargoClippyExtraArgs = "--all-targets --all-features"; }
           );
@@ -119,7 +119,7 @@
               ]);
 
             LIBCLANG_PATH = "${pkgs.libclang.lib}/lib";
-            RUST_LOG = "error,muni_bot=debug";
+            RUST_LOG = "error,munibot=debug";
             LEPTOS_TAILWIND_VERSION = "v3.4.14";
             LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath buildInputs;
           };
@@ -127,7 +127,7 @@
     )
     // {
       overlays.default = final: prev: {
-        muni_bot = self.packages.${prev.system}.default;
+        munibot = self.packages.${prev.system}.default;
       };
 
       nixosModules.default = import ./nix/nixos.nix self;

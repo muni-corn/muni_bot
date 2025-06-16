@@ -26,7 +26,7 @@ async fn ventriloquize<'a, 'b: 'a>(
     ctx.send(reply).await?;
 
     tokio::spawn(async move {
-        // start typing to look like muni_bot is actually typing
+        // start typing to look like munibot is actually typing
         let typing = channel_id.start_typing(&http);
 
         // wait a minute to simulate typing

@@ -2377,7 +2377,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "muni_bot"
+name = "munibot"
 version = "0.2.3"
 dependencies = [
  "anyhow",

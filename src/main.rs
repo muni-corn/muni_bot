@@ -3,7 +3,7 @@ use std::sync::Arc;
 use clap::Parser;
 use env_logger::Env;
 use log::{error, info, warn};
-use muni_bot::{
+use munibot::{
     config::Config,
     discord::{
         simple::SimpleCommandProvider, start_discord_integration, vc_greeter::VoiceChannelGreeter,

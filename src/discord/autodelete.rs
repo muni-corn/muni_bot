@@ -334,7 +334,7 @@ impl AutoDeleteTimer {
                     .set_pauses(
                         self.data.channel_id,
                         &[PauseType::MessageDeleteBulk, PauseType::MessageDelete],
-                        "muni_bot is cleaning up messages because an autodelete timer has fired",
+                        "munibot is cleaning up messages because an autodelete timer has fired",
                     )
                     .await;
 

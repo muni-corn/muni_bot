@@ -21,7 +21,7 @@ const SCOPE: [Scope; 8] = [
     Scope::ChatRead,
 ];
 
-/// Returns the authorization URL to authorize muni_bot's Twitch account. Will
+/// Returns the authorization URL to authorize munibot's Twitch account. Will
 /// only return an error if the `TWITCH_CLIENT_ID` variable is not set.
 pub fn get_basic_auth_url() -> Result<Url, VarError> {
     let mut url = Url::from_str("https://id.twitch.tv/oauth2/authorize").unwrap();

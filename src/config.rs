@@ -74,7 +74,7 @@ impl Config {
             } else {
                 // notify we wrote the file
                 info!(
-                    "hi! i'm muni_bot! i've written my default configuration file to {} for you :3 <3",
+                    "hi! i'm munibot! i've written my default configuration file to {} for you :3 <3",
                     p.display()
                 );
             }

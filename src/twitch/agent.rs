@@ -68,7 +68,7 @@ impl<'a> TwitchAgent<'a> {
                 self.auth.get_user_token(),
             )
             .await?;
-        info!("muni_bot banned user {ban_user_id} from broadcaster {broadcaster_id}");
+        info!("munibot banned user {ban_user_id} from broadcaster {broadcaster_id}");
         Ok(())
     }
 }

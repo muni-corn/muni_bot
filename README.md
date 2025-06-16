@@ -14,7 +14,7 @@ i need some environment variables at runtime to run smoothly.
 DATABASE_URL=127.0.0.1:7654
 
 # surrealdb database endpoint
-DATABASE_USER=muni_bot
+DATABASE_USER=munibot
 
 # surrealdb database password
 DATABASE_PASS=
