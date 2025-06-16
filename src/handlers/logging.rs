@@ -6,8 +6,8 @@ use std::{
 use log::debug;
 use poise::serenity_prelude::{
     self as serenity, async_trait, CacheHttp, ChannelId, CreateEmbed, CreateMessage,
-    EmbedMessageBuilding, FullEvent, GuildId, GuildMemberUpdateEvent, Member, Mentionable, Message,
-    MessageBuilder, MessageUpdateEvent, ReactionType, Result, Role,
+    EmbedMessageBuilding, FullEvent, Guild, GuildId, GuildMemberUpdateEvent, Member, Mentionable,
+    Message, MessageBuilder, MessageUpdateEvent, PartialGuild, ReactionType, Result, Role,
 };
 use serde::{Deserialize, Serialize};
 use surrealdb::{Connection, RecordId, Surreal};
@@ -259,9 +259,15 @@ impl DiscordEventHandler for LoggingHandler {
             }
 
             FullEvent::GuildUpdate {
-                old_data_if_available: _,
+                old_data_if_available,
                 new_data,
-            } => send(new_data.id, useless_embed("guild updated")).await,
+            } => {
+                if let Some(old) = old_data_if_available {
+                    handle_guild_update(send, old, new_data).await
+                } else {
+                    Ok(())
+                }
+            }
 
             FullEvent::InviteCreate { data } => {
                 let title = if data.temporary {
@@ -930,11 +936,11 @@ where
     }
 
     if old.hoist != new.hoist {
-        fields.push(("hoist".into(), bool_to_string(new.hoist), true));
+        fields.push(("hoist".into(), yes_no_bool(new.hoist), true));
     }
 
     if old.mentionable != new.mentionable {
-        fields.push(("mentionable".into(), bool_to_string(new.mentionable), true));
+        fields.push(("mentionable".into(), yes_no_bool(new.mentionable), true));
     }
 
     if old.permissions != new.permissions {
@@ -960,6 +966,220 @@ where
     .await
 }
 
-fn bool_to_string(b: bool) -> String {
+async fn handle_guild_update<F, X>(
+    send: F,
+    old: &Guild,
+    new: &PartialGuild,
+) -> Result<(), DiscordHandlerError>
+where
+    F: Fn(GuildId, CreateEmbed) -> X,
+    X: Future<Output = Result<(), DiscordHandlerError>>,
+{
+    let mut fields = vec![];
+
+    if old.name != new.name {
+        fields.push(("name".to_string(), new.name.clone(), false))
+    }
+
+    if old.icon != new.icon {
+        let status = if new.icon.is_none() {
+            "removed"
+        } else {
+            "updated"
+        };
+        fields.push(("icon".to_string(), status.to_string(), true))
+    }
+
+    if old.splash != new.splash {
+        fields.push(("splash".to_string(), "updated".to_string(), true))
+    }
+
+    if old.verification_level != new.verification_level {
+        fields.push((
+            "verification level".to_string(),
+            format!(
+                "was {:?}, now {:?}",
+                old.verification_level, new.verification_level
+            ),
+            false,
+        ))
+    }
+
+    if old.description != new.description {
+        let status = match (&old.description, &new.description) {
+            (None, Some(desc)) => format!("set to **{}**", desc),
+            (Some(_), None) => "*removed*".to_string(),
+            (Some(_), Some(desc)) => format!("changed to **{}**", desc),
+            (None, None) => unreachable!(),
+        };
+        fields.push(("description".to_string(), status, false))
+    }
+
+    if old.banner != new.banner {
+        let status = if new.banner.is_none() {
+            "*removed*"
+        } else {
+            "*updated*"
+        };
+        fields.push(("banner".to_string(), status.to_string(), true))
+    }
+
+    if old.discovery_splash != new.discovery_splash {
+        let status = if new.discovery_splash.is_none() {
+            "*removed*"
+        } else {
+            "*updated*"
+        };
+        fields.push(("discovery splash".to_string(), status.to_string(), true))
+    }
+
+    if old.premium_tier != new.premium_tier {
+        fields.push((
+            "premium tier".to_string(),
+            format!(
+                "was **{:?}**, now **{:?}**",
+                old.premium_tier, new.premium_tier
+            ),
+            true,
+        ))
+    }
+
+    if old.preferred_locale != new.preferred_locale {
+        fields.push((
+            "preferred locale".to_string(),
+            format!(
+                "changed from **{}** to **{}**",
+                old.preferred_locale, new.preferred_locale
+            ),
+            true,
+        ))
+    }
+
+    if old.default_message_notifications != new.default_message_notifications {
+        fields.push((
+            "default notifications".to_string(),
+            format!(
+                "was **{:?}**, now **{:?}**",
+                old.default_message_notifications, new.default_message_notifications
+            ),
+            false,
+        ))
+    }
+
+    if old.explicit_content_filter != new.explicit_content_filter {
+        fields.push((
+            "explicit content filter".to_string(),
+            format!(
+                "was **{:?}**, now **{:?}**",
+                old.explicit_content_filter, new.explicit_content_filter
+            ),
+            false,
+        ))
+    }
+
+    if old.mfa_level != new.mfa_level {
+        fields.push((
+            "mfa level".to_string(),
+            format!("was **{:?}**, now **{:?}**", old.mfa_level, new.mfa_level),
+            true,
+        ))
+    }
+
+    if old.system_channel_id != new.system_channel_id {
+        let status = match (&old.system_channel_id, &new.system_channel_id) {
+            (None, Some(channel)) => format!("set to **{}**", channel.mention()),
+            (Some(_), None) => "removed".to_string(),
+            (Some(_), Some(channel)) => format!("changed to **{}**", channel.mention()),
+            (None, None) => unreachable!(),
+        };
+        fields.push(("system channel".to_string(), status, false))
+    }
+
+    if old.rules_channel_id != new.rules_channel_id {
+        let status = match (&old.rules_channel_id, &new.rules_channel_id) {
+            (None, Some(channel)) => format!("set to **{}**", channel.mention()),
+            (Some(_), None) => "removed".to_string(),
+            (Some(_), Some(channel)) => format!("changed to **{}**", channel.mention()),
+            (None, None) => unreachable!(),
+        };
+        fields.push(("rules channel".to_string(), status, false))
+    }
+
+    if old.public_updates_channel_id != new.public_updates_channel_id {
+        let status = match (
+            &old.public_updates_channel_id,
+            &new.public_updates_channel_id,
+        ) {
+            (None, Some(channel)) => format!("set to **{}**", channel.mention()),
+            (Some(_), None) => "removed".to_string(),
+            (Some(_), Some(channel)) => format!("changed to **{}**", channel.mention()),
+            (None, None) => unreachable!(),
+        };
+        fields.push(("public updates channel".to_string(), status, false))
+    }
+
+    if old.vanity_url_code != new.vanity_url_code {
+        let status = match (&old.vanity_url_code, &new.vanity_url_code) {
+            (None, Some(code)) => format!("set to **{}**", code),
+            (Some(_), None) => "removed".to_string(),
+            (Some(_), Some(code)) => format!("changed to **{}**", code),
+            (None, None) => unreachable!(),
+        };
+        fields.push(("vanity URL".to_string(), status, false))
+    }
+
+    if old.owner_id != new.owner_id {
+        fields.push((
+            "owner".to_string(),
+            format!("transferred to **{}**", new.owner_id.mention()),
+            false,
+        ))
+    }
+
+    if old.widget_enabled != new.widget_enabled {
+        if let Some(enabled) = new.widget_enabled {
+            fields.push(("widget".to_string(), yes_no_bool(enabled), true))
+        }
+    }
+
+    if old.widget_channel_id != new.widget_channel_id {
+        let status = match (&old.widget_channel_id, &new.widget_channel_id) {
+            (None, Some(channel)) => format!("set to {}", channel.mention()),
+            (Some(_), None) => "removed".to_string(),
+            (Some(_), Some(channel)) => format!("changed to {}", channel.mention()),
+            (None, None) => unreachable!(),
+        };
+        fields.push(("widget channel".to_string(), status, true))
+    }
+
+    if old.nsfw_level != new.nsfw_level {
+        fields.push((
+            "nsfw level".to_string(),
+            format!("was {:?}, now {:?}", old.nsfw_level, new.nsfw_level),
+            true,
+        ))
+    }
+
+    if old.premium_progress_bar_enabled != new.premium_progress_bar_enabled {
+        fields.push((
+            "premium progress bar".to_string(),
+            enabled_bool(new.premium_progress_bar_enabled),
+            true,
+        ))
+    }
+
+    // if we don't care about any of the actual changes, quietly do nothing
+    if fields.is_empty() {
+        Ok(())
+    } else {
+        send(new.id, embed_with_fields("guild updated", "", fields)).await
+    }
+}
+
+fn yes_no_bool(b: bool) -> String {
     if b { "yes" } else { "no" }.to_string()
+}
+
+fn enabled_bool(b: bool) -> String {
+    if b { "enabled" } else { "disabled" }.to_string()
 }
