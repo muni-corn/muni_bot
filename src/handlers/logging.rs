@@ -1006,13 +1006,15 @@ where
     }
 
     if old.description != new.description {
-        let status = match (&old.description, &new.description) {
-            (None, Some(desc)) => format!("set to **{}**", desc),
-            (Some(_), None) => "*removed*".to_string(),
-            (Some(_), Some(desc)) => format!("changed to **{}**", desc),
-            (None, None) => unreachable!(),
+        if let Some(status) = match (&old.description, &new.description) {
+            (Some(_), Some(desc)) | (None, Some(desc)) if !desc.is_empty() => {
+                Some(desc.to_string())
+            }
+            (Some(_), None) => Some("*removed*".to_string()),
+            _ => None,
+        } {
+            fields.push(("description".to_string(), status, false))
         };
-        fields.push(("description".to_string(), status, false))
     }
 
     if old.banner != new.banner {
@@ -1087,9 +1089,8 @@ where
 
     if old.system_channel_id != new.system_channel_id {
         let status = match (&old.system_channel_id, &new.system_channel_id) {
-            (None, Some(channel)) => format!("set to **{}**", channel.mention()),
-            (Some(_), None) => "removed".to_string(),
-            (Some(_), Some(channel)) => format!("changed to **{}**", channel.mention()),
+            (Some(_), None) => "*removed*".to_string(),
+            (Some(_), Some(channel)) | (None, Some(channel)) => format!("{}", channel.mention()),
             (None, None) => unreachable!(),
         };
         fields.push(("system channel".to_string(), status, false))
@@ -1097,9 +1098,8 @@ where
 
     if old.rules_channel_id != new.rules_channel_id {
         let status = match (&old.rules_channel_id, &new.rules_channel_id) {
-            (None, Some(channel)) => format!("set to **{}**", channel.mention()),
-            (Some(_), None) => "removed".to_string(),
-            (Some(_), Some(channel)) => format!("changed to **{}**", channel.mention()),
+            (Some(_), Some(channel)) | (None, Some(channel)) => format!("{}", channel.mention()),
+            (Some(_), None) => "*removed*".to_string(),
             (None, None) => unreachable!(),
         };
         fields.push(("rules channel".to_string(), status, false))
@@ -1110,9 +1110,8 @@ where
             &old.public_updates_channel_id,
             &new.public_updates_channel_id,
         ) {
-            (None, Some(channel)) => format!("set to **{}**", channel.mention()),
-            (Some(_), None) => "removed".to_string(),
-            (Some(_), Some(channel)) => format!("changed to **{}**", channel.mention()),
+            (Some(_), None) => "*removed*".to_string(),
+            (Some(_), Some(channel)) | (None, Some(channel)) => format!("{}", channel.mention()),
             (None, None) => unreachable!(),
         };
         fields.push(("public updates channel".to_string(), status, false))
@@ -1120,9 +1119,8 @@ where
 
     if old.vanity_url_code != new.vanity_url_code {
         let status = match (&old.vanity_url_code, &new.vanity_url_code) {
-            (None, Some(code)) => format!("set to **{}**", code),
-            (Some(_), None) => "removed".to_string(),
-            (Some(_), Some(code)) => format!("changed to **{}**", code),
+            (Some(_), None) => "*removed*".to_string(),
+            (Some(_), Some(code)) | (None, Some(code)) => format!("changed to **{}**", code),
             (None, None) => unreachable!(),
         };
         fields.push(("vanity URL".to_string(), status, false))
@@ -1137,16 +1135,15 @@ where
     }
 
     if old.widget_enabled != new.widget_enabled {
-        if let Some(enabled) = new.widget_enabled {
+        if let (Some(_), Some(enabled)) = (old.widget_enabled, new.widget_enabled) {
             fields.push(("widget".to_string(), yes_no_bool(enabled), true))
         }
     }
 
     if old.widget_channel_id != new.widget_channel_id {
         let status = match (&old.widget_channel_id, &new.widget_channel_id) {
-            (None, Some(channel)) => format!("set to {}", channel.mention()),
             (Some(_), None) => "removed".to_string(),
-            (Some(_), Some(channel)) => format!("changed to {}", channel.mention()),
+            (Some(_), Some(channel)) | (None, Some(channel)) => format!("{}", channel.mention()),
             (None, None) => unreachable!(),
         };
         fields.push(("widget channel".to_string(), status, true))
