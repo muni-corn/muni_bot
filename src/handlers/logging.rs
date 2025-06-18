@@ -983,9 +983,9 @@ where
 
     if old.icon != new.icon {
         let status = if new.icon.is_none() {
-            "removed"
+            "*removed*"
         } else {
-            "updated"
+            "*updated*"
         };
         fields.push(("icon".to_string(), status.to_string(), true))
     }
@@ -1120,7 +1120,7 @@ where
     if old.vanity_url_code != new.vanity_url_code {
         let status = match (&old.vanity_url_code, &new.vanity_url_code) {
             (Some(_), None) => "*removed*".to_string(),
-            (Some(_), Some(code)) | (None, Some(code)) => format!("changed to **{}**", code),
+            (Some(_), Some(code)) | (None, Some(code)) => code.to_string(),
             (None, None) => unreachable!(),
         };
         fields.push(("vanity URL".to_string(), status, false))
@@ -1142,7 +1142,7 @@ where
 
     if old.widget_channel_id != new.widget_channel_id {
         let status = match (&old.widget_channel_id, &new.widget_channel_id) {
-            (Some(_), None) => "removed".to_string(),
+            (Some(_), None) => "*removed*".to_string(),
             (Some(_), Some(channel)) | (None, Some(channel)) => format!("{}", channel.mention()),
             (None, None) => unreachable!(),
         };
